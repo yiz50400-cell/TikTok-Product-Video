@@ -1,0 +1,4 @@
+Preferred product-video overlay assets:
+- preferred_down_arrow.png: use as the default red vertical downward arrow.
+- preferred_cart.png: place immediately to the right of the arrow in CTA scenes.
+- Keep the arrow/cart pair as a reusable default for future product showcase edits.

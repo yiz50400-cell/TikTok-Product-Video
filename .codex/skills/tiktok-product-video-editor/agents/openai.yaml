@@ -1,0 +1,6 @@
+interface:
+  display_name: "TK产品短视频剪辑"
+  short_description: "按墨西哥、巴西、印尼等市场找素材、写口播并剪成片"
+  default_prompt: "Use $tiktok-product-video-editor to choose a target market, find product footage if needed, draft the voiceover, edit a fast-paced TikTok Shop product video, and deliver clickable files."
+policy:
+  allow_implicit_invocation: true

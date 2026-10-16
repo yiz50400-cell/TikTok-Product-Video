@@ -1,0 +1,6 @@
+interface:
+  display_name: "剪辑环境补齐"
+  short_description: "只补齐商品视频剪辑所需工具、配置和本机环境"
+  default_prompt: "Use $setup-video-editor-environment to check and complete the standalone TikTok product video editor environment."
+policy:
+  allow_implicit_invocation: true

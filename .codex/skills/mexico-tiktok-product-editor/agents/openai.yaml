@@ -1,0 +1,6 @@
+﻿interface:
+  display_name: "墨西哥TK产品剪辑"
+  short_description: "兼容旧入口；实际按多市场产品短视频剪辑规则执行"
+  default_prompt: "Use $mexico-tiktok-product-editor for a Mexico TikTok Shop product video; follow the multi-market editor rules."
+policy:
+  allow_implicit_invocation: true

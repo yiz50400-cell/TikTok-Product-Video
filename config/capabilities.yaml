@@ -1,0 +1,10 @@
+schema_version: 1
+capabilities:
+  - id: product_video_editing
+    display_name: 商品视频剪辑
+    skill: tiktok-product-video-editor
+    package_path: .codex/skills/tiktok-product-video-editor
+    local_requirements:
+      - ffmpeg_toolchain
+    host_requirements: []
+    writes_external_state: false

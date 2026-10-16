@@ -1,0 +1,235 @@
+{
+  "version": "v0.2.0",
+  "files": [
+    {
+      "path": ".codex/skills/mexico-tiktok-product-editor/SKILL.md",
+      "sha256": "dc8f1a8fd6ee30b4e9ab13053b4dbe634ab2d68ee2d14c6cece724048d0c9833",
+      "size": 715
+    },
+    {
+      "path": ".codex/skills/mexico-tiktok-product-editor/agents/openai.yaml",
+      "sha256": "ed3cb03b33c1248ba3337bffb3f0a82992138362f694f8b62752e3ae1267cfd8",
+      "size": 324
+    },
+    {
+      "path": ".codex/skills/setup-video-editor-environment/SKILL.md",
+      "sha256": "1a2a91f21e00011affaca68954b674fc149d365f42475b1715653db614a2d9cc",
+      "size": 2573
+    },
+    {
+      "path": ".codex/skills/setup-video-editor-environment/agents/openai.yaml",
+      "sha256": "bb2269f4fb839d1a27d923d4e9c0c0d98e32959464e055d9df1464fd25f8d82b",
+      "size": 311
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/SKILL.md",
+      "sha256": "39cec4a90381eddf9c567636b0da96395e6ace59f326e6ed75cae54ff617bddc",
+      "size": 10899
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/agents/openai.yaml",
+      "sha256": "b56670224387ba3670b29ffe7a45ca6a30982f9e09f04e796eac026594145be5",
+      "size": 398
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/references/tiktok-shop-video-compliance.md",
+      "sha256": "0ff715f9a51fddc6b40887a2d4ed9647a781453bbb9a934fc2a5dd799a938ac0",
+      "size": 3419
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/scripts/download_material_urls.py",
+      "sha256": "e97d5e26c68290da7183a1c4ebae7796e0f70fbd57a82c4646dcfc7c3c6bf2bb",
+      "size": 3154
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/scripts/make_video_run_manifest.py",
+      "sha256": "2ad5515b73b77de190154d8d7beeb541821d92501495b394023a17c26ffcfe96",
+      "size": 2577
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/scripts/prepare_video_assets.py",
+      "sha256": "8ebd6cc750e46a1f681f09af52a01daf9e82740b8630a6f3c405ae6cd02daf5e",
+      "size": 5424
+    },
+    {
+      "path": ".codex/skills/tiktok-product-video-editor/scripts/probe_video_materials.py",
+      "sha256": "4b18905257bbf54fcaf8b75686dd01ff1fb0aad22d557e54016d2a0f5c3649b8",
+      "size": 7323
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "a89871031ad023ccebd2fbaae43f90ca3c0bde7dc8a72ebdca9b6ccacb38afe4",
+      "size": 253
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "bdff0b5b5f6e4fde33a4a75eff0d4449474413f2273f2ce44cb6c8f66166d3df",
+      "size": 757
+    },
+    {
+      "path": "DEPLOYMENT.md",
+      "sha256": "463c21fd8bd4e7bc87fb4ff0b3ba024fb60e358c9516a22d19f0300f1b932db7",
+      "size": 1970
+    },
+    {
+      "path": "README.md",
+      "sha256": "a29a9aacde8b13a93e5b1374e17b47890632db33a053aee88d1d8fcc7a770974",
+      "size": 6850
+    },
+    {
+      "path": "SOURCE-VALIDATION.md",
+      "sha256": "efe694042f00d50b977fc748e11bc1da3bbb768232c533b14c31326a4538ea91",
+      "size": 1705
+    },
+    {
+      "path": "VALIDATION.md",
+      "sha256": "6319d8fd5558a0fbf385825df3bc5cef78296e07ad329e4dc27dbcb31339766a",
+      "size": 869
+    },
+    {
+      "path": "VERSION",
+      "sha256": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9",
+      "size": 6
+    },
+    {
+      "path": "assets/video/default_cart_arrow_down_red.png",
+      "sha256": "453a4b50c9e361025bfd1143138f984d2d4ea12f889d4a6a4822ef0ce3aed032",
+      "size": 3223
+    },
+    {
+      "path": "assets/video/overlays/preferred_cart.png",
+      "sha256": "8de0cae37f6bd1d3428ae715b1f3470d95bd3298819d59eb5451f452ca4e1810",
+      "size": 7244
+    },
+    {
+      "path": "assets/video/overlays/preferred_down_arrow.png",
+      "sha256": "7424afc8b7a3bf0fac5863b9783d81198de828c89e9a5c4168c2fec505130bf0",
+      "size": 8087
+    },
+    {
+      "path": "assets/video/overlays/preferred_usage.txt",
+      "sha256": "20f034129723d694460cadf3ac29485dca41c725e9990ee5e5852a085c4375d8",
+      "size": 281
+    },
+    {
+      "path": "config/capabilities.yaml",
+      "sha256": "48c595d84b0042d93f322944f12b11fb0fc35fde09ec4e86c6110c2d90a1f2e7",
+      "size": 306
+    },
+    {
+      "path": "config/video-editor.example.yaml",
+      "sha256": "193b69f31a85cba61bc0773effea0846caf0d25586951c81aa8a4f17917f7b88",
+      "size": 392
+    },
+    {
+      "path": "config/video-showcase.example.json",
+      "sha256": "301a0cc78b2f7031c4c3367e5a5e4e85b388c2d0374602c92291ea180d7c3ca3",
+      "size": 554
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "a163fe1486a6ebec2316b0a2c0b5d6803f0296da6222b03d1cb0eb3481091830",
+      "size": 871
+    },
+    {
+      "path": "scripts/analyze_video_repetition.py",
+      "sha256": "f6a8980feb8d1c492fcdb533be1b1c4fb4bc074b4ee5305456f57e7fcdb4c5e7",
+      "size": 13624
+    },
+    {
+      "path": "scripts/bootstrap-video-editor-workspace.ps1",
+      "sha256": "131e832160d703682197f8a2923518c00ee7b163b8678c7ba62847b88c8b8e60",
+      "size": 6745
+    },
+    {
+      "path": "scripts/doctor-video-editor-workspace.ps1",
+      "sha256": "d8494797f6e8d2c128676057db59bff137b9a44c81f4a45666c8b9656815e1b8",
+      "size": 4251
+    },
+    {
+      "path": "scripts/make_dynamic_cart_arrow.py",
+      "sha256": "6d4b4ee58ddb4c838832e1b517fdf1c1a22e9c80a68426543866682ca8228907",
+      "size": 1653
+    },
+    {
+      "path": "scripts/make_straight_down_arrow.py",
+      "sha256": "8e2f5de42cd52e857b147f060d85c557ef0038d599f70f7514e28c2d22a8d759",
+      "size": 1065
+    },
+    {
+      "path": "scripts/render-video-showcase.ps1",
+      "sha256": "616308bc9439c54f611ee2fd3bba3d6ea4f38de955528bb53dbe3e07d92c3440",
+      "size": 6818
+    },
+    {
+      "path": "scripts/verify-video-delivery.ps1",
+      "sha256": "376eb375692b59d4cce9881b50b3744b4193cd94fa768223e5ce59294cc8f1d1",
+      "size": 1943
+    },
+    {
+      "path": "src/tk_ops_workspace/__init__.py",
+      "sha256": "a7f4934e2ad4fdbf188a99ba8db1516c5f276a29c646371b58a414e9263ab321",
+      "size": 302
+    },
+    {
+      "path": "src/tk_ops_workspace/__main__.py",
+      "sha256": "0f7d54f3fbb1f79a85eb8110f11793db99da6f3c61ee979de5abe9a1b5f3fdb3",
+      "size": 49
+    },
+    {
+      "path": "src/tk_ops_workspace/catalog.py",
+      "sha256": "b8a2901f01924e4b7c7be704d761b15d850f956fc95dacf1cbcff0a01360da4f",
+      "size": 5667
+    },
+    {
+      "path": "src/tk_ops_workspace/cli.py",
+      "sha256": "7c4357a7561a1e68b8649db09a72c21e1c1a5bcc5df640bf6f5069db3c7f85bb",
+      "size": 4201
+    },
+    {
+      "path": "src/tk_ops_workspace/config.py",
+      "sha256": "59d05d1188f2b3db387e8b9612fe92370c1aac6cc1af3fc7d5b9596e7792f5ab",
+      "size": 4186
+    },
+    {
+      "path": "src/tk_ops_workspace/doctor.py",
+      "sha256": "a34dd8382ad1913081754f15b45a34fd737c3e015a6e45f1c8d787e9085371f3",
+      "size": 5676
+    },
+    {
+      "path": "src/tk_ops_workspace/jimeng_prompt.py",
+      "sha256": "543ba1b29761fbbc942cc4874cb5ecc076f3abc4dfb07103f44165021c2d29fd",
+      "size": 39398
+    },
+    {
+      "path": "src/tk_ops_workspace/models.py",
+      "sha256": "79741aae0918a4f66178e137b5d635e7f3889acf199f35dff65a63da9d83079f",
+      "size": 614
+    },
+    {
+      "path": "src/tk_ops_workspace/release.py",
+      "sha256": "e5b25df8fb715d2a072c0213c70bfc40e7620d3005d725e7d899fd30e5174998",
+      "size": 9500
+    },
+    {
+      "path": "src/tk_ops_workspace/video_compliance.py",
+      "sha256": "a6b43275bd417b0f816d56038c8cfd01c70531804da1ea8fab85fbeba813a76e",
+      "size": 21691
+    },
+    {
+      "path": "tests/test_jimeng_prompt.py",
+      "sha256": "0379cec28116552f91f47b1d3c074959d7345c0188bd7dcb72ec04c9697b9c88",
+      "size": 4348
+    },
+    {
+      "path": "tests/test_video_compliance.py",
+      "sha256": "02f75a4384edafe25528dee516b95c19ea5ba450adb4b5e1903e468e54eb6062",
+      "size": 4273
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "99077a6cd25662d40a421bf6992fa338eb8654d2782718cbedb5fcb35ece463c",
+      "size": 95731
+    }
+  ]
+}

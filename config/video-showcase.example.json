@@ -1,0 +1,15 @@
+{
+  "title": "Pasta Dental Probi\u00f3tica",
+  "cta": "P\u00eddela en el carrito",
+  "segments": [
+    { "start": 0.0, "end": 3.8, "speed": 1.5 },
+    { "start": 4.2, "end": 7.6, "speed": 1.65 },
+    { "start": 8.0, "end": 11.2, "speed": 1.45 },
+    { "start": 11.7, "end": 15.0, "speed": 1.75 },
+    { "start": 15.5, "end": 18.5, "speed": 1.4 },
+    { "start": 19.1, "end": 22.4, "speed": 1.65 },
+    { "start": 23.0, "end": 26.2, "speed": 1.45 },
+    { "start": 28.4, "end": 31.4, "speed": 1.7 },
+    { "start": 32.0, "end": 36.0, "speed": 1.3 }
+  ]
+}

@@ -1,0 +1,11 @@
+video_editor:
+  default_market: ""
+  output_root: "outputs/video"
+  require_chinese_script_approval: true
+  prefer_vertical_9x16: true
+  render_preview_first: true
+  final_video_codec: "h264"
+  final_audio_codec: "aac"
+  downloader: "yt-dlp"
+  tts_provider: "local_kokoro_if_available"
+  notes: "No secrets here. Employee may set default_market to Mexico, Brazil, Indonesia, or leave blank."
