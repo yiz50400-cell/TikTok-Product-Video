@@ -97,10 +97,12 @@ if ($hasUv) {
     }
 }
 $ttsWarnings = [System.Collections.Generic.List[string]]::new()
+# winget is only needed by bootstrap to install missing tools; never a failure on its own.
+$environmentWarnings = [System.Collections.Generic.List[string]]::new()
+if (-not $hasWinget) { $environmentWarnings.Add("winget_missing_manual_install_needed_for_missing_tools") }
 if (-not $kokoroReady -and -not $edgeTtsReady) { $ttsWarnings.Add("tts_backend_missing_voiceover_unavailable") }
 
 $failureCodes = [System.Collections.Generic.List[string]]::new()
-if (-not $hasWinget) { $failureCodes.Add("winget_missing") }
 if (-not $hasUv) { $failureCodes.Add("uv_missing") }
 if (-not $pythonRunnable) { $failureCodes.Add("python_missing") }
 if (-not $ffmpegRunnable) { $failureCodes.Add("ffmpeg_missing") }
@@ -122,6 +124,7 @@ if (-not $hasConfig) { $failureCodes.Add("video_editor_config_missing") }
         yt_dlp_available = $ytDlpRunnable
         config_exists = $hasConfig
         failure_codes = @($failureCodes)
+        warnings = @($environmentWarnings)
     }
     voiceover_environment = [pscustomobject]@{
         kokoro_available = $kokoroReady
