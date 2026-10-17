@@ -1,0 +1,5 @@
+# Keep LF everywhere so DELIVERY-MANIFEST.json hashes match on Windows checkouts too.
+* text=auto eol=lf
+*.png binary
+*.ttf binary
+*.otf binary
