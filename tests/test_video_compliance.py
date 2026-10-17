@@ -123,3 +123,72 @@ def test_mexico_cosmetic_ad_requires_label_disclaimer_age_and_regulatory_readine
         "mexico_nom_141_label_missing",
         "mexico_aviso_publicidad_missing",
     } <= rule_ids
+
+
+def _rule_ids(report) -> set[str]:
+    return {match.rule_id for match in report.matches}
+
+
+def test_blocks_portuguese_exaggerations_for_brazil() -> None:
+    report = check_video_compliance(
+        fields={"script": "O melhor creme do mercado, garantido! Sempre funciona. Grátis hoje."},
+        market="Brazil",
+        category="general",
+    )
+    assert report.status == "blocked"
+    assert {"absolute_best", "absolute_guarantee", "absolute_always_never", "promotion_claim"} <= (
+        _rule_ids(report)
+    )
+    assert report.checks["market_family"] == "brazil"
+
+
+def test_blocks_indonesian_exaggerations_for_indonesia() -> None:
+    report = check_video_compliance(
+        fields={"script": "Produk terbaik nomor satu, dijamin! Menyembuhkan jerawat, diskon hari ini."},
+        market="印尼",
+        category="general",
+    )
+    assert report.status == "blocked"
+    assert {"absolute_best", "absolute_guarantee", "medical_treatment", "promotion_claim"} <= (
+        _rule_ids(report)
+    )
+
+
+def test_review_reproduction_mixed_pt_id_copy_is_blocked_in_all_markets() -> None:
+    text = "O melhor produto, garantido. Produk terbaik, dijamin."
+    for market in ("Mexico", "Brazil", "Indonesia"):
+        ids = _rule_ids(check_video_compliance(fields={"script": text}, market=market, category="general"))
+        assert {"absolute_best", "absolute_guarantee"} <= ids, market
+
+
+def test_pt_id_cosmetic_claims_are_blocked() -> None:
+    report = check_video_compliance(
+        fields={"script": "Clareia a pele e remove manchas. Memutihkan dan awet muda."},
+        market="Brazil",
+        category="cosmetics",
+    )
+    assert {"cosmetic_whitening", "cosmetic_spots", "cosmetic_rejuvenation"} <= _rule_ids(report)
+
+
+def test_neutral_pt_and_id_copy_passes() -> None:
+    for market, text in (
+        ("Brazil", "Textura leve para o dia a dia. Peça no carrinho."),
+        ("Indonesia", "Kopi instan praktis untuk pagi hari. Pesan di keranjang."),
+    ):
+        report = check_video_compliance(fields={"script": text}, market=market, category="general")
+        assert report.status == "passed", (market, report.matches)
+
+
+def test_unknown_market_is_not_silently_passed() -> None:
+    report = check_video_compliance(fields={"script": "Hola"}, market="France", category="general")
+    assert report.status == "blocked"
+    assert "market_unsupported" in _rule_ids(report)
+
+
+def test_numeric_units_in_pt_and_id_require_pdp() -> None:
+    report = check_video_compliance(
+        fields={"script": "Resultado em 7 dias. 3 kali lebih cepat."},
+        market="Brazil",
+        category="general",
+    )
+    assert "numeric_claim_without_pdp" in _rule_ids(report)
