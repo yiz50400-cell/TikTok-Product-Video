@@ -9,11 +9,13 @@ Gates that are never bypassed here:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import importlib.util
 import itertools
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -164,13 +166,14 @@ def fit_timeline(
     tail: float = 0.3,
     max_tempo: float = 1.25,
     min_fill: float = 0.7,
-    max_gap: float = 0.6,
+    target_fill: float = 0.85,
+    max_gap: float = 0.7,
 ) -> FitResult:
     """Place phrases on the video timeline.
 
     - Overrun: speed voice up (atempo) up to ``max_tempo``; beyond that it is an error.
-    - Underfill (voice ends before ``min_fill`` of the video): widen gaps up to ``max_gap``
-      and warn if it still ends early. Voice is never slowed down.
+    - Underfill: widen gaps (up to ``max_gap``) aiming for ``target_fill`` of the video and
+      warn if the voice still ends before ``min_fill``. Voice is never slowed down.
     """
     if video_duration <= 0:
         raise VoiceoverError("video duration must be positive")
@@ -216,8 +219,8 @@ def fit_timeline(
         speech = sum(scaled)
         used_gap = gap
         end = lead_in + speech + gap * (n - 1)
-        if n > 1 and end < min_fill * video_duration:
-            want = (min_fill * video_duration - lead_in - speech) / (n - 1)
+        if n > 1 and end < target_fill * video_duration:
+            want = (target_fill * video_duration - lead_in - speech) / (n - 1)
             used_gap = min(max_gap, max(gap, want))
         starts, t = [], lead_in
         for d in scaled:
@@ -233,7 +236,7 @@ def fit_timeline(
     return FitResult(tempo, starts, scaled, voice_end, warnings)
 
 
-def wrap_subtitle(text: str, max_chars: int = 32) -> str:
+def wrap_subtitle(text: str, max_chars: int = 26) -> str:
     words = text.split()
     if len(text) <= max_chars or len(words) < 2:
         return text
@@ -328,6 +331,30 @@ def default_voice(backend: str, language: str) -> str:
     return "silent"
 
 
+@contextlib.contextmanager
+def _stdout_to_stderr():
+    """Route library chatter (Python and native, e.g. espeak/torch) to stderr.
+
+    stdout carries the machine-readable JSON result that the PowerShell wrappers parse.
+    """
+    sys.stdout.flush()
+    try:
+        fd = sys.stdout.fileno()
+        saved = os.dup(fd)
+    except (AttributeError, OSError, ValueError):  # e.g. pytest capture without a real fd
+        with contextlib.redirect_stdout(sys.stderr):
+            yield
+        return
+    try:
+        os.dup2(sys.stderr.fileno(), fd)
+        with contextlib.redirect_stdout(sys.stderr):
+            yield
+    finally:
+        sys.stdout.flush()
+        os.dup2(saved, fd)
+        os.close(saved)
+
+
 class _Synth:
     def __init__(self, backend: str, language: str, voice: str, speed: float, ffmpeg: str):
         self.backend, self.language, self.voice, self.speed, self.ffmpeg = backend, language, voice, speed, ffmpeg
@@ -351,8 +378,12 @@ class _Synth:
             from kokoro import KPipeline
 
             if self._pipeline is None:
-                self._pipeline = KPipeline(lang_code=LANGUAGES[self.language]["kokoro_lang"])
-            chunks = [audio for _, _, audio in self._pipeline(text, voice=self.voice, speed=self.speed)]
+                with _stdout_to_stderr():
+                    self._pipeline = KPipeline(lang_code=LANGUAGES[self.language]["kokoro_lang"])
+            with _stdout_to_stderr():
+                chunks = [
+                    audio for _, _, audio in self._pipeline(text, voice=self.voice, speed=self.speed)
+                ]
             if not chunks:
                 raise VoiceoverError(f"kokoro produced no audio for: {text!r}")
             out = dest_stem.with_suffix(".wav")
@@ -374,10 +405,52 @@ def _read_pcm(path: Path) -> bytes:
         return w.readframes(w.getnframes())
 
 
-def _normalize(ffmpeg: str, src: Path, dest: Path, tempo: float = 1.0) -> float:
+TRIM_THRESHOLD_DB = -50
+TRIM_KEEP_SECONDS = 0.05
+
+
+def trim_silence_filter(threshold_db: int = TRIM_THRESHOLD_DB, keep: float = TRIM_KEEP_SECONDS) -> str:
+    """Strip leading/trailing silence that TTS engines pad around each phrase.
+
+    edge-tts adds ~0.2s before and ~0.8s after every clip, which otherwise turns a 0.15s
+    phrase gap into >1s of dead air and makes subtitles appear before the voice.
+    """
+    one_side = (
+        f"silenceremove=start_periods=1:start_threshold={threshold_db}dB:"
+        f"start_silence={keep}:detection=peak"
+    )
+    return f"{one_side},areverse,{one_side},areverse"
+
+
+def loudness_filter(target_lufs: float) -> str:
+    """Single-pass EBU R128 normalisation (TikTok plays around -14 LUFS)."""
+    return f"loudnorm=I={target_lufs:g}:TP=-1.5:LRA=11"
+
+
+def subtitle_style(font: str, size: int, margin_v: int, margin_h: int) -> str:
+    """libass force_style for SRT (PlayRes 384x288 units: x*2.81, y*6.67 on 1080x1920).
+
+    MarginL/R keep text out of the right-hand TikTok action buttons; libass wraps lines
+    that would otherwise run into them.
+    """
+    return (
+        f"FontName={font},Fontsize={size},PrimaryColour=&H00FFFFFF,"
+        f"OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0.6,Alignment=2,"
+        f"MarginV={margin_v},MarginL={margin_h},MarginR={margin_h}"
+    )
+
+
+def _normalize(
+    ffmpeg: str, src: Path, dest: Path, tempo: float = 1.0, trim: bool = False
+) -> float:
     args = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", str(src)]
+    filters = []
+    if trim:
+        filters.append(trim_silence_filter())
     if abs(tempo - 1.0) > 1e-3:
-        args += ["-filter:a", f"atempo={tempo:.3f}"]
+        filters.append(f"atempo={tempo:.3f}")
+    if filters:
+        args += ["-filter:a", ",".join(filters)]
     _run([*args, "-ac", "1", "-ar", str(SAMPLE_RATE), "-sample_fmt", "s16", str(dest)])
     with wave.open(str(dest), "rb") as w:
         return w.getnframes() / SAMPLE_RATE
@@ -463,7 +536,9 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
     raw_durations = []
     for i, phrase in enumerate(script.phrases):
         raw = synth.raw(phrase.text, work / f"raw_{i:03d}")
-        raw_durations.append(_normalize(ffmpeg, raw, work / f"norm_{i:03d}.wav"))
+        raw_durations.append(
+            _normalize(ffmpeg, raw, work / f"norm_{i:03d}.wav", trim=backend != "silent")
+        )
 
     fixed = [p.start for p in script.phrases] if script.phrases[0].start is not None else None
     fit = fit_timeline(raw_durations, video_duration, fixed_starts=fixed, max_tempo=ns.max_tempo)
@@ -481,15 +556,14 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
         ffmpeg, "-n", "-hide_banner", "-loglevel", "error",
         "-i", str(video), "-i", str(outputs["audio"]),
         "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
+        *(["-af", loudness_filter(ns.loudness)] if ns.loudness else []),
         "-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2",
         "-t", f"{video_duration:.3f}", "-movflags", "+faststart", str(outputs["video"]),
     ]
     _run(mux)
     if ns.burn_subtitles:
-        style = (
-            f"FontName={ns.subtitle_font},Fontsize={ns.subtitle_font_size},PrimaryColour=&H00FFFFFF,"
-            f"OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0.6,Alignment=2,"
-            f"MarginV={ns.subtitle_margin_v}"
+        style = subtitle_style(
+            ns.subtitle_font, ns.subtitle_font_size, ns.subtitle_margin_v, ns.subtitle_margin_h
         )
         # Run from the work dir with a plain ASCII file name so paths with spaces, Chinese
         # characters or quotes never reach the filter parser.
@@ -526,7 +600,9 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
         "category": ns.category,
         "approved_by": approved_by,
         "compliance": {"status": report.status, "rule_version": report.rule_version},
-        "tts": {"backend": backend, "voice": voice, "speed": ns.speed, "tempo": fit.tempo},
+        "tts": {"backend": backend, "voice": voice, "speed": ns.speed, "tempo": fit.tempo,
+                "silence_trimmed": backend != "silent"},
+        "loudness_target_lufs": ns.loudness or None,
         "video_duration": round(video_duration, 3),
         "voice_end": fit.voice_end,
         "fill_ratio": round(fit.voice_end / video_duration, 3),
@@ -561,7 +637,11 @@ def add_voiceover_parser(subparsers: argparse._SubParsersAction) -> None:  # typ
     b.add_argument("--max-tempo", type=float, default=1.25)
     b.add_argument("--burn-subtitles", action="store_true")
     b.add_argument("--subtitle-font", default="Arial")
-    b.add_argument("--subtitle-font-size", type=int, default=11)
+    b.add_argument("--subtitle-font-size", type=int, default=10)
+    b.add_argument("--subtitle-margin-h", type=int, default=50,
+                   help="libass units (x2.81 px at 1080 wide); keeps text clear of the side UI")
+    b.add_argument("--loudness", type=float, default=-14.0,
+                   help="target integrated loudness in LUFS for the voice track (0 disables)")
     b.add_argument("--subtitle-margin-v", type=int, default=110,
                    help="libass units (PlayResY=288); 110 keeps text above the CTA/lower safe area")
     b.add_argument("--output-stem", default="")

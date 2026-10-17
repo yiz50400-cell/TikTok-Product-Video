@@ -42,6 +42,15 @@ $env:PYTHONUTF8 = "1"
 $workspaceRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 function Resolve-Full { param([string]$Path) return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path) }
 
+function ConvertFrom-ToolJson {
+    # Tools print one indented JSON object on stdout; skip any library chatter before it.
+    param([object[]]$Lines)
+    $text = @($Lines | ForEach-Object { "$_" })
+    $start = [Array]::IndexOf($text, "{")
+    if ($start -lt 0) { throw ("No JSON result in tool output:`n" + ($text -join "`n")) }
+    return (($text[$start..($text.Count - 1)]) -join "`n") | ConvertFrom-Json
+}
+
 if ($VoiceoverScript -and -not $Market) {
     throw "-Market is required when -VoiceoverScript is given."
 }
@@ -65,14 +74,14 @@ if ($FfprobePath) { $arguments += @("--ffprobe", (Resolve-Full $FfprobePath)) }
 if ($FontFile) { $arguments += @("--fontfile", (Resolve-Full $FontFile)) }
 if ($SkipQa) { $arguments += "--skip-qa" }
 
-$renderJson = (& uv @arguments) -join "`n"
+$renderLines = @(& uv @arguments)
 $renderExit = $LASTEXITCODE
 if ($renderExit -ne 0) {
-    Write-Output $renderJson
+    Write-Output ($renderLines -join "`n")
     if ($renderExit -eq 3) { throw "Render finished but delivery QA failed (see qa.errors). Inspect and re-cut; do not deliver." }
     throw "Render failed (exit $renderExit). See the JSON above."
 }
-$render = $renderJson | ConvertFrom-Json
+$render = ConvertFrom-ToolJson $renderLines
 
 $voiceover = $null
 if ($VoiceoverScript) {
@@ -87,7 +96,7 @@ if ($VoiceoverScript) {
     if ($Voice) { $voArgs.Voice = $Voice }
     if ($BurnSubtitles) { $voArgs.BurnSubtitles = $true }
     $voiceoverJson = & (Join-Path $PSScriptRoot "add-voiceover-subtitles.ps1") @voArgs
-    $voiceover = ($voiceoverJson -join "`n") | ConvertFrom-Json
+    $voiceover = ConvertFrom-ToolJson @($voiceoverJson)
 }
 
 $render | Add-Member -NotePropertyName voiceover -NotePropertyValue $voiceover -Force

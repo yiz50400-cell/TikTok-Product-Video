@@ -88,8 +88,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "1dbcb48fc18437ec7e75649679908d4c8aa18972d9bfdbb0f759f463c7ed607d",
-      "size": 12669
+      "sha256": "9dad3c948ff54f357b494bb30e33c11cc2806c7e12b1104d908b11660f9537ba",
+      "size": 13020
     },
     {
       "path": "SOURCE-VALIDATION.md",
@@ -193,8 +193,8 @@
     },
     {
       "path": "scripts/render-video-showcase.ps1",
-      "sha256": "79a6e85fc1dbd30cb219ac852c6db9bd1fac28dd838b7a541555c8ca18d7d46e",
-      "size": 3901
+      "sha256": "51689466f2fed26aa7d711694ce025e86425ae4159850b8f22fd3849b9766666",
+      "size": 4312
     },
     {
       "path": "scripts/verify-video-delivery.ps1",
@@ -258,8 +258,8 @@
     },
     {
       "path": "src/tk_ops_workspace/voiceover.py",
-      "sha256": "8b516b2961adf2281812757782e7129cdf84892ca4873bf9feb4b7d19157409d",
-      "size": 24597
+      "sha256": "5d7edd5013ea3758ce104b28fde9a19f99650ceef6da1275421939c11ce439fd",
+      "size": 27439
     },
     {
       "path": "tests/e2e/plan.json",
@@ -303,8 +303,8 @@
     },
     {
       "path": "tests/test_voiceover.py",
-      "sha256": "22d485c6c5d9dd6667221cd5f4f7dc5891196f8bbed997adc9c39a260e2b9900",
-      "size": 6114
+      "sha256": "dfa6789a39f248c6e58ac2ed9aba810af08b796f82333795f0f8bf5d82d8efb6",
+      "size": 7300
     },
     {
       "path": "uv.lock",

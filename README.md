@@ -100,7 +100,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\render-video-showc
 
 - 闸门：没有 `-ApprovedBy`（或 JSON `approved_by`）会直接拒绝；口播文本会先过 `video-compliance`，非 `passed` 一律阻断，不会生成任何音频。
 - TTS：`auto` 优先本地 Kokoro（es-MX `ef_dora`、pt-BR `pf_dora`），否则用 edge-tts（es-MX `es-MX-DaliaNeural`、pt-BR `pt-BR-FranciscaNeural`、id-ID `id-ID-GadisNeural`，需联网）。Kokoro 没有印尼语。`silent` 只用于测试。可用 `-Voice`、`-Speed` 覆盖。
-- 时长适配：配音超出视频时最多加速到 1.25 倍，再超则报错要求缩短口播；配音结束早于视频 70% 时会拉开句间停顿（最多 0.6 秒）并给出警告。
+- 时长适配：配音超出视频时最多加速到 1.25 倍，再超则报错要求缩短口播；每句 TTS 前后的静音会先裁掉（edge-tts 每句自带约 1 秒空白）；配音偏短时拉开句间停顿（最多 0.7 秒，目标覆盖视频 85%），仍早于 70% 结束会给出警告；配音音量统一标准化到 -14 LUFS（`--loudness`，0 关闭）。
+- 字幕烧录：默认字号 10、左右边距 50（约 140 像素，避开 TikTok 右侧按钮栏），每行最多约 26 个字符，过长由 libass 自动换行。
 - 输出（同一运行目录，已存在则拒绝覆盖）：`<名>.voiced.mp4`（H.264 + AAC，+faststart）、`<名>.<语言>.srt`、`<名>.voice.wav`、`<名>.voiceover-notes.json`（记录审批人、合规结果、TTS 引擎、音色、语速、加速倍数、警告），加 `-BurnSubtitles` 时另有 `<名>.voiced.subtitled.mp4`（字幕位于 CTA 和底部安全区上方，可用 `-SubtitleMarginV` 调整）。默认交付干净成片 + 单独 SRT。
 - 安装 TTS 依赖：`uv sync --project . --extra kokoro`（本地，首次会下载 PyTorch 和模型，体积较大）或 `uv sync --project . --extra edge-tts`。
 

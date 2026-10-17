@@ -92,7 +92,7 @@ def test_fit_rejects_large_overrun():
 
 def test_fit_widens_gaps_and_warns_when_short():
     fit = fit_timeline([1.0, 1.0], 20.0)
-    assert fit.starts[1] - fit.starts[0] - 1.0 == pytest.approx(0.6)
+    assert fit.starts[1] - fit.starts[0] - 1.0 == pytest.approx(0.7)
     assert any("ends_early" in w for w in fit.warnings)
 
 
@@ -115,7 +115,7 @@ def _ns(tmp_path, video, script, **kw):
     base = {"script": script, "video": video, "run_dir": tmp_path / "run", "market": "Mexico",
                 "category": "general", "language": "es-MX", "approved_by": "", "backend": "silent", "voice": "",
                 "speed": 1.0, "max_tempo": 1.25, "burn_subtitles": False, "subtitle_font": "Arial",
-                "subtitle_font_size": 11, "subtitle_margin_v": 110, "output_stem": "", "ai_generated": False,
+                "subtitle_font_size": 10, "subtitle_margin_v": 110, "subtitle_margin_h": 50, "loudness": -14.0, "output_stem": "", "ai_generated": False,
                 "ai_label_enabled": False, "keep_work": False, "ffmpeg": "", "ffprobe": ""}
     base.update(kw)
     return Namespace(**base)
@@ -161,3 +161,30 @@ def test_end_to_end_silent_backend(tmp_path):
     assert notes["tts"]["backend"] == "silent"
     with pytest.raises(VoiceoverError, match="overwrite"):
         build_voiceover(ns)
+
+
+def test_audio_and_subtitle_filters():
+    from tk_ops_workspace.voiceover import loudness_filter, subtitle_style, trim_silence_filter
+
+    trim = trim_silence_filter()
+    assert trim.count("silenceremove") == 2 and trim.count("areverse") == 2
+    assert loudness_filter(-14) == "loudnorm=I=-14:TP=-1.5:LRA=11"
+    style = subtitle_style("Arial", 10, 110, 50)
+    assert "MarginL=50,MarginR=50" in style and "MarginV=110" in style and "Fontsize=10" in style
+
+
+def test_default_wrap_keeps_lines_short():
+    for line in wrap_subtitle("Use de manhã e à noite, com escovação suave.").split("\n"):
+        assert len(line) <= 26
+
+
+@pytest.mark.skipif(not shutil.which("ffmpeg"), reason="ffmpeg")
+def test_trim_removes_tts_padding(tmp_path):
+    from tk_ops_workspace.voiceover import _normalize
+
+    padded = tmp_path / "p.wav"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i",
+                    "sine=f=440:d=1:r=24000", "-af", "adelay=300,apad=pad_dur=0.8",
+                    str(padded)], check=True)
+    trimmed = _normalize("ffmpeg", padded, tmp_path / "t.wav", trim=True)
+    assert 0.95 <= trimmed <= 1.2
