@@ -23,6 +23,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+from .media import MediaToolError, find_tool
+from .qa import QaSettings, run_qa
 from .video_compliance import check_video_compliance
 
 SAMPLE_RATE = 24000
@@ -276,18 +278,10 @@ def build_srt(cues: Sequence[Cue]) -> str:
 
 # ---------------------------------------------------------------- tools / backends
 
-def _tool(name: str, explicit: str = "") -> str:
-    if explicit:
-        return explicit
-    found = shutil.which(name)
-    if not found:
-        raise VoiceoverError(f"{name} not found on PATH")
-    return found
-
-
-def _run(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+def _run(cmd: Sequence[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     proc = subprocess.run(
-        list(cmd), capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        list(cmd), capture_output=True, text=True, encoding="utf-8", errors="replace",
+        check=False, cwd=cwd,
     )
     if proc.returncode != 0:
         raise VoiceoverError(f"command failed ({proc.returncode}): {cmd[0]} ... {proc.stderr[-800:]}")
@@ -400,10 +394,6 @@ def assemble_track(clips: Sequence[Path], starts: Sequence[float], total: float,
     _write_wav(dest, bytes(buf))
 
 
-def _filter_path(path: Path) -> str:
-    return str(path).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
-
-
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -457,8 +447,8 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
         if path == video or path == script_path:
             raise VoiceoverError("output would overwrite an input file")
 
-    ffmpeg = _tool("ffmpeg", ns.ffmpeg or "")
-    ffprobe = _tool("ffprobe", ns.ffprobe or "")
+    ffmpeg = find_tool("ffmpeg", ns.ffmpeg or None)
+    ffprobe = find_tool("ffprobe", ns.ffprobe or None)
     video_duration = probe_duration(ffprobe, video)
     backend = resolve_backend(ns.backend, script.language)
     voice = ns.voice or default_voice(backend, script.language)
@@ -501,13 +491,29 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
             f"OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0.6,Alignment=2,"
             f"MarginV={ns.subtitle_margin_v}"
         )
-        vf = f"subtitles='{_filter_path(outputs['srt'])}':force_style='{style}'"
-        _run([
-            ffmpeg, "-n", "-hide_banner", "-loglevel", "error", "-i", str(outputs["video"]),
-            "-vf", vf, "-map", "0:v:0", "-map", "0:a:0",
-            "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p", "-c:a", "copy",
-            "-movflags", "+faststart", str(outputs["burned"]),
-        ])
+        # Run from the work dir with a plain ASCII file name so paths with spaces, Chinese
+        # characters or quotes never reach the filter parser.
+        shutil.copyfile(outputs["srt"], work / "subs.srt")
+        vf = f"subtitles=subs.srt:force_style='{style}'"
+        _run(
+            [
+                ffmpeg, "-n", "-hide_banner", "-loglevel", "error", "-i", str(outputs["video"]),
+                "-vf", vf, "-map", "0:v:0", "-map", "0:a:0",
+                "-c:v", "libx264", "-crf", "21", "-pix_fmt", "yuv420p", "-c:a", "copy",
+                "-movflags", "+faststart", str(outputs["burned"]),
+            ],
+            cwd=work,
+        )
+
+    qa_results = {}
+    for key in ("video", "burned"):
+        if key in outputs:
+            qa_results[key] = run_qa(
+                outputs[key],
+                QaSettings(expected_duration=video_duration, expected_fps=None,
+                           require_audio=True, check_freezes=False),
+                ffmpeg=ffmpeg, ffprobe=ffprobe, write_report=False,
+            )
 
     notes = {
         "created_at": datetime.now(UTC).isoformat(),
@@ -528,6 +534,9 @@ def build_voiceover(ns: argparse.Namespace) -> dict[str, object]:
         "cues": [asdict(c) for c in cues],
         "outputs": {k: str(v) for k, v in outputs.items()},
         "subtitles_burned": bool(ns.burn_subtitles),
+        "qa": {k: {"passed": v["passed"], "errors": v["errors"], "audio_codec": v["audio_codec"]}
+               for k, v in qa_results.items()},
+        "qa_passed": all(v["passed"] for v in qa_results.values()),
     }
     outputs["notes"].write_text(json.dumps(notes, ensure_ascii=False, indent=2), encoding="utf-8")
     if not ns.keep_work:
@@ -573,11 +582,12 @@ def handle_voiceover(ns: argparse.Namespace) -> int:
             ns.language = ""
     try:
         notes = build_voiceover(ns)
-    except (VoiceoverError, OSError, UnicodeError, ValueError) as error:
-        print(json.dumps({"status": "blocked", "error": str(error)}, ensure_ascii=False, indent=2))
+    except (VoiceoverError, MediaToolError, OSError, UnicodeError, ValueError) as error:
+        print(json.dumps({"status": "blocked", "error": str(error)}, ensure_ascii=True, indent=2))
         return 2
-    print(json.dumps({"status": "ok", **notes}, ensure_ascii=False, indent=2))
-    return 0
+    status = "ok" if notes["qa_passed"] else "qa_failed"
+    print(json.dumps({"status": status, **notes}, ensure_ascii=True, indent=2))
+    return 0 if status == "ok" else 3
 
 
 __all__ = [

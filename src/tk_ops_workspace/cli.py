@@ -8,6 +8,7 @@ from pathlib import Path
 from .catalog import CapabilityCatalogError
 from .doctor import run_doctor
 from .qa import add_verify_parser, handle_verify
+from .render import add_render_parser, handle_render
 from .video_compliance import add_video_compliance_parser, handle_video_compliance
 from .voiceover import add_voiceover_parser, handle_voiceover
 
@@ -20,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.add_argument("--config", type=Path, default=Path("config/employee.local.yaml"))
     add_video_compliance_parser(subparsers)
     add_voiceover_parser(subparsers)
+    add_render_parser(subparsers)
     add_verify_parser(subparsers)
     return parser
 
@@ -52,6 +54,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if report.project_valid else 2
     if namespace.command == "video-compliance":
         return handle_video_compliance(namespace)
+    if namespace.command == "render":
+        return handle_render(namespace)
     if namespace.command == "verify":
         return handle_verify(namespace)
     if namespace.command == "voiceover":
