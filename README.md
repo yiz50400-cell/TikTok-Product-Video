@@ -28,7 +28,7 @@
 在 GitHub 下载固定版本源码包后，在项目目录执行：
 
 ```powershell
-uv sync --project .
+uv sync --frozen --project .
 ```
 
 如果没有 `uv`，从 Astral 官方渠道安装后再执行上面的命令。FFmpeg 建议使用当前 Windows 用户可用的 `Gyan.FFmpeg` 包，安装后确认：
@@ -73,7 +73,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\render-video-showc
   -SegmentsJson ".\config\video-showcase.example.json"
 ```
 
-渲染前仍必须按 Skill 展示并确认中文口播稿。该入口复现当前已跑通的画面展示逻辑：按片段裁剪、局部变速、竖屏 1080x1920、标题、购物车 CTA、红色下箭头和黄色购物车。不传 `-VoiceoverScript` 时行为与之前一致（无音频画面版）。
+渲染前仍必须按 Skill 展示并确认中文口播稿。该入口复现当前已跑通的画面展示逻辑：按片段裁剪、局部变速、竖屏 1080x1920、标题、购物车 CTA、红色下箭头和黄色购物车。不传 `-VoiceoverScript` 时输出无音频画面版，画面与 v0.2.0 一致。
+
+PowerShell 脚本只是薄封装，核心逻辑在 `src/tk_ops_workspace/render.py`（`uv run tk-ops-workspace render showcase --help`）：
+
+- **渲染前校验**：片段超出素材时长会在渲染前直接报错，不会再生成冻结画面；输出文件已存在会拒绝覆盖（每次用新的 `-RunDir`）。
+- **字体**：标题/CTA 使用明确的字体文件。优先级：`-FontFile` > 片段 JSON 的 `layout.fontfile` > 环境变量 `TK_VIDEO_FONTFILE` > `C:\Windows\Fonts\arialbd.ttf` / `segoeuib.ttf` / `arial.ttf`。仓库不附带字体；需要更完整字符集时可自行下载 OFL 授权的 Noto Sans 并用 `-FontFile` 指定。
+- **版式**：片段 JSON 可选 `layout` 段（见 `config/video-showcase.example.json`），可调画面尺寸、帧率、标题/CTA 位置和字号、箭头/购物车位置和大小、文字描边和底框；不写则用 v0.2.0 默认值。标题过长会自动换行（最多 `max_lines` 行），仍放不下时逐步缩小到 `min_font_size`，并在结果里给出警告。
+- **自动 QA**：渲染后自动检查 H.264、1080x1920、yuv420p、30fps、实际时长与计划时长（误差 0.25 秒内）以及冻结画面（≥0.8 秒判失败），结果写入 `<名>.qa.json`。QA 不通过时脚本报错，请重剪后再交付。`--plan-only` 可只打印滤镜图用于排查。
 
 ### 配音和字幕（固定脚本）
 
@@ -105,14 +112,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\render-video-showc
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\doctor-video-editor-workspace.ps1
 ```
 
-对成片做编码和尺寸检查：
+对成片做交付检查（编码、尺寸、yuv420p、帧率、时长、冻结画面，生成 QA JSON）：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-video-delivery.ps1 `
   -Video ".\outputs\video\mexico\2026-10-16\run-example\showcase.mp4"
 ```
 
-带配音的成片加 `-RequireAudio`，会额外要求 AAC 音轨。
+可选参数：`-ExpectedDuration <秒>`（填渲染结果里的 `duration_seconds`）、`-RequireAudio`（配音成片要求 AAC 音轨）、`-ExpectedFps`、`-FreezeMaxSeconds`、`-SkipFreezeCheck`、`-QaJson`。默认报告写到 `<视频名>.qa.json`，已存在时另起带时间戳的文件，不覆盖。
 
 合规文本检查：
 
@@ -131,17 +138,21 @@ uv run --project . tk-ops-workspace video-compliance check `
 ## 项目结构
 
 - `.codex/skills/tiktok-product-video-editor/`：视频剪辑规则、合规参考和素材工具脚本。
-- `scripts/render-video-showcase.ps1`：可移植的当前实际剪辑入口。
+- `scripts/render-video-showcase.ps1`：剪辑入口（薄封装，调用 `tk-ops-workspace render showcase`）。
+- `src/tk_ops_workspace/render.py`：片段/版式解析、素材时长校验、标题换行缩放、滤镜图生成。
+- `src/tk_ops_workspace/qa.py`：交付 QA（`tk-ops-workspace verify`）。
+- `scripts/generate_delivery_manifest.py`：根据 `VERSION` 和 Git 跟踪文件生成/校验 `DELIVERY-MANIFEST.json`。
+- `.github/workflows/ci.yml`：Windows/Ubuntu 上跑 `uv sync --frozen`、pytest、ruff、清单校验、ps1 语法检查和 Windows PowerShell 5.1 冒烟渲染。
 - `scripts/add-voiceover-subtitles.ps1`：对已审批的本地化口播稿生成 TTS 配音、逐句 SRT 并混入 AAC 音轨，可选烧录字幕。
 - `src/tk_ops_workspace/voiceover.py`：配音/字幕核心逻辑（`tk-ops-workspace voiceover build`）。
 - `config/voiceover.example.json`：本地化口播稿格式示例。
-- `scripts/verify-video-delivery.ps1`：成片编码、尺寸、像素格式和时长检查。
+- `scripts/verify-video-delivery.ps1`：成片编码、尺寸、像素格式、帧率、时长和冻结画面检查（薄封装）。
 - `scripts/doctor-video-editor-workspace.ps1`：只读环境诊断。
 - `scripts/bootstrap-video-editor-workspace.ps1`：查看或应用剪辑依赖补齐计划。
 - `assets/video/overlays/`：实际使用的红色下箭头和黄色购物车资源。
-- `src/tk_ops_workspace/`：视频合规检查和工作区 CLI。
+- `src/tk_ops_workspace/`：渲染、QA、配音字幕、合规检查和工作区 CLI。
 - `config/video-showcase.example.json`：当前剪辑片段配置示例。
-- `DELIVERY-MANIFEST.json`：交付文件 SHA-256 清单。
+- `DELIVERY-MANIFEST.json`：交付文件 SHA-256 清单（由脚本生成，版本号取自 `VERSION`）。
 - `outputs/video/`：运行时输出目录，默认不纳入 Git。
 
 ## 常见问题
@@ -155,8 +166,14 @@ uv run --project . tk-ops-workspace video-compliance check `
 **成片不是 1080x1920 或出现黑边**  
 检查片段 JSON 和原素材比例，使用 `verify-video-delivery.ps1`，再人工抽帧确认主体是否被裁掉。
 
-**标题或 CTA 乱码**  
-确认 PowerShell 以 UTF-8 运行，脚本和 JSON 使用 UTF-8；不要把编辑器保存为本地代码页。
+**标题或 CTA 乱码、字体报错**  
+确认 JSON 使用 UTF-8；用 `-FontFile` 或 `TK_VIDEO_FONTFILE` 指定一个包含所需字符的字体（如 Arial Bold、Noto Sans）。
+
+**渲染报 segments exceed the source video**  
+片段 `end` 超过了素材时长。按素材实际时长修改片段 JSON，不要靠冻结帧补时长。
+
+**QA 报 freeze_detected 或 duration_mismatch**  
+查看 `<名>.qa.json` 中的 `freezes` 和 `duration_delta_seconds`，重剪对应片段。
 
 **合规检查被阻断**  
 按 `.codex/skills/tiktok-product-video-editor/references/tiktok-shop-video-compliance.md` 修改口播、字幕、标签或画面文字，并重新执行检查。不要用未验证的数字、保证性、医疗性或促销性表述绕过检查。
@@ -173,3 +190,9 @@ uv run --project . tk-ops-workspace video-compliance check `
 ## 不随仓库交付的内容
 
 原始视频、成片、SRT、运行日志、临时抽帧、客户数据、订单数据、本机账号配置、微信缓存路径、紫鸟配置、MCP OAuth 和任何密钥都不在本交付包中。接收者必须使用自己的素材、账号和授权。
+
+## 维护者
+
+- 修改任何文件后运行 `uv run python scripts/generate_delivery_manifest.py` 更新清单；CI 会用 `--check` 校验。
+- 版本号只改 `VERSION`；`pyproject.toml` 的版本和清单都从它读取。
+- 本地检查：`uv sync --frozen --extra dev`、`uv run pytest -q`、`uv run ruff check .`。

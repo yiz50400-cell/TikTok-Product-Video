@@ -156,7 +156,9 @@ Run proportionate checks before saying the video is done:
 - check final duration and pacing against approved script;
 - inspect for dead air and frozen/static padding;
 - run `ffmpeg`/`ffprobe` checks when available;
-- run `freezedetect`; any freeze segment `>= 0.8s` must be inspected and recut rather than explained away;
+- run `freezedetect`; any freeze segment `>= 0.8s` must be inspected and recut rather than explained away. `render-video-showcase.ps1` does this automatically and writes `<name>.qa.json`; for other outputs run `scripts/verify-video-delivery.ps1 -Video <mp4> -ExpectedDuration <planned seconds>` (add `-RequireAudio` for voiced files). A failing QA means re-cut, not deliver;
+- never stretch a short source with frozen frames: the renderer rejects segments past the source duration — fix the segments JSON instead;
+- put per-product placement changes (title/CTA position and size, arrow/cart position, font) in the segments JSON `layout` section, not in the scripts;
 - verify final preview is H.264/AAC-compatible MP4 with `yuv420p` and faststart when possible;
 - open or sample the final output if practical.
 - complete the compliance gate and record its rule version and any blocked items in the run notes;
