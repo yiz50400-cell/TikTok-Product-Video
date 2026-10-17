@@ -1,0 +1,79 @@
+name: Windows E2E (voiceover + subtitles)
+
+on:
+  workflow_dispatch:
+    inputs:
+      kokoro:
+        description: "Also run the Kokoro (local TTS) job"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "tests/e2e/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/windows-e2e.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  edge-tts:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install FFmpeg
+        run: choco install ffmpeg -y --no-progress
+      - name: uv sync --frozen --extra edge-tts
+        run: uv sync --frozen --extra edge-tts
+      - name: Render es-MX / pt-BR / id-ID with edge-tts (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + $env:Path
+          .\scripts\ci\windows-e2e.ps1 -ArtifactDir "$env:RUNNER_TEMP\artifacts" -TtsBackend edge-tts -RunPrefix edge
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-e2e-edge-tts
+          path: ${{ runner.temp }}/artifacts
+          retention-days: 14
+
+  kokoro:
+    if: github.event_name == 'pull_request' || inputs.kokoro
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install FFmpeg
+        run: choco install ffmpeg -y --no-progress
+      - name: uv sync --frozen --extra kokoro (timed)
+        shell: powershell
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          uv sync --frozen --extra kokoro
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $sw.Stop()
+          $size = (Get-ChildItem .venv -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
+          "kokoro_sync_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,1)) venv_mb=$([math]::Round($size))" | Tee-Object -FilePath "$env:RUNNER_TEMP\kokoro-install.txt"
+      - name: Render es-MX with Kokoro (first run downloads the model)
+        shell: powershell
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + $env:Path
+          .\scripts\ci\windows-e2e.ps1 -ArtifactDir "$env:RUNNER_TEMP\artifacts" -Languages es-MX -TtsBackend kokoro -RunPrefix kokoro
+          Copy-Item "$env:RUNNER_TEMP\kokoro-install.txt" "$env:RUNNER_TEMP\artifacts\"
+          $hf = Join-Path $env:USERPROFILE ".cache\huggingface"
+          if (Test-Path $hf) {
+            $mb = (Get-ChildItem $hf -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
+            "hf_cache_mb=$([math]::Round($mb))" | Add-Content "$env:RUNNER_TEMP\artifacts\kokoro-install.txt"
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-e2e-kokoro
+          path: ${{ runner.temp }}/artifacts
+          retention-days: 14

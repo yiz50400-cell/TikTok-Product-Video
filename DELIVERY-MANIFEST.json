@@ -67,6 +67,11 @@
       "size": 3905
     },
     {
+      "path": ".github/workflows/windows-e2e.yml",
+      "sha256": "1e85ccfd568f7312f178a4d8985578588910d95fd590002a1eaeea9caf121ac3",
+      "size": 2998
+    },
+    {
       "path": ".gitignore",
       "sha256": "a89871031ad023ccebd2fbaae43f90ca3c0bde7dc8a72ebdca9b6ccacb38afe4",
       "size": 253
@@ -162,6 +167,11 @@
       "size": 7541
     },
     {
+      "path": "scripts/ci/windows-e2e.ps1",
+      "sha256": "604406e031399c320a7ce1bdaa3f355ee406d6be68330e6b688e3005c6a583ec",
+      "size": 4508
+    },
+    {
       "path": "scripts/doctor-video-editor-workspace.ps1",
       "sha256": "8a62d2443f24b88281677da0562796dc2ae1b9d7d28ae94eba874bc876ec8c97",
       "size": 5551
@@ -250,6 +260,26 @@
       "path": "src/tk_ops_workspace/voiceover.py",
       "sha256": "8b516b2961adf2281812757782e7129cdf84892ca4873bf9feb4b7d19157409d",
       "size": 24597
+    },
+    {
+      "path": "tests/e2e/plan.json",
+      "sha256": "851b86188e685ef7bae7050c0be54d4b9d7550d5de9733aa3bc807594d055fd7",
+      "size": 609
+    },
+    {
+      "path": "tests/e2e/vo.es-MX.txt",
+      "sha256": "7a50dca3ae6e286963a0ed8ed9cb80dfd96d06a98cbb450344791a8ab00a33b0",
+      "size": 200
+    },
+    {
+      "path": "tests/e2e/vo.id-ID.txt",
+      "sha256": "6cb0dce415c8895b749843bd6eef219b20d5ded6b0412f6b6679d8d2327c5468",
+      "size": 187
+    },
+    {
+      "path": "tests/e2e/vo.pt-BR.txt",
+      "sha256": "aabc88a88b98e78274a6a822885c6ba17ba3eda6f9be41dfe2541ecca1a5578b",
+      "size": 204
     },
     {
       "path": "tests/test_cli.py",
