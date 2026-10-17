@@ -148,3 +148,8 @@ def test_render_e2e_and_short_source_failure(tmp_path):
     with pytest.raises(RenderError, match="exceed the source"):
         render_showcase(source=short, run_dir=tmp_path / "run 2", segments_json=plan)
     assert not (tmp_path / "run 2").exists()
+
+
+def test_example_layout_section_equals_defaults():
+    raw = json.loads((ROOT / "config" / "video-showcase.example.json").read_text(encoding="utf-8"))
+    assert merge_layout(raw["layout"]) == DEFAULT_LAYOUT
