@@ -92,6 +92,8 @@ class FittedText:
 def merge_layout(overrides: Mapping[str, Any] | None) -> dict[str, Any]:
     layout = copy.deepcopy(DEFAULT_LAYOUT)
     for key, value in (overrides or {}).items():
+        if key.startswith("_"):
+            continue  # comments such as "_comment"
         if key not in layout:
             raise RenderError(f"unknown layout key: {key!r}")
         if isinstance(layout[key], dict):

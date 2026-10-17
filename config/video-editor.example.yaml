@@ -1,14 +1,19 @@
+# Copy to config/video-editor.local.yaml (doctor checks that the local file exists).
+# All keys are DESCRIPTIVE: they document employee preferences for Codex and the skill.
+# No script reads them. Script behaviour comes from CLI/PowerShell parameters and from the
+# "layout" section of the segments JSON (see config/video-showcase.example.json).
+# No secrets here.
 video_editor:
-  default_market: ""
-  output_root: "outputs/video"
-  require_chinese_script_approval: true
-  prefer_vertical_9x16: true
-  render_preview_first: true
-  final_video_codec: "h264"
-  final_audio_codec: "aac"
-  downloader: "yt-dlp"
+  default_market: ""                      # Mexico | Brazil | Indonesia | blank = ask; -Market / --market
+  output_root: "outputs/video"            # convention for -RunDir (one new run dir per edit)
+  require_chinese_script_approval: true   # enforced by voiceover: -ApprovedBy is mandatory
+  prefer_vertical_9x16: true              # render layout width/height (default 1080x1920)
+  render_preview_first: true              # skill workflow preference
+  final_video_codec: "h264"               # fixed in render (libx264, yuv420p, +faststart)
+  final_audio_codec: "aac"                # fixed in voiceover mux
+  downloader: "yt-dlp"                    # used by the skill's download_material_urls.py
   tts_provider: "local_kokoro_if_available"  # voiceover --backend auto: kokoro -> edge-tts; silent = test only
-  tts_max_tempo: 1.25
+  tts_max_tempo: 1.25                     # voiceover --max-tempo default
   default_delivery: "clean_mp4_plus_srt"  # burn subtitles only on request (-BurnSubtitles)
   voiceover_example: "config/voiceover.example.json"
-  notes: "No secrets here. Employee may set default_market to Mexico, Brazil, Indonesia, or leave blank."
+  fontfile: ""                            # set $env:TK_VIDEO_FONTFILE or layout.fontfile / -FontFile instead
