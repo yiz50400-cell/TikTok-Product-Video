@@ -76,7 +76,9 @@ def main() -> int:
         if args.dry_run:
             print("DRY_RUN " + " ".join(cmd))
             continue
-        proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        )
         if proc.returncode == 0:
             print(f"OK {url}")
         else:

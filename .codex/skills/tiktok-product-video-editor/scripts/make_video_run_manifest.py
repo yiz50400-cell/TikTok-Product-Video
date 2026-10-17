@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -67,7 +67,7 @@ def main() -> int:
     )
     payload = {
         "schema_version": 1,
-        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "created_at": datetime.now(UTC).astimezone().isoformat(timespec="seconds"),
         "market": args.market,
         "voice": args.voice,
         "speed": args.speed,

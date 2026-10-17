@@ -10,7 +10,6 @@ from .catalog import CapabilityDefinition, load_capability_catalog
 from .config import EmployeeConfigError, load_employee_config
 from .models import EmployeeConfig
 
-
 CapabilityStatus = Literal[
     "available",
     "missing_config",

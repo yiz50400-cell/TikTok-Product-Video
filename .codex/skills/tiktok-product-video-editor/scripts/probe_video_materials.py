@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv", ".avi"}
 SAFE_VIDEO_CODECS = {"h264"}
 SAFE_AUDIO_CODECS = {"aac", ""}
@@ -72,7 +71,9 @@ def list_media(paths: list[Path]) -> list[Path]:
 
 
 def run_json(cmd: list[str]) -> dict[str, Any]:
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+    )
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "command failed")
     return json.loads(proc.stdout)
@@ -120,7 +121,7 @@ def probe(path: Path, ffprobe: str | None) -> dict[str, Any]:
             "width": width,
             "height": height,
             "aspect": f"{width}:{height}" if width and height else "",
-            "vertical": bool(height > width and width > 0),
+            "vertical": bool(height > width > 0),
             "codec_video": vcodec,
             "codec_audio": acodec,
             "pix_fmt": pix_fmt,
@@ -150,7 +151,9 @@ def detect_freezes(path: Path, ffmpeg: str | None, threshold: float) -> dict[str
         "null",
         "-",
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+    )
     text = proc.stderr + "\n" + proc.stdout
     starts = [line.strip() for line in text.splitlines() if "freeze_start:" in line]
     durations = [line.strip() for line in text.splitlines() if "freeze_duration:" in line]
