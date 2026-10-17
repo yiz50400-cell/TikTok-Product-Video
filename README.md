@@ -73,7 +73,29 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\render-video-showc
   -SegmentsJson ".\config\video-showcase.example.json"
 ```
 
-渲染前仍必须按 Skill 展示并确认中文口播稿。该入口复现当前已跑通的画面展示逻辑：按片段裁剪、局部变速、竖屏 1080x1920、标题、购物车 CTA、红色下箭头和黄色购物车。当前版本不自动添加配音或字幕；如有配音需求，应按 Skill 的审批、合规和 SRT 时间轴规则扩展运行目录，不覆盖原始素材。
+渲染前仍必须按 Skill 展示并确认中文口播稿。该入口复现当前已跑通的画面展示逻辑：按片段裁剪、局部变速、竖屏 1080x1920、标题、购物车 CTA、红色下箭头和黄色购物车。不传 `-VoiceoverScript` 时行为与之前一致（无音频画面版）。
+
+### 配音和字幕（固定脚本）
+
+中文口播稿确认后，把**本地化后的目标语言口播稿**保存为 UTF-8 文本（一行一句）或 JSON（见 `config/voiceover.example.json`，可带 `start`/`end` 秒数）。然后在渲染时一并生成配音和字幕：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\render-video-showcase.ps1 `
+  -Source "D:\path\to\source.mp4" `
+  -RunDir ".\outputs\video\mexico\2026-10-17\run-001" `
+  -SegmentsJson ".\config\video-showcase.example.json" `
+  -VoiceoverScript "D:\path\to\voiceover.es-MX.txt" `
+  -Market Mexico -Category general -ApprovedBy "张三" `
+  -TtsBackend auto   # 可加 -BurnSubtitles 烧录字幕
+```
+
+也可以对已有成片单独加配音：`scripts\add-voiceover-subtitles.ps1 -Video ... -VoiceoverScript ... -RunDir ... -Market ... -ApprovedBy ...`（底层是 `uv run tk-ops-workspace voiceover build`）。
+
+- 闸门：没有 `-ApprovedBy`（或 JSON `approved_by`）会直接拒绝；口播文本会先过 `video-compliance`，非 `passed` 一律阻断，不会生成任何音频。
+- TTS：`auto` 优先本地 Kokoro（es-MX `ef_dora`、pt-BR `pf_dora`），否则用 edge-tts（es-MX `es-MX-DaliaNeural`、pt-BR `pt-BR-FranciscaNeural`、id-ID `id-ID-GadisNeural`，需联网）。Kokoro 没有印尼语。`silent` 只用于测试。可用 `-Voice`、`-Speed` 覆盖。
+- 时长适配：配音超出视频时最多加速到 1.25 倍，再超则报错要求缩短口播；配音结束早于视频 70% 时会拉开句间停顿（最多 0.6 秒）并给出警告。
+- 输出（同一运行目录，已存在则拒绝覆盖）：`<名>.voiced.mp4`（H.264 + AAC，+faststart）、`<名>.<语言>.srt`、`<名>.voice.wav`、`<名>.voiceover-notes.json`（记录审批人、合规结果、TTS 引擎、音色、语速、加速倍数、警告），加 `-BurnSubtitles` 时另有 `<名>.voiced.subtitled.mp4`（字幕位于 CTA 和底部安全区上方，可用 `-SubtitleMarginV` 调整）。默认交付干净成片 + 单独 SRT。
+- 安装 TTS 依赖：`uv sync --project . --extra kokoro`（本地，首次会下载 PyTorch 和模型，体积较大）或 `uv sync --project . --extra edge-tts`。
 
 ## 验证
 
@@ -89,6 +111,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\doctor-video-edito
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-video-delivery.ps1 `
   -Video ".\outputs\video\mexico\2026-10-16\run-example\showcase.mp4"
 ```
+
+带配音的成片加 `-RequireAudio`，会额外要求 AAC 音轨。
 
 合规文本检查：
 
@@ -108,6 +132,9 @@ uv run --project . tk-ops-workspace video-compliance check `
 
 - `.codex/skills/tiktok-product-video-editor/`：视频剪辑规则、合规参考和素材工具脚本。
 - `scripts/render-video-showcase.ps1`：可移植的当前实际剪辑入口。
+- `scripts/add-voiceover-subtitles.ps1`：对已审批的本地化口播稿生成 TTS 配音、逐句 SRT 并混入 AAC 音轨，可选烧录字幕。
+- `src/tk_ops_workspace/voiceover.py`：配音/字幕核心逻辑（`tk-ops-workspace voiceover build`）。
+- `config/voiceover.example.json`：本地化口播稿格式示例。
 - `scripts/verify-video-delivery.ps1`：成片编码、尺寸、像素格式和时长检查。
 - `scripts/doctor-video-editor-workspace.ps1`：只读环境诊断。
 - `scripts/bootstrap-video-editor-workspace.ps1`：查看或应用剪辑依赖补齐计划。
@@ -133,6 +160,12 @@ uv run --project . tk-ops-workspace video-compliance check `
 
 **合规检查被阻断**  
 按 `.codex/skills/tiktok-product-video-editor/references/tiktok-shop-video-compliance.md` 修改口播、字幕、标签或画面文字，并重新执行检查。不要用未验证的数字、保证性、医疗性或促销性表述绕过检查。
+
+**配音步骤报 no TTS backend available**  
+执行 `uv sync --project . --extra kokoro` 或 `--extra edge-tts`，再运行 doctor 查看 `voiceover_environment`。印尼语只能用 edge-tts。
+
+**配音太长被阻断**  
+缩短本地化口播稿（重新走中文口播稿确认），不要通过把 `--max-tempo` 调得很高来硬塞。
 
 **换电脑后 Codex 不加载 Skill**  
 确认 Codex 工作区根目录就是本项目目录，并检查 `.codex/skills/tiktok-product-video-editor/SKILL.md` 存在。重新打开或新建 Codex 任务后再验收。

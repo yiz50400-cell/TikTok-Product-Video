@@ -10,6 +10,7 @@ from .doctor import run_doctor
 from .jimeng_prompt import add_jimeng_prompt_parser, handle_jimeng_prompt
 from .release import EmployeeReleaseError, build_employee_release
 from .video_compliance import add_video_compliance_parser, handle_video_compliance
+from .voiceover import add_voiceover_parser, handle_voiceover
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,6 +37,7 @@ def build_parser() -> argparse.ArgumentParser:
     release.add_argument("--version")
     add_jimeng_prompt_parser(subparsers)
     add_video_compliance_parser(subparsers)
+    add_voiceover_parser(subparsers)
     return parser
 
 
@@ -122,4 +124,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return handle_jimeng_prompt(namespace)
     if namespace.command == "video-compliance":
         return handle_video_compliance(namespace)
+    if namespace.command == "voiceover":
+        return handle_voiceover(namespace)
     return 2

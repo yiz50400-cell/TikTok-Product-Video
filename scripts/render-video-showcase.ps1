@@ -11,7 +11,18 @@ param(
     [string]$ArrowPath = "",
     [string]$CartPath = "",
     [string]$FfmpegPath = "",
-    [string]$FfprobePath = ""
+    [string]$FfprobePath = "",
+    # Optional voiceover/subtitle step (omit -VoiceoverScript for the original visual-only render).
+    [string]$VoiceoverScript = "",
+    [string]$Market = "",
+    [string]$Category = "general",
+    [string]$Language = "",
+    [string]$ApprovedBy = "",
+    [ValidateSet("auto", "kokoro", "edge-tts", "silent")]
+    [string]$TtsBackend = "auto",
+    [string]$Voice = "",
+    [double]$Speed = 1.0,
+    [switch]$BurnSubtitles
 )
 
 Set-StrictMode -Version Latest
@@ -27,6 +38,9 @@ $sourcePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromP
 $runPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($RunDir)
 if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
     throw "Source video does not exist: $sourcePath"
+}
+if ($VoiceoverScript -and -not $Market) {
+    throw "-Market is required when -VoiceoverScript is given."
 }
 New-Item -ItemType Directory -Force -Path $runPath | Out-Null
 
@@ -101,6 +115,9 @@ $outputPath = Join-Path $runPath $OutputName
 $titleFile = Join-Path $workPath "title.txt"
 $ctaFile = Join-Path $workPath "cta.txt"
 $probePath = Join-Path $runPath "ffprobe.json"
+if (Test-Path -LiteralPath $outputPath) {
+    throw "Output already exists: $outputPath. Use a new -RunDir; previous runs are never overwritten."
+}
 New-Item -ItemType Directory -Force -Path $workPath | Out-Null
 [System.IO.File]::WriteAllText($titleFile, $Title, $utf8NoBom)
 [System.IO.File]::WriteAllText($ctaFile, $Cta, $utf8NoBom)
@@ -133,7 +150,7 @@ $graph.Add("[t2][ar]overlay=x=165:y='1245+42*sin(2*PI*t/0.72)':enable='gte(t,$(N
 $graph.Add("[u][ca]overlay=x=365:y=1320:enable='gte(t,$(Number $ctaStart))'[v]")
 
 Invoke-Ffmpeg @(
-    "-y", "-hide_banner", "-loglevel", "error",
+    "-n", "-hide_banner", "-loglevel", "error",
     "-i", $sourcePath,
     "-loop", "1", "-i", $arrowPathResolved,
     "-loop", "1", "-i", $cartPathResolved,
@@ -148,8 +165,24 @@ if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $outputPath -PathType L
     throw "Render output verification failed."
 }
 
+$voiceover = $null
+if ($VoiceoverScript) {
+    $voArgs = @{
+        Video = $outputPath; VoiceoverScript = $VoiceoverScript; RunDir = $runPath
+        Market = $Market; Category = $Category; TtsBackend = $TtsBackend; Speed = $Speed
+        FfmpegPath = $ffmpeg; FfprobePath = $ffprobe
+    }
+    if ($Language) { $voArgs.Language = $Language }
+    if ($ApprovedBy) { $voArgs.ApprovedBy = $ApprovedBy }
+    if ($Voice) { $voArgs.Voice = $Voice }
+    if ($BurnSubtitles) { $voArgs.BurnSubtitles = $true }
+    $voiceoverJson = & (Join-Path $PSScriptRoot "add-voiceover-subtitles.ps1") @voArgs
+    $voiceover = ($voiceoverJson -join "`n") | ConvertFrom-Json
+}
+
 [pscustomobject]@{
     output = $outputPath
+    voiceover = $voiceover
     ffprobe = $probePath
     duration_seconds = $totalDuration
     segment_count = $segments.Count

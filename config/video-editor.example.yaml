@@ -7,5 +7,8 @@ video_editor:
   final_video_codec: "h264"
   final_audio_codec: "aac"
   downloader: "yt-dlp"
-  tts_provider: "local_kokoro_if_available"
+  tts_provider: "local_kokoro_if_available"  # voiceover --backend auto: kokoro -> edge-tts; silent = test only
+  tts_max_tempo: 1.25
+  default_delivery: "clean_mp4_plus_srt"  # burn subtitles only on request (-BurnSubtitles)
+  voiceover_example: "config/voiceover.example.json"
   notes: "No secrets here. Employee may set default_market to Mexico, Brazil, Indonesia, or leave blank."

@@ -23,8 +23,8 @@
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/SKILL.md",
-      "sha256": "39cec4a90381eddf9c567636b0da96395e6ace59f326e6ed75cae54ff617bddc",
-      "size": 10899
+      "sha256": "ae4097fc082c81174f0b672f37b0ad911f1d1e6c2ab613729ca633d538fb91cb",
+      "size": 11839
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/agents/openai.yaml",
@@ -68,13 +68,13 @@
     },
     {
       "path": "DEPLOYMENT.md",
-      "sha256": "463c21fd8bd4e7bc87fb4ff0b3ba024fb60e358c9516a22d19f0300f1b932db7",
-      "size": 1970
+      "sha256": "64703b98d6dcf09332ce6a8f28eb61f52e913a7408111fcb7efbdffed38263c1",
+      "size": 2402
     },
     {
       "path": "README.md",
-      "sha256": "a29a9aacde8b13a93e5b1374e17b47890632db33a053aee88d1d8fcc7a770974",
-      "size": 6850
+      "sha256": "d44eae005f3f77c4e8067b2fdf849eee745385f10076e4ec1ed362b0d9e2774d",
+      "size": 9719
     },
     {
       "path": "SOURCE-VALIDATION.md",
@@ -118,8 +118,8 @@
     },
     {
       "path": "config/video-editor.example.yaml",
-      "sha256": "193b69f31a85cba61bc0773effea0846caf0d25586951c81aa8a4f17917f7b88",
-      "size": 392
+      "sha256": "5326e1f5e958adbe999b2db739cfeff7a70ddf480572395778f21425231db1db",
+      "size": 627
     },
     {
       "path": "config/video-showcase.example.json",
@@ -127,9 +127,19 @@
       "size": 554
     },
     {
+      "path": "config/voiceover.example.json",
+      "sha256": "f79c68ed67a3baf80245ff48396cdc4298ceb9a77de1af52f1f0c63544b0c78d",
+      "size": 482
+    },
+    {
       "path": "pyproject.toml",
-      "sha256": "a163fe1486a6ebec2316b0a2c0b5d6803f0296da6222b03d1cb0eb3481091830",
-      "size": 871
+      "sha256": "ac7a6c1f7d3fb203d129355754a1130927ac360cffd89103bf71fb2692ce79d2",
+      "size": 979
+    },
+    {
+      "path": "scripts/add-voiceover-subtitles.ps1",
+      "sha256": "8ed0b357e05e07be7060d257e7d460ae6594431107be953af21bc6021d5cd13c",
+      "size": 2893
     },
     {
       "path": "scripts/analyze_video_repetition.py",
@@ -138,13 +148,13 @@
     },
     {
       "path": "scripts/bootstrap-video-editor-workspace.ps1",
-      "sha256": "131e832160d703682197f8a2923518c00ee7b163b8678c7ba62847b88c8b8e60",
-      "size": 6745
+      "sha256": "aa5fb9329e5f09488f74895bd490a5050ae5f1ae132bc78a8efebd8ac25696ce",
+      "size": 7541
     },
     {
       "path": "scripts/doctor-video-editor-workspace.ps1",
-      "sha256": "d8494797f6e8d2c128676057db59bff137b9a44c81f4a45666c8b9656815e1b8",
-      "size": 4251
+      "sha256": "62925bb93a1e3af89554622bff9b46bf14b2cd0d824b4f4cbcdde180160c1d9d",
+      "size": 5298
     },
     {
       "path": "scripts/make_dynamic_cart_arrow.py",
@@ -158,13 +168,13 @@
     },
     {
       "path": "scripts/render-video-showcase.ps1",
-      "sha256": "616308bc9439c54f611ee2fd3bba3d6ea4f38de955528bb53dbe3e07d92c3440",
-      "size": 6818
+      "sha256": "146343913dffadbec3f8ee6ebbdafe80c8da5a1807dc2ee9fed07799b88e56e6",
+      "size": 8182
     },
     {
       "path": "scripts/verify-video-delivery.ps1",
-      "sha256": "376eb375692b59d4cce9881b50b3744b4193cd94fa768223e5ce59294cc8f1d1",
-      "size": 1943
+      "sha256": "6dc2622504da869b97d786f49b5343972140bc2f20b08cec958750a49c1b7659",
+      "size": 2497
     },
     {
       "path": "src/tk_ops_workspace/__init__.py",
@@ -183,8 +193,8 @@
     },
     {
       "path": "src/tk_ops_workspace/cli.py",
-      "sha256": "7c4357a7561a1e68b8649db09a72c21e1c1a5bcc5df640bf6f5069db3c7f85bb",
-      "size": 4201
+      "sha256": "eb0a2ee089f37d11683e61c7b2f6984b8f7eab6ef207d7bd2bad400f2edda1dc",
+      "size": 4384
     },
     {
       "path": "src/tk_ops_workspace/config.py",
@@ -217,6 +227,11 @@
       "size": 21691
     },
     {
+      "path": "src/tk_ops_workspace/voiceover.py",
+      "sha256": "9271863a1951ffcbd952376df4b2ab642ddbe4a4db16c8fbb8e439abafb56110",
+      "size": 23849
+    },
+    {
       "path": "tests/test_jimeng_prompt.py",
       "sha256": "0379cec28116552f91f47b1d3c074959d7345c0188bd7dcb72ec04c9697b9c88",
       "size": 4348
@@ -227,9 +242,14 @@
       "size": 4273
     },
     {
+      "path": "tests/test_voiceover.py",
+      "sha256": "22d485c6c5d9dd6667221cd5f4f7dc5891196f8bbed997adc9c39a260e2b9900",
+      "size": 6114
+    },
+    {
       "path": "uv.lock",
-      "sha256": "99077a6cd25662d40a421bf6992fa338eb8654d2782718cbedb5fcb35ece463c",
-      "size": 95731
+      "sha256": "0c5dcb76b33cf704974e10af4b0dc45eabba618de3e0d82934a2a6c3afd9398d",
+      "size": 667517
     }
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "language": "es-MX",
+  "approved_by": "",
+  "note": "Fill approved_by only after the exact Chinese voiceover draft was approved and this localized text was reviewed. One phrase per subtitle cue. start/end (seconds) are optional; give start on all phrases or none.",
+  "phrases": [
+    { "text": "¿Tu sonrisa se ve apagada?" },
+    { "text": "Esta pasta dental probiótica" },
+    { "text": "deja una sensación fresca y limpia" },
+    { "text": "Pídela en el carrito" }
+  ]
+}

@@ -87,6 +87,18 @@ $ffmpegRunnable = $hasFfmpeg -and (Test-NativeCommand { & ffmpeg -version })
 $ffprobeRunnable = $hasFfprobe -and (Test-NativeCommand { & ffprobe -version })
 $ytDlpRunnable = $hasYtDlp -and (Test-NativeCommand { & yt-dlp --version })
 
+# Optional TTS backends (informational; missing TTS does not fail doctor because the visual-only path still works).
+$kokoroReady = $false
+$edgeTtsReady = (Test-LocalCommand "edge-tts")
+if ($hasUv) {
+    $kokoroReady = Test-NativeCommand { & uv run --project $workspaceRoot --no-sync python -c "import kokoro, soundfile" }
+    if (-not $edgeTtsReady) {
+        $edgeTtsReady = Test-NativeCommand { & uv run --project $workspaceRoot --no-sync python -c "import edge_tts" }
+    }
+}
+$ttsWarnings = [System.Collections.Generic.List[string]]::new()
+if (-not $kokoroReady -and -not $edgeTtsReady) { $ttsWarnings.Add("tts_backend_missing_voiceover_unavailable") }
+
 $failureCodes = [System.Collections.Generic.List[string]]::new()
 if (-not $hasWinget) { $failureCodes.Add("winget_missing") }
 if (-not $hasUv) { $failureCodes.Add("uv_missing") }
@@ -111,10 +123,17 @@ if (-not $hasConfig) { $failureCodes.Add("video_editor_config_missing") }
         config_exists = $hasConfig
         failure_codes = @($failureCodes)
     }
+    voiceover_environment = [pscustomobject]@{
+        kokoro_available = $kokoroReady
+        edge_tts_available = $edgeTtsReady
+        install_hint = "uv sync --project . --extra kokoro   (es-MX/pt-BR)  |  uv sync --project . --extra edge-tts   (all incl. id-ID, needs internet)"
+        warnings = @($ttsWarnings)
+    }
     host_checks_still_required = @(
         "current_codex_loads_tiktok_product_video_editor_skill",
         "employee_material_can_be_probed",
-        "employee_material_can_render_h264_mp4_after_script_approval"
+        "employee_material_can_render_h264_mp4_after_script_approval",
+        "voiced_mp4_has_aac_audio_and_srt_after_script_approval"
     )
     performed_external_writes = $false
 } | ConvertTo-Json -Depth 6
