@@ -2,7 +2,7 @@
 
 ## 下载
 
-从本仓库 Releases 下载 TikTok-Product-Video-Editor-Delivery-v0.2.0.zip，完整解压到一个独立目录，例如 D:\TikTokVideoEditor。保留 .codex、src、scripts、assets、config 等目录结构。
+从本仓库 [Releases](https://github.com/yiz50400-cell/TikTok-Product-Video/releases) 下载 TikTok-Product-Video-Editor-Delivery-v0.2.0.zip，完整解压到一个独立目录，例如 D:\TikTokVideoEditor。保留 .codex、src、scripts、assets、config 等目录结构。
 
 ## 配置环境
 

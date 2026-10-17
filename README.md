@@ -2,8 +2,8 @@
 
 ## 客户下载与部署
 
-- [下载固定版本 v0.2.0 完整源码交付包](https://github.com/yiz50400-cell/TikTok-Product-Video-Editor-Delivery/releases/download/v0.2.0/TikTok-Product-Video-Editor-Delivery-v0.2.0.zip)
-- [查看 v0.2.0 发布页](https://github.com/yiz50400-cell/TikTok-Product-Video-Editor-Delivery/releases/tag/v0.2.0)
+- [下载固定版本 v0.2.0 完整源码交付包](https://github.com/yiz50400-cell/TikTok-Product-Video/releases/download/v0.2.0/TikTok-Product-Video-Editor-Delivery-v0.2.0.zip)
+- [查看 v0.2.0 发布页](https://github.com/yiz50400-cell/TikTok-Product-Video/releases/tag/v0.2.0)
 - [中文安装说明](DEPLOYMENT.md)
 
 这是公开的源码交付仓库，下载无需 GitHub 登录或邀请。下载 ZIP 后完整解压，在 Windows 10/11 电脑上按安装说明配置环境。项目包含可编辑的源码、Skill、剪辑脚本和资源；本地修改可用于排错和适配。普通访客没有向本仓库直接推送修改的权限。
