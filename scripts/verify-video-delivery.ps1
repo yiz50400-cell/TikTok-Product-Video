@@ -3,49 +3,53 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Video,
     [string]$FfprobePath = "",
+    [string]$FfmpegPath = "",
     # Require an AAC audio stream (use for voiced deliveries such as *.voiced.mp4).
-    [switch]$RequireAudio
+    [switch]$RequireAudio,
+    # Planned duration in seconds (render JSON duration_seconds); fails if off by more than -DurationTolerance.
+    [double]$ExpectedDuration = 0,
+    [double]$DurationTolerance = 0.25,
+    [double]$ExpectedFps = 30,
+    [double]$FreezeMaxSeconds = 0.8,
+    [switch]$SkipFreezeCheck,
+    # QA report path; default <video>.qa.json next to the video (never overwritten).
+    [string]$QaJson = ""
 )
+
+# Thin wrapper around `tk-ops-workspace verify` (src/tk_ops_workspace/qa.py):
+# H.264 1080x1920 yuv420p, fps, expected duration, optional AAC audio, freezedetect; writes a QA JSON.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$videoPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Video)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[Console]::OutputEncoding = $utf8NoBom
+$env:PYTHONUTF8 = "1"
+
+$workspaceRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+function Resolve-Full { param([string]$Path) return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path) }
+
+$videoPath = Resolve-Full $Video
 if (-not (Test-Path -LiteralPath $videoPath -PathType Leaf)) {
     throw "Video does not exist: $videoPath"
 }
-
-if ($FfprobePath) {
-    $probe = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FfprobePath)
-} else {
-    $command = Get-Command ffprobe -ErrorAction SilentlyContinue
-    if ($null -eq $command) { throw "ffprobe is required for delivery verification." }
-    $probe = $command.Source
+if ($null -eq (Get-Command uv -ErrorAction SilentlyContinue)) {
+    throw "uv is required for delivery verification. Run scripts\bootstrap-video-editor-workspace.ps1 first."
 }
 
-$json = & $probe "-v" "error" "-show_entries" "format=duration:stream=codec_type,codec_name,width,height,pix_fmt,r_frame_rate,channels,sample_rate" "-of" "json" $videoPath | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw "ffprobe failed with exit code $LASTEXITCODE." }
-$stream = @($json.streams | Where-Object { $_.codec_name -eq "h264" } | Select-Object -First 1)
-$audio = @($json.streams | Where-Object { $_.codec_type -eq "audio" } | Select-Object -First 1)
-$duration = [double]$json.format.duration
-$errors = New-Object System.Collections.Generic.List[string]
-if ($stream.Count -eq 0) { $errors.Add("missing_h264_video_stream") }
-if ($stream.Count -gt 0 -and ($stream[0].width -ne 1080 -or $stream[0].height -ne 1920)) { $errors.Add("expected_1080x1920") }
-if ($stream.Count -gt 0 -and $stream[0].pix_fmt -ne "yuv420p") { $errors.Add("expected_yuv420p") }
-if ($duration -le 0) { $errors.Add("invalid_duration") }
-if ($RequireAudio -and $audio.Count -eq 0) { $errors.Add("missing_audio_stream") }
-if ($RequireAudio -and $audio.Count -gt 0 -and $audio[0].codec_name -ne "aac") { $errors.Add("expected_aac_audio") }
+$inv = [Globalization.CultureInfo]::InvariantCulture
+$arguments = @(
+    "run", "--project", $workspaceRoot, "tk-ops-workspace", "verify",
+    "--video", $videoPath,
+    "--duration-tolerance", $DurationTolerance.ToString($inv),
+    "--expected-fps", $ExpectedFps.ToString($inv),
+    "--freeze-max-seconds", $FreezeMaxSeconds.ToString($inv)
+)
+if ($ExpectedDuration -gt 0) { $arguments += @("--expected-duration", $ExpectedDuration.ToString($inv)) }
+if ($RequireAudio) { $arguments += "--require-audio" }
+if ($SkipFreezeCheck) { $arguments += "--skip-freeze-check" }
+if ($QaJson) { $arguments += @("--qa-json", (Resolve-Full $QaJson)) }
+if ($FfprobePath) { $arguments += @("--ffprobe", (Resolve-Full $FfprobePath)) }
+if ($FfmpegPath) { $arguments += @("--ffmpeg", (Resolve-Full $FfmpegPath)) }
 
-[pscustomobject]@{
-    video = $videoPath
-    duration_seconds = $duration
-    h264 = ($stream.Count -gt 0)
-    width = if ($stream.Count -gt 0) { $stream[0].width } else { $null }
-    height = if ($stream.Count -gt 0) { $stream[0].height } else { $null }
-    pix_fmt = if ($stream.Count -gt 0) { $stream[0].pix_fmt } else { $null }
-    audio = ($audio.Count -gt 0)
-    audio_codec = if ($audio.Count -gt 0) { $audio[0].codec_name } else { $null }
-    errors = @($errors)
-    passed = ($errors.Count -eq 0)
-} | ConvertTo-Json -Depth 4
-
-if ($errors.Count -gt 0) { exit 1 }
+& uv @arguments
+exit $LASTEXITCODE
