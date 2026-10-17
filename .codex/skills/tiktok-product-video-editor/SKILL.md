@@ -137,7 +137,10 @@ If any approved copy, subtitle, timing, speed, cover text, or structure changes 
 
 ## Voice, subtitles, and cover
 
-- Use local Kokoro/TTS when available for speed. Record the voice name and speed in notes when practical.
+- Use the fixed scripted step instead of ad-hoc TTS: after the Chinese draft is approved and localized, save the localized text (one phrase per line, or JSON like `config/voiceover.example.json`) and run `scripts/render-video-showcase.ps1 ... -VoiceoverScript <file> -Market <market> -Category <category> -ApprovedBy <approver>` or `scripts/add-voiceover-subtitles.ps1` on an existing render (CLI: `tk-ops-workspace voiceover build`).
+- The step refuses to run without an approver and blocks unless video-compliance returns `passed`; never fill `approved_by` before real approval and never raise `--max-tempo` to force an overlong script — shorten the script and re-approve instead.
+- Backend `auto` prefers local Kokoro (es-MX, pt-BR), else edge-tts (all markets, required for id-ID). `silent` is for tests only. Voice, speed, tempo and warnings are recorded in `<name>.voiceover-notes.json`.
+- Verify voiced deliveries with `scripts/verify-video-delivery.ps1 -Video <name>.voiced.mp4 -RequireAudio`, then listen and check subtitle placement.
 - Match voice language to the selected market.
 - Subtitles should be synced phrase-by-phrase, not as long multi-sentence blocks.
 - Keep subtitles fully visible and above the platform lower safety area.
@@ -153,7 +156,9 @@ Run proportionate checks before saying the video is done:
 - check final duration and pacing against approved script;
 - inspect for dead air and frozen/static padding;
 - run `ffmpeg`/`ffprobe` checks when available;
-- run `freezedetect`; any freeze segment `>= 0.8s` must be inspected and recut rather than explained away;
+- run `freezedetect`; any freeze segment `>= 0.8s` must be inspected and recut rather than explained away. `render-video-showcase.ps1` does this automatically and writes `<name>.qa.json`; for other outputs run `scripts/verify-video-delivery.ps1 -Video <mp4> -ExpectedDuration <planned seconds>` (add `-RequireAudio` for voiced files). A failing QA means re-cut, not deliver;
+- never stretch a short source with frozen frames: the renderer rejects segments past the source duration — fix the segments JSON instead;
+- put per-product placement changes (title/CTA position and size, arrow/cart position, font) in the segments JSON `layout` section, not in the scripts;
 - verify final preview is H.264/AAC-compatible MP4 with `yuv420p` and faststart when possible;
 - open or sample the final output if practical.
 - complete the compliance gate and record its rule version and any blocked items in the run notes;

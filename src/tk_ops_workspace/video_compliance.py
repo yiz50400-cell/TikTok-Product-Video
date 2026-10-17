@@ -7,8 +7,10 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-COMPLIANCE_RULE_VERSION = "2026-09-v1"
-MEXICO_MARKETS = frozenset({"mx", "mexico", "墨西哥", "es-mx", "es_mx"})
+COMPLIANCE_RULE_VERSION = "2026-10-v2"
+MEXICO_MARKETS = frozenset({"mx", "mexico", "méxico", "墨西哥", "es-mx", "es_mx"})
+BRAZIL_MARKETS = frozenset({"br", "brazil", "brasil", "巴西", "pt-br", "pt_br"})
+INDONESIA_MARKETS = frozenset({"id", "indonesia", "印尼", "印度尼西亚", "id-id", "id_id"})
 COSMETIC_CATEGORIES = (
     "cosmetic",
     "cosmetics",
@@ -109,7 +111,7 @@ GENERAL_RULES = (
     ),
     _TextRule(
         "numeric_claim_without_pdp",
-        r"(?<![\w])\d+(?:[.,]\d+)?(?:\s*%|\s*(?:por ciento|veces|d[ií]as?|horas?|minutos?|mbps))?",
+        r"(?<![\w])\d+(?:[.,]\d+)?(?:\s*%|\s*(?:por ciento|por cento|persen|veces|vezes|kali|d[ií]as?|horas?|minutos?|hari|jam|menit|mbps))?",
         "数字、百分比、倍数或时限必须能在 PDP 找到原文",
         action="删除或补充 PDP 原文依据",
         requires_pdp=True,
@@ -139,6 +141,136 @@ GENERAL_RULES = (
         "无真实促销时不得使用促销标签",
         action="删除或补充真实活动依据",
         requires_promotion_verification=True,
+    ),
+)
+
+# Portuguese (Brazil) and Indonesian equivalents. These are applied to every market because
+# localized copy can be mixed; the words are language-specific so false positives stay low.
+PT_BR_RULES = (
+    _TextRule("absolute_100_natural_safe", r"100%\s*(?:natural|seguro|alami|aman)", "绝对化或安全保证"),
+    _TextRule(
+        "absolute_best",
+        r"\bo melhor\b|\ba melhor\b|\bmelhor do mercado\b|\bmelhor do brasil\b|\bnúmero um\b",
+        "最好或第一的无证据比较（葡语）",
+    ),
+    _TextRule("absolute_unique", r"\búnic[oa]\b", "唯一的绝对化表述（葡语）"),
+    _TextRule("absolute_guarantee", r"\bgarantid[oa]s?\b|\bgarantimos\b", "保证性承诺（葡语）"),
+    _TextRule("absolute_always_never", r"\bsempre\b|\bjamais\b", "绝对化承诺（葡语）"),
+    _TextRule("instant_effect", r"\binstantâne[oa]\b|\bna hora\b|\befeito imediato\b", "即时效果承诺（葡语）"),
+    _TextRule(
+        "medical_treatment",
+        r"\bcura\b|\bcuram\b|\btrata\b|\bprevine\b|\bprevenir doenças\b",
+        "医疗健康宣称（葡语）",
+    ),
+    _TextRule(
+        "medical_pain_weight",
+        r"\balivia a dor\b|\bemagrece\b|\bperde peso\b|\bperder peso\b",
+        "医疗或身体功能宣称（葡语）",
+    ),
+    _TextRule(
+        "expert_endorsement",
+        r"\bdermatologista\b|\brecomendado por médicos\b|\bindicado por médicos\b",
+        "冒充专家或专业背书（葡语）",
+    ),
+    _TextRule(
+        "unsupported_endorsement",
+        r"\brecomendado por especialistas\b|\bclinicamente comprovado\b|\bresultados clínicos\b",
+        "无证据的专家或临床背书（葡语）",
+    ),
+    _TextRule("regulatory_endorsement", r"\baprovado pela anvisa\b", "无证据的监管机构批准宣称（葡语）"),
+    _TextRule(
+        "promotion_claim",
+        r"\bgrátis\b|\bdesconto\b|\bpor tempo limitado\b|\bqueima de estoque\b|\búltima chance\b|\bsó hoje\b",
+        "促销、赠送或紧迫感必须真实且有 PDP/活动依据（葡语）",
+        action="删除或补充真实活动依据",
+        requires_promotion_verification=True,
+    ),
+    _TextRule(
+        "time_claim",
+        r"\bem\s+\d+\s+(?:dias?|horas?|minutos?|semanas?)\b",
+        "时限效果承诺必须有 PDP 原文依据（葡语）",
+        action="删除或补充 PDP 原文依据",
+        requires_pdp=True,
+    ),
+)
+
+ID_RULES = (
+    _TextRule(
+        "absolute_best",
+        r"\bterbaik\b|\bnomor satu\b|\bno\.?\s*1\b|\bpaling bagus\b|\bpaling ampuh\b",
+        "最好或第一的无证据比较（印尼语）",
+    ),
+    _TextRule("absolute_unique", r"\bsatu-satunya\b", "唯一的绝对化表述（印尼语）"),
+    _TextRule("absolute_guarantee", r"\bdijamin\b|\bpasti berhasil\b", "保证性承诺（印尼语）"),
+    _TextRule(
+        "absolute_always_never",
+        r"\bselalu\b|\btidak pernah\b|\bselamanya\b",
+        "绝对化承诺（印尼语）",
+    ),
+    _TextRule("instant_effect", r"\b(?:hasil|efek) instan\b|\blangsung terlihat\b|\bseketika\b", "即时效果承诺（印尼语）"),
+    _TextRule(
+        "medical_treatment",
+        r"\bmenyembuhkan\b|\bmengobati\b|\bmencegah penyakit\b|\bobat\b",
+        "医疗健康宣称（印尼语）",
+    ),
+    _TextRule(
+        "medical_pain_weight",
+        r"\bmenghilangkan rasa sakit\b|\bmenurunkan berat badan\b|\bmelangsingkan\b",
+        "医疗或身体功能宣称（印尼语）",
+    ),
+    _TextRule(
+        "expert_endorsement",
+        r"\bdokter\b|\bdermatolog\b|\bdirekomendasikan ahli\b",
+        "冒充专家或专业背书（印尼语）",
+    ),
+    _TextRule(
+        "unsupported_endorsement",
+        r"\bteruji klinis\b|\bterbukti secara klinis\b|\bhasil klinis\b",
+        "无证据的专家或临床背书（印尼语）",
+    ),
+    _TextRule(
+        "regulatory_endorsement",
+        r"\bdisetujui bpom\b|\bdirekomendasikan bpom\b",
+        "无证据的监管机构批准宣称（印尼语）",
+    ),
+    _TextRule(
+        "promotion_claim",
+        r"\bgratis\b|\bdiskon\b|\bpromo\b|\bwaktu terbatas\b|\bcuci gudang\b|\bkesempatan terakhir\b|\bhari ini saja\b",
+        "促销、赠送或紧迫感必须真实且有 PDP/活动依据（印尼语）",
+        action="删除或补充真实活动依据",
+        requires_promotion_verification=True,
+    ),
+    _TextRule(
+        "time_claim",
+        r"\bdalam\s+\d+\s+(?:hari|jam|menit|minggu)\b",
+        "时限效果承诺必须有 PDP 原文依据（印尼语）",
+        action="删除或补充 PDP 原文依据",
+        requires_pdp=True,
+    ),
+)
+
+PT_ID_COSMETIC_RULES = (
+    _TextRule("cosmetic_acne", r"\bacaba com a acne\b|\belimina a acne\b|\bmenghilangkan jerawat\b",
+              "化妆品医疗化功效宣称"),
+    _TextRule(
+        "cosmetic_whitening",
+        r"\bclareia a pele\b|\bbranqueia\b|\bmemutihkan\b|\bkulit putih permanen\b",
+        "化妆品美白或肤色改变宣称",
+    ),
+    _TextRule("cosmetic_spots", r"\bremove manchas\b|\btira manchas\b|\bmenghilangkan flek\b",
+              "化妆品祛斑宣称"),
+    _TextRule(
+        "cosmetic_wrinkles",
+        r"\belimina (?:as )?rugas\b|\bacaba com as rugas\b|\bmenghilangkan kerutan\b",
+        "化妆品去皱宣称",
+    ),
+    _TextRule("cosmetic_rejuvenation", r"\brejuvenesce\b|\bawet muda\b|\banti penuaan\b",
+              "化妆品抗衰或逆龄宣称"),
+    _TextRule("cosmetic_perfect_skin", r"\bpele perfeita\b|\bkulit sempurna\b", "化妆品绝对化肤质宣称"),
+    _TextRule(
+        "cosmetic_chemical_free",
+        r"\blivre de químicos\b|\bsem químicos\b|\btanpa bahan kimia\b",
+        "虚假或绝对化成分安全宣称",
     ),
 )
 
@@ -254,6 +386,22 @@ def _is_mexico(market: str) -> bool:
     return normalized in MEXICO_MARKETS
 
 
+def _normalized_market(market: str) -> str:
+    return market.strip().casefold().replace("_", "-")
+
+
+def market_family(market: str) -> str:
+    """Return ``mexico``, ``brazil``, ``indonesia`` or ``unknown``."""
+    normalized = _normalized_market(market)
+    if normalized in MEXICO_MARKETS:
+        return "mexico"
+    if normalized in BRAZIL_MARKETS:
+        return "brazil"
+    if normalized in INDONESIA_MARKETS:
+        return "indonesia"
+    return "unknown"
+
+
 def _is_cosmetic(category: str) -> bool:
     normalized = category.strip().casefold()
     return any(term in normalized for term in COSMETIC_CATEGORIES)
@@ -336,9 +484,10 @@ def check_video_compliance(
     aviso_publicidad_confirmed: bool = False,
 ) -> ComplianceReport:
     matches: list[ComplianceMatch] = []
-    rules = list(GENERAL_RULES)
+    rules = [*GENERAL_RULES, *PT_BR_RULES, *ID_RULES]
     if _is_cosmetic(category):
         rules.extend(COSMETIC_RULES)
+        rules.extend(PT_ID_COSMETIC_RULES)
     rules.extend(CATEGORY_RULES)
     for field, text in fields.items():
         if text.strip():
@@ -355,6 +504,19 @@ def check_video_compliance(
             matches,
             fields=fields,
             pdp_text=pdp_text,
+        )
+
+    family = market_family(market)
+    if family == "unknown":
+        matches.append(
+            ComplianceMatch(
+                rule_id="market_unsupported",
+                field="market",
+                matched_text=market,
+                severity="block",
+                action="使用 Mexico、Brazil 或 Indonesia，或先为该市场补充规则",
+                reason="未识别的目标市场没有对应规则，不能视为已通过合规检查",
+            )
         )
 
     effective_visual_flags = tuple(visual_flags)
@@ -457,6 +619,7 @@ def check_video_compliance(
         "audience_18_plus": audience_18_plus if advertisement else "not_applicable",
         "category_is_cosmetic": _is_cosmetic(category),
         "effect_disclaimer_required": effect_disclaimer_required,
+        "market_family": family,
         "market_is_mexico": _is_mexico(market),
         "pdp_provided": bool(pdp_text.strip()),
         "promotion_verified": promotion_verified,
@@ -473,24 +636,6 @@ def check_video_compliance(
         matches=tuple(matches),
         checks=checks,
     )
-
-
-def compliance_prompt_block(*, market: str, product_notes: str) -> str:
-    """Return a compact compliance block for AI video generation prompts."""
-    cosmetic_mexico = _is_mexico(market) and _is_cosmetic(product_notes)
-    block = (
-        "【发布合规硬规则】口播、字幕、标签、画面文字逐词自查：禁止绝对化、保证、医疗、"
-        "医生/专家背书、虚假促销；数字、百分比、倍数、时限、成分功效必须逐字有 PDP/INCI 依据，"
-        "没有依据就删除。上传 AI 素材前必须开启 AI 生成内容标注。不得生成虚假使用前后对比、"
-        "滤镜效果或冒充真人好评，画面只使用 PDP 支持的场景和真实商品配件。"
-    )
-    if cosmetic_mexico:
-        block += (
-            "墨西哥化妆品额外规则：只拍室内产品、包装、质地和涂抹动作；禁止皮肤变白/变光滑、"
-            "痘痘或皱纹消失、医生专家形象和未经 PDP/INCI 的成分；涉及效果描述时加入 "
-            "“los resultados pueden variar”。"
-        )
-    return block
 
 
 def add_video_compliance_parser(
@@ -580,6 +725,5 @@ __all__ = [
     "ComplianceReport",
     "add_video_compliance_parser",
     "check_video_compliance",
-    "compliance_prompt_block",
     "handle_video_compliance",
 ]

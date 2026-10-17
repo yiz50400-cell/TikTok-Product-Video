@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tk-shop-image-agent"
-version = "0.1.1"
-description = "Codex-managed product scene image generation and local asset organization for TikTok Shop operations."
+name = "tiktok-product-video"
+dynamic = ["version"]
+description = "Windows-first TikTok Shop product video editing workspace: FFmpeg render, voiceover/subtitles, compliance checks."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -18,8 +18,13 @@ dev = [
   "pytest>=8.4,<9",
   "ruff>=0.12,<1",
 ]
-openai = [
-  "openai>=2,<3",
+kokoro = [
+  "kokoro>=0.9.4,<1",
+  "soundfile>=0.12",
+  "numpy>=1.26",
+]
+edge-tts = [
+  "edge-tts>=7,<8",
 ]
 
 [project.scripts]
@@ -39,6 +44,10 @@ extend-exclude = [
   "domains/tk_ad_agent/.tmp",
   "domains/tk_report_agent/.tmp",
 ]
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "^v?(?P<version>[0-9][^\\s]*)"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tk_ops_workspace"]

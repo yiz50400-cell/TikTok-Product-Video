@@ -50,6 +50,12 @@ When market is Mexico and category is cosmetics, skincare, beauty, or makeup:
 
 The default safe AI scene is an indoor product/packaging/texture/application demonstration with no skin transformation.
 
+## Brazil (pt-BR) and Indonesia (id-ID)
+
+Rule version `2026-10-v2` adds Portuguese and Indonesian equivalents of the absolute, guarantee, instant-effect, medical, endorsement, promotion, time and cosmetic rules (for example `o melhor`, `garantido`, `sempre`, `clinicamente comprovado`, `aprovado pela Anvisa`, `clareia a pele`; `terbaik`, `nomor satu`, `dijamin`, `menyembuhkan`, `teruji klinis`, `disetujui BPOM`, `memutihkan`). All language rule sets run for every market because localized copy can be mixed. Numeric units in Portuguese/Indonesian (`vezes`, `dias`, `kali`, `hari`, `persen`) also need PDP evidence. Country-specific regulatory checklists (Anvisa, BPOM) are not modelled yet; confirm them manually before publishing cosmetics in Brazil or Indonesia.
+
+An unrecognised market is reported as `market_unsupported` and blocks; it is never treated as passed.
+
 ## Workflow Gate
 
 1. Extract a claim whitelist from the PDP and INCI.

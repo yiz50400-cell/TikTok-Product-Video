@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: uv sync --frozen
+        run: uv sync --frozen --extra dev
+      - name: pytest
+        run: uv run --frozen pytest -q
+      - name: ruff
+        run: uv run --frozen ruff check .
+      - name: Delivery manifest up to date
+        run: uv run --frozen python scripts/generate_delivery_manifest.py --check
+
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse all ps1 (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $failed = $false
+          foreach ($f in Get-ChildItem -Recurse -Filter *.ps1) {
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$null, [ref]$errors)
+            if ($errors) { $failed = $true; Write-Host "$($f.Name):"; $errors | Format-List | Out-String | Write-Host }
+          }
+          if ($failed) { exit 1 }
+      - name: Parse all ps1 (PowerShell 7)
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($f in Get-ChildItem -Recurse -Filter *.ps1) {
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$null, [ref]$errors)
+            if ($errors) { $failed = $true; Write-Host "$($f.Name):"; $errors | Out-String | Write-Host }
+          }
+          if ($failed) { exit 1 }
+      - uses: astral-sh/setup-uv@v6
+      - name: Install FFmpeg
+        run: choco install ffmpeg -y --no-progress
+      - name: uv sync --frozen
+        run: uv sync --frozen
+      - name: Smoke render via Windows PowerShell 5.1 (path with spaces and Chinese)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + $env:Path
+          $dir = Join-Path $env:RUNNER_TEMP "素材 目录"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $src = Join-Path $dir "源 视频.mp4"
+          & ffmpeg -loglevel error -f lavfi -i "testsrc2=s=1280x720:d=37:r=30" -c:v libx264 -pix_fmt yuv420p $src
+          if ($LASTEXITCODE -ne 0) { throw "ffmpeg failed" }
+          .\scripts\render-video-showcase.ps1 -Source $src -RunDir (Join-Path $dir "run 1")
+          .\scripts\verify-video-delivery.ps1 -Video (Join-Path $dir "run 1\showcase.mp4") -ExpectedDuration 19.878 -QaJson (Join-Path $dir "run 1\verify.qa.json")
+          if ($LASTEXITCODE -ne 0) { throw "verify failed" }
+          $short = Join-Path $dir "short.mp4"
+          & ffmpeg -loglevel error -f lavfi -i "testsrc2=s=1280x720:d=10:r=30" -c:v libx264 -pix_fmt yuv420p $short
+          $failedAsExpected = $false
+          try { .\scripts\render-video-showcase.ps1 -Source $short -RunDir (Join-Path $dir "run 2") } catch { $failedAsExpected = $true }
+          if ($LASTEXITCODE -ne 0) { $failedAsExpected = $true }
+          if (-not $failedAsExpected) { throw "short source should have been rejected" }
+          if (Test-Path -LiteralPath (Join-Path $dir "run 2\showcase.mp4")) { throw "short source must not produce output" }
+          Write-Host "Short source rejected as expected."
+          exit 0
+      - name: Doctor (read-only)
+        shell: powershell
+        run: |
+          .\scripts\doctor-video-editor-workspace.ps1
+          exit 0

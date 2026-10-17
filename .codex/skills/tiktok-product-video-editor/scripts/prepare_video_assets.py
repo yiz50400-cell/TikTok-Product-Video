@@ -14,7 +14,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv", ".avi"}
 
 
@@ -120,7 +119,9 @@ def run_one(args: tuple[str, int, Path, Path, str, str, int, str, bool]) -> tupl
     cmd = build_cmd(ffmpeg, src, dst, mode, size, crf, preset)
     if dry_run:
         return dst, 0, "DRY_RUN " + " ".join(cmd)
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+    )
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout).strip().splitlines()[-8:]
         return dst, proc.returncode, "\n".join(tail)

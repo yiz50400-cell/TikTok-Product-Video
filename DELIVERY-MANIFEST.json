@@ -3,13 +3,13 @@
   "files": [
     {
       "path": ".codex/skills/mexico-tiktok-product-editor/SKILL.md",
-      "sha256": "dc8f1a8fd6ee30b4e9ab13053b4dbe634ab2d68ee2d14c6cece724048d0c9833",
-      "size": 715
+      "sha256": "8f2d5f0d59a48c807cfc194064156767bf972bf7894aa52d0eab1ee508ff04d0",
+      "size": 714
     },
     {
       "path": ".codex/skills/mexico-tiktok-product-editor/agents/openai.yaml",
-      "sha256": "ed3cb03b33c1248ba3337bffb3f0a82992138362f694f8b62752e3ae1267cfd8",
-      "size": 324
+      "sha256": "0732b67a528922ae99e29a8eb9e20556ca1ca2a6514380941d35b9a014516d20",
+      "size": 323
     },
     {
       "path": ".codex/skills/setup-video-editor-environment/SKILL.md",
@@ -23,8 +23,8 @@
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/SKILL.md",
-      "sha256": "39cec4a90381eddf9c567636b0da96395e6ace59f326e6ed75cae54ff617bddc",
-      "size": 10899
+      "sha256": "0f75de5916b1c17035c481878bce8122f5f7f7fc39112f3d6578a9acd659a133",
+      "size": 12400
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/agents/openai.yaml",
@@ -33,28 +33,43 @@
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/references/tiktok-shop-video-compliance.md",
-      "sha256": "0ff715f9a51fddc6b40887a2d4ed9647a781453bbb9a934fc2a5dd799a938ac0",
-      "size": 3419
+      "sha256": "7928beb6535ec98af5e920c4d2a334181957fab482c80191a9e8adb8d9a68c4a",
+      "size": 4291
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/scripts/download_material_urls.py",
-      "sha256": "e97d5e26c68290da7183a1c4ebae7796e0f70fbd57a82c4646dcfc7c3c6bf2bb",
-      "size": 3154
+      "sha256": "35a082c63f6718f4a76a62df98556c3b452b9c15f593e72e772d0044ae89155e",
+      "size": 3189
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/scripts/make_video_run_manifest.py",
-      "sha256": "2ad5515b73b77de190154d8d7beeb541821d92501495b394023a17c26ffcfe96",
-      "size": 2577
+      "sha256": "d544b3271eea460065d2bbec93718b4da47ff851be89aee2d4cc8205ad6d5c40",
+      "size": 2598
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/scripts/prepare_video_assets.py",
-      "sha256": "8ebd6cc750e46a1f681f09af52a01daf9e82740b8630a6f3c405ae6cd02daf5e",
-      "size": 5424
+      "sha256": "7310c5bbd0e221fd8bd6bdb2ce48e475ffe04387a7234cc289b40a2bac4c93cf",
+      "size": 5450
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/scripts/probe_video_materials.py",
-      "sha256": "4b18905257bbf54fcaf8b75686dd01ff1fb0aad22d557e54016d2a0f5c3649b8",
-      "size": 7323
+      "sha256": "ecade51826a9c484636c607a31b0356534f07393bc31b152e01273c4670ca50f",
+      "size": 7366
+    },
+    {
+      "path": ".gitattributes",
+      "sha256": "84d5a3f691a2dd24909b5bb161987e7b4157627110fc090dbf2ef7b69f809241",
+      "size": 144
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "5a323de3feccdb4ee8c437af6b60eeba05c32edbaa99ffdc049824d2730ea016",
+      "size": 3905
+    },
+    {
+      "path": ".github/workflows/windows-e2e.yml",
+      "sha256": "1e85ccfd568f7312f178a4d8985578588910d95fd590002a1eaeea9caf121ac3",
+      "size": 2998
     },
     {
       "path": ".gitignore",
@@ -68,13 +83,13 @@
     },
     {
       "path": "DEPLOYMENT.md",
-      "sha256": "463c21fd8bd4e7bc87fb4ff0b3ba024fb60e358c9516a22d19f0300f1b932db7",
-      "size": 1970
+      "sha256": "f45a557f4c456d5879a9b333b90da8dab604eb6e4319701494e2bfd4a125e6c3",
+      "size": 2821
     },
     {
       "path": "README.md",
-      "sha256": "a29a9aacde8b13a93e5b1374e17b47890632db33a053aee88d1d8fcc7a770974",
-      "size": 6850
+      "sha256": "9dad3c948ff54f357b494bb30e33c11cc2806c7e12b1104d908b11660f9537ba",
+      "size": 13020
     },
     {
       "path": "SOURCE-VALIDATION.md",
@@ -118,33 +133,53 @@
     },
     {
       "path": "config/video-editor.example.yaml",
-      "sha256": "193b69f31a85cba61bc0773effea0846caf0d25586951c81aa8a4f17917f7b88",
-      "size": 392
+      "sha256": "9fcf05644618fe3d3733ee57740faa04eee75f58fd8057913893a777b854c568",
+      "size": 1521
     },
     {
       "path": "config/video-showcase.example.json",
-      "sha256": "301a0cc78b2f7031c4c3367e5a5e4e85b388c2d0374602c92291ea180d7c3ca3",
-      "size": 554
+      "sha256": "3e2468b8074683e74955af5e705148a04dffcd838371de34b8e9f2338d97b9ec",
+      "size": 1642
+    },
+    {
+      "path": "config/voiceover.example.json",
+      "sha256": "f79c68ed67a3baf80245ff48396cdc4298ceb9a77de1af52f1f0c63544b0c78d",
+      "size": 482
     },
     {
       "path": "pyproject.toml",
-      "sha256": "a163fe1486a6ebec2316b0a2c0b5d6803f0296da6222b03d1cb0eb3481091830",
-      "size": 871
+      "sha256": "9fff8fe7c58a3aeb8b0c01539add61fcbbf3af4d5f74afdc3147f80f7827f6dc",
+      "size": 1045
+    },
+    {
+      "path": "scripts/add-voiceover-subtitles.ps1",
+      "sha256": "8ed0b357e05e07be7060d257e7d460ae6594431107be953af21bc6021d5cd13c",
+      "size": 2893
     },
     {
       "path": "scripts/analyze_video_repetition.py",
-      "sha256": "f6a8980feb8d1c492fcdb533be1b1c4fb4bc074b4ee5305456f57e7fcdb4c5e7",
-      "size": 13624
+      "sha256": "1a390e238faa26b43e6a9c63e8836388a538391e746cb224d5967b928c0bf671",
+      "size": 13601
     },
     {
       "path": "scripts/bootstrap-video-editor-workspace.ps1",
-      "sha256": "131e832160d703682197f8a2923518c00ee7b163b8678c7ba62847b88c8b8e60",
-      "size": 6745
+      "sha256": "aa5fb9329e5f09488f74895bd490a5050ae5f1ae132bc78a8efebd8ac25696ce",
+      "size": 7541
+    },
+    {
+      "path": "scripts/ci/windows-e2e.ps1",
+      "sha256": "604406e031399c320a7ce1bdaa3f355ee406d6be68330e6b688e3005c6a583ec",
+      "size": 4508
     },
     {
       "path": "scripts/doctor-video-editor-workspace.ps1",
-      "sha256": "d8494797f6e8d2c128676057db59bff137b9a44c81f4a45666c8b9656815e1b8",
-      "size": 4251
+      "sha256": "8a62d2443f24b88281677da0562796dc2ae1b9d7d28ae94eba874bc876ec8c97",
+      "size": 5551
+    },
+    {
+      "path": "scripts/generate_delivery_manifest.py",
+      "sha256": "7f5bdb0ef99e02b872ea974cde52e234287593bcdbb4d32f149a229d317d3c64",
+      "size": 2085
     },
     {
       "path": "scripts/make_dynamic_cart_arrow.py",
@@ -158,13 +193,13 @@
     },
     {
       "path": "scripts/render-video-showcase.ps1",
-      "sha256": "616308bc9439c54f611ee2fd3bba3d6ea4f38de955528bb53dbe3e07d92c3440",
-      "size": 6818
+      "sha256": "51689466f2fed26aa7d711694ce025e86425ae4159850b8f22fd3849b9766666",
+      "size": 4312
     },
     {
       "path": "scripts/verify-video-delivery.ps1",
-      "sha256": "376eb375692b59d4cce9881b50b3744b4193cd94fa768223e5ce59294cc8f1d1",
-      "size": 1943
+      "sha256": "6749bfb31a781ca4a8da22e4c0d29af5807d99248137569b48477728cff35dfe",
+      "size": 2377
     },
     {
       "path": "src/tk_ops_workspace/__init__.py",
@@ -173,8 +208,8 @@
     },
     {
       "path": "src/tk_ops_workspace/__main__.py",
-      "sha256": "0f7d54f3fbb1f79a85eb8110f11793db99da6f3c61ee979de5abe9a1b5f3fdb3",
-      "size": 49
+      "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+      "size": 48
     },
     {
       "path": "src/tk_ops_workspace/catalog.py",
@@ -183,8 +218,8 @@
     },
     {
       "path": "src/tk_ops_workspace/cli.py",
-      "sha256": "7c4357a7561a1e68b8649db09a72c21e1c1a5bcc5df640bf6f5069db3c7f85bb",
-      "size": 4201
+      "sha256": "e52858983ea98649f6a5504673b5747954ee1dfdb3c51fb7325a6daff054e66d",
+      "size": 2373
     },
     {
       "path": "src/tk_ops_workspace/config.py",
@@ -193,13 +228,13 @@
     },
     {
       "path": "src/tk_ops_workspace/doctor.py",
-      "sha256": "a34dd8382ad1913081754f15b45a34fd737c3e015a6e45f1c8d787e9085371f3",
-      "size": 5676
+      "sha256": "e27df6ebbd8a2ed2638c859fa2d2f0bbc73c5e2a8ed93f21da0381c205e89c54",
+      "size": 5675
     },
     {
-      "path": "src/tk_ops_workspace/jimeng_prompt.py",
-      "sha256": "543ba1b29761fbbc942cc4874cb5ecc076f3abc4dfb07103f44165021c2d29fd",
-      "size": 39398
+      "path": "src/tk_ops_workspace/media.py",
+      "sha256": "6c7753e8104531ca8bf26a4f31ea4d883e742905d7543a7b73b3719d2b70d067",
+      "size": 2660
     },
     {
       "path": "src/tk_ops_workspace/models.py",
@@ -207,29 +242,74 @@
       "size": 614
     },
     {
-      "path": "src/tk_ops_workspace/release.py",
-      "sha256": "e5b25df8fb715d2a072c0213c70bfc40e7620d3005d725e7d899fd30e5174998",
-      "size": 9500
+      "path": "src/tk_ops_workspace/qa.py",
+      "sha256": "d80cf76e74ba230a62eca572d0b060abf9f11235684d673227c9628f026de34f",
+      "size": 9044
+    },
+    {
+      "path": "src/tk_ops_workspace/render.py",
+      "sha256": "809d1193be5912348bcbac5509afb8c5c275df14eef96c8cea55a01f7e63213c",
+      "size": 21496
     },
     {
       "path": "src/tk_ops_workspace/video_compliance.py",
-      "sha256": "a6b43275bd417b0f816d56038c8cfd01c70531804da1ea8fab85fbeba813a76e",
-      "size": 21691
+      "sha256": "bd8db4e73ee773d25526f4fc4d4d063b4d03608c5d806447570173c5eafa64ae",
+      "size": 27549
     },
     {
-      "path": "tests/test_jimeng_prompt.py",
-      "sha256": "0379cec28116552f91f47b1d3c074959d7345c0188bd7dcb72ec04c9697b9c88",
-      "size": 4348
+      "path": "src/tk_ops_workspace/voiceover.py",
+      "sha256": "5d7edd5013ea3758ce104b28fde9a19f99650ceef6da1275421939c11ce439fd",
+      "size": 27439
+    },
+    {
+      "path": "tests/e2e/plan.json",
+      "sha256": "851b86188e685ef7bae7050c0be54d4b9d7550d5de9733aa3bc807594d055fd7",
+      "size": 609
+    },
+    {
+      "path": "tests/e2e/vo.es-MX.txt",
+      "sha256": "7a50dca3ae6e286963a0ed8ed9cb80dfd96d06a98cbb450344791a8ab00a33b0",
+      "size": 200
+    },
+    {
+      "path": "tests/e2e/vo.id-ID.txt",
+      "sha256": "6cb0dce415c8895b749843bd6eef219b20d5ded6b0412f6b6679d8d2327c5468",
+      "size": 187
+    },
+    {
+      "path": "tests/e2e/vo.pt-BR.txt",
+      "sha256": "aabc88a88b98e78274a6a822885c6ba17ba3eda6f9be41dfe2541ecca1a5578b",
+      "size": 204
+    },
+    {
+      "path": "tests/test_cli.py",
+      "sha256": "33fe572cf72a6f0c57ceb50a2f0ecfec8ff87d078264382b91ea89942f97a683",
+      "size": 916
+    },
+    {
+      "path": "tests/test_qa.py",
+      "sha256": "fe61f99804e6b57518a986b8d6469ca579be7d04b57280bef2fc9a90fd8a310c",
+      "size": 3062
+    },
+    {
+      "path": "tests/test_render.py",
+      "sha256": "f349e6e22e4071adcf8b5b7df13436ca436eb5bc42aa0cb34b2b7dbdc2187192",
+      "size": 6611
     },
     {
       "path": "tests/test_video_compliance.py",
-      "sha256": "02f75a4384edafe25528dee516b95c19ea5ba450adb4b5e1903e468e54eb6062",
-      "size": 4273
+      "sha256": "5605fd34f5a8c57d4d5550bd668d201f4181a0c6599afa6ce1554076fba14770",
+      "size": 6955
+    },
+    {
+      "path": "tests/test_voiceover.py",
+      "sha256": "dfa6789a39f248c6e58ac2ed9aba810af08b796f82333795f0f8bf5d82d8efb6",
+      "size": 7300
     },
     {
       "path": "uv.lock",
-      "sha256": "99077a6cd25662d40a421bf6992fa338eb8654d2782718cbedb5fcb35ece463c",
-      "size": 95731
+      "sha256": "286b72ba32bdbb58dbb6af59a1efd919f649611ec68de6c42125d1c58b5d9443",
+      "size": 645410
     }
   ]
 }

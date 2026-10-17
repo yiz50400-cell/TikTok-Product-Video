@@ -2,7 +2,7 @@
 
 ## 下载
 
-从本仓库 Releases 下载 TikTok-Product-Video-Editor-Delivery-v0.2.0.zip，完整解压到一个独立目录，例如 D:\TikTokVideoEditor。保留 .codex、src、scripts、assets、config 等目录结构。
+从本仓库 [Releases](https://github.com/yiz50400-cell/TikTok-Product-Video/releases) 下载 TikTok-Product-Video-Editor-Delivery-v0.2.0.zip，完整解压到一个独立目录，例如 D:\TikTokVideoEditor。保留 .codex、src、scripts、assets、config 等目录结构。
 
 ## 配置环境
 
@@ -19,6 +19,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-video-ed
 ~~~powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-video-editor-workspace.ps1 -Apply -Confirmed
 uv sync --frozen --project .
+# 需要配音时二选一或都装（Kokoro 体积大，首次运行会下载模型）：
+# uv sync --frozen --project . --extra kokoro
+# uv sync --frozen --project . --extra edge-tts
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\doctor-video-editor-workspace.ps1
 ~~~
 
@@ -34,7 +37,7 @@ Copy-Item .\config\video-editor.example.yaml .\config\video-editor.local.yaml
 
 > 请读取本项目 README 和剪辑环境 Skill，检查并补齐这台电脑的剪辑环境。
 
-使用客户自己的素材，按 README 的渲染示例生成一个视频，并执行 scripts/verify-video-delivery.ps1，再检查播放、画面和文字。固定渲染脚本目前验证的是无音频的画面展示版本；配音、字幕需按相应工作流另行配置和验证。
+使用客户自己的素材，按 README 的渲染示例生成一个视频，并执行 scripts/verify-video-delivery.ps1，再检查播放、画面和文字。渲染脚本会在渲染前校验片段是否超出素材时长，渲染后自动生成 `<名>.qa.json`（冻结画面、时长、帧率、编码）。字体默认使用 C:\Windows\Fonts\arialbd.ttf，可用 `-FontFile` 或环境变量 TK_VIDEO_FONTFILE 指定。winget 只在需要自动安装缺失工具时才用到，缺少时 doctor 只给警告。不带 -VoiceoverScript 时固定渲染脚本输出无音频的画面展示版本；带 -VoiceoverScript（需已审批、合规通过）时会额外输出 .voiced.mp4 和 .srt，用 `verify-video-delivery.ps1 -RequireAudio` 检查音轨，并人工试听配音、核对字幕位置和时间轴。也可在 bootstrap 时加 `-WithTts kokoro|edge-tts|all` 安装配音依赖。
 
 ## 本地维护
 

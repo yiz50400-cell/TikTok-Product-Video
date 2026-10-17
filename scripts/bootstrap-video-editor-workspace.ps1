@@ -2,6 +2,8 @@
 param(
     [switch]$Apply,
     [switch]$Confirmed,
+    [ValidateSet("", "kokoro", "edge-tts", "all")]
+    [string]$WithTts = "",
     [switch]$Help
 )
 
@@ -9,7 +11,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 if ($Help) {
-    Write-Output "Usage: powershell -File scripts/bootstrap-video-editor-workspace.ps1 [-Apply -Confirmed]"
+    Write-Output "Usage: powershell -File scripts/bootstrap-video-editor-workspace.ps1 [-Apply -Confirmed] [-WithTts kokoro|edge-tts|all]"
     Write-Output "Without -Apply this command only prints a read-only environment plan."
     exit 0
 }
@@ -114,12 +116,15 @@ $hasFfprobe = (Test-LocalCommand "ffprobe") -and (Test-NativeCommand { & ffprobe
 $hasYtDlp = ((Test-LocalCommand "yt-dlp") -and (Test-NativeCommand { & yt-dlp --version })) -or ((Test-LocalCommand "yt-dlp.exe") -and (Test-NativeCommand { & yt-dlp.exe --version }))
 $hasLocalConfig = Test-Path -LiteralPath $localConfig -PathType Leaf
 
+$ttsExtras = switch ($WithTts) { "kokoro" { @("kokoro") } "edge-tts" { @("edge-tts") } "all" { @("kokoro", "edge-tts") } default { @() } }
+
 $plan = [System.Collections.Generic.List[object]]::new()
 Add-PlanItem $plan "winget" ($(if ($hasWinget) { "ready" } else { "missing" })) "Windows official package manager required only when installing missing tools."
 Add-PlanItem $plan "uv" ($(if ($hasUv) { "ready" } else { "missing" })) "Install official astral-sh.uv with winget." (-not $hasUv)
 Add-PlanItem $plan "python_3_12" ($(if ($hasPython) { "ready" } else { "missing" })) "Install Python 3.12 runtime through uv for video utility scripts." (-not $hasPython)
 Add-PlanItem $plan "ffmpeg_toolchain" ($(if ($hasFfmpeg -and $hasFfprobe) { "ready" } else { "missing" })) "Install Gyan.FFmpeg with winget; provides ffmpeg and ffprobe for probing, transcode, render, and freeze checks." (-not ($hasFfmpeg -and $hasFfprobe))
 Add-PlanItem $plan "yt_dlp" ($(if ($hasYtDlp) { "ready" } else { "missing" })) "Install yt-dlp with uv tool for accessible public material downloads." (-not $hasYtDlp)
+Add-PlanItem $plan "tts_optional" ($(if ($ttsExtras.Count -gt 0) { "requested" } else { "skipped" })) "Optional voiceover TTS: uv sync --extra kokoro (local, es-MX/pt-BR; downloads PyTorch + model on first use) and/or --extra edge-tts (online, all markets incl. id-ID). Select with -WithTts." ($ttsExtras.Count -gt 0)
 Add-PlanItem $plan "video_editor_config" ($(if ($hasLocalConfig) { "ready" } else { "missing" })) "Create config/video-editor.local.yaml from secret-free example." (-not $hasLocalConfig)
 
 [pscustomobject]@{
@@ -170,6 +175,12 @@ if (-not $hasLocalConfig) {
     }
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $localConfig) | Out-Null
     Copy-Item -LiteralPath $exampleConfig -Destination $localConfig
+}
+
+if ($ttsExtras.Count -gt 0) {
+    $syncArgs = @("sync", "--project", $workspaceRoot)
+    foreach ($extra in $ttsExtras) { $syncArgs += @("--extra", $extra) }
+    Invoke-Checked "TTS dependency installation" { & uv @syncArgs }
 }
 
 & (Join-Path $PSScriptRoot "doctor-video-editor-workspace.ps1")

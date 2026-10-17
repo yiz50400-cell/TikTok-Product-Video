@@ -4,13 +4,10 @@ import argparse
 import csv
 import hashlib
 import json
-import math
-import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 
 FFMPEG = Path(".tools/bin/ffmpeg.exe")
 FFPROBE = Path(".tools/bin/ffprobe.exe")
@@ -29,7 +26,9 @@ class FrameFeature:
 
 
 def run_json(cmd: list[str]) -> dict[str, Any]:
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
+    p = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+    )
     if p.returncode != 0:
         raise RuntimeError(p.stderr.strip())
     return json.loads(p.stdout)
