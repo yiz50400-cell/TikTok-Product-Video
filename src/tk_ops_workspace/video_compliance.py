@@ -475,24 +475,6 @@ def check_video_compliance(
     )
 
 
-def compliance_prompt_block(*, market: str, product_notes: str) -> str:
-    """Return a compact compliance block for AI video generation prompts."""
-    cosmetic_mexico = _is_mexico(market) and _is_cosmetic(product_notes)
-    block = (
-        "【发布合规硬规则】口播、字幕、标签、画面文字逐词自查：禁止绝对化、保证、医疗、"
-        "医生/专家背书、虚假促销；数字、百分比、倍数、时限、成分功效必须逐字有 PDP/INCI 依据，"
-        "没有依据就删除。上传 AI 素材前必须开启 AI 生成内容标注。不得生成虚假使用前后对比、"
-        "滤镜效果或冒充真人好评，画面只使用 PDP 支持的场景和真实商品配件。"
-    )
-    if cosmetic_mexico:
-        block += (
-            "墨西哥化妆品额外规则：只拍室内产品、包装、质地和涂抹动作；禁止皮肤变白/变光滑、"
-            "痘痘或皱纹消失、医生专家形象和未经 PDP/INCI 的成分；涉及效果描述时加入 "
-            "“los resultados pueden variar”。"
-        )
-    return block
-
-
 def add_video_compliance_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
@@ -580,6 +562,5 @@ __all__ = [
     "ComplianceReport",
     "add_video_compliance_parser",
     "check_video_compliance",
-    "compliance_prompt_block",
     "handle_video_compliance",
 ]
