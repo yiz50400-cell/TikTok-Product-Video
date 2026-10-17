@@ -79,7 +79,11 @@ jobs:
           & ffmpeg -loglevel error -f lavfi -i "testsrc2=s=1280x720:d=10:r=30" -c:v libx264 -pix_fmt yuv420p $short
           $failedAsExpected = $false
           try { .\scripts\render-video-showcase.ps1 -Source $short -RunDir (Join-Path $dir "run 2") } catch { $failedAsExpected = $true }
+          if ($LASTEXITCODE -ne 0) { $failedAsExpected = $true }
           if (-not $failedAsExpected) { throw "short source should have been rejected" }
+          if (Test-Path -LiteralPath (Join-Path $dir "run 2\showcase.mp4")) { throw "short source must not produce output" }
+          Write-Host "Short source rejected as expected."
+          exit 0
       - name: Doctor (read-only)
         shell: powershell
         run: |
