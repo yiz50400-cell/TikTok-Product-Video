@@ -69,3 +69,23 @@ def test_outer_timeout_cleans_nested_stage_process_group(tmp_path):
     assert ready.exists()
     time.sleep(1.1)
     assert not marker.exists()
+
+
+@pytest.mark.skipif(os.name == 'nt', reason='POSIX process groups')
+def test_darwin_empty_group_permission_error_preserves_original_timeout(monkeypatch):
+    from workflow.orchestration.process import _stop
+    class Exited:
+        pid = 123456
+        returncode = -15
+        def communicate(self, timeout):
+            return '', ''
+        def poll(self):
+            return self.returncode
+    calls = []
+    def killpg(pid, sig):
+        calls.append(sig)
+        if sig == __import__('signal').SIGKILL:
+            raise PermissionError(1, 'Operation not permitted')
+    monkeypatch.setattr(os, 'killpg', killpg)
+    _stop(Exited())
+    assert len(calls) == 2

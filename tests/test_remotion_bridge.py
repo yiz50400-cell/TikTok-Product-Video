@@ -148,7 +148,7 @@ def load_json(path):
                     reason='explicit Remotion layout failure smoke')
 def test_overflowing_copy_fails_instead_of_clipping(package):
     data, sessions, request, output = package
-    request['cta'] = '商品' * 30
+    request['cta'] = 'A\nB\nC\nD\nE\nF'
     prepare(request, output, data, sessions)
     with pytest.raises(subprocess.CalledProcessError):
         render(output, data, sessions)

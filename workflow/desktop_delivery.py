@@ -75,7 +75,7 @@ def validate_video(path, expected, mode):
     if ((rotation and abs(float(rotation[1])) > .01) or 'Video: h264' not in video
             or not pixel_format or pixel_format[1] != 'yuv420p' or height <= width
             or abs(width / height - 9 / 16) > .02):
-        raise ValueError('需要H264/yuv420p的9:16竖屏MP4')
+        raise ValueError(f'需要H264/yuv420p的9:16竖屏MP4: {video}; rotation={rotation[1] if rotation else None}')
     if abs(duration - expected) > .25 or abs(decoded - duration) > .25:
         raise ValueError('实际视频时长与预期不符')
     if audio != (mode == 'narration'):

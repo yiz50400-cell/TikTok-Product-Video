@@ -623,8 +623,8 @@
     },
     {
       "path": "tests/test_pipeline_process.py",
-      "sha256": "2f2f750c3e61300287e5dc054bc9d269545c70b1faa9334e734bda44e6d8278f",
-      "size": 3556
+      "sha256": "5b5eb55ff98540cb8d31a68f972480c1a2a0cb96d5f5a22937e05f9edd1d40de",
+      "size": 4226
     },
     {
       "path": "tests/test_pipeline_reuse.py",
@@ -663,8 +663,8 @@
     },
     {
       "path": "tests/test_remotion_bridge.py",
-      "sha256": "95296a0205de3d76b9de3375a79cc5722b0239ce108a366e0270154c82cfb51e",
-      "size": 7798
+      "sha256": "fa8240f2dc40ebba18d694fb1cabfd6e988a6f8ea04018d4e98505808a1ccaf6",
+      "size": 7803
     },
     {
       "path": "tests/test_render.py",
@@ -778,8 +778,8 @@
     },
     {
       "path": "workflow/desktop_delivery.py",
-      "sha256": "6f4b417604aadea28b50a08fc959170a44a914638b86bf6217452cf203887bfd",
-      "size": 17061
+      "sha256": "993d58193b224285391537f838835096e6e7e7fc0e6d4ceae3585022585ec97f",
+      "size": 17117
     },
     {
       "path": "workflow/markets.py",
@@ -818,8 +818,8 @@
     },
     {
       "path": "workflow/orchestration/process.py",
-      "sha256": "9b39de7a1ab220bc5a17ee345060f3aa90fdd79ad1510140ef6a10d84651fd32",
-      "size": 1851
+      "sha256": "cfb388b201378fa6cc9207ba7d406d7db320612ed3cf2ab10f6539060e10190f",
+      "size": 2190
     },
     {
       "path": "workflow/orchestration/repair.py",

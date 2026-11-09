@@ -23,6 +23,12 @@ def _stop(process):
         else:
             try:os.killpg(process.pid,signal.SIGKILL)
             except ProcessLookupError:pass
+            except PermissionError:
+                # Darwin can report EPERM for an empty/zombie-only group after
+                # TERM and communicate have already reaped its leader. Preserve
+                # real permission errors while the workload remains alive.
+                if process.poll() is None:
+                    raise
     process.communicate(timeout=5)
 
 
