@@ -1,12 +1,8 @@
-﻿---
+---
 name: mexico-tiktok-product-editor
-description: Compatibility entry for the older Mexico product video editor skill. Use when the user invokes $mexico-tiktok-product-editor or asks for Mexico TikTok/TK Shop product video editing, material search, voiceover, subtitles, covers, or final MP4/SRT delivery. For current work, follow the multi-market rules in ../tiktok-product-video-editor/SKILL.md.
+description: Compatibility entry for Mexico TikTok product editing from customer-supplied local footage; follows the Codex Desktop and ChatCut native editing workflow.
 ---
 
-# Mexico TikTok Product Editor Compatibility Entry
+# 墨西哥剪辑兼容入口
 
-This skill is kept so older prompts that call `$mexico-tiktok-product-editor` still work.
-
-Before doing the task, read and follow `../tiktok-product-video-editor/SKILL.md`.
-
-Default target market: Mexico (`es-MX`) unless the user selects another market.
+读取并遵循 ../tiktok-product-video-editor/SKILL.md。默认 MX/es-MX，客户指定时使用其他支持市场。只接收本地素材，缺料等待客户补充。默认直接桌面制作；明确要求对话精修才逐步确认。

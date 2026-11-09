@@ -1,45 +1,40 @@
 {
-  "version": "v0.2.0",
+  "version": "v0.3.0",
   "files": [
     {
       "path": ".codex/skills/mexico-tiktok-product-editor/SKILL.md",
-      "sha256": "8f2d5f0d59a48c807cfc194064156767bf972bf7894aa52d0eab1ee508ff04d0",
-      "size": 714
+      "sha256": "27838085d8ba7c6c43e83e7ede1146126f3fd06b6c80d4464aedc2db805a49ac",
+      "size": 482
     },
     {
       "path": ".codex/skills/mexico-tiktok-product-editor/agents/openai.yaml",
-      "sha256": "0732b67a528922ae99e29a8eb9e20556ca1ca2a6514380941d35b9a014516d20",
-      "size": 323
+      "sha256": "eb1fff6d31911d681a4d2013cb5ab3ee33b582bd5fc93b02d9dceeb5860694a8",
+      "size": 276
     },
     {
       "path": ".codex/skills/setup-video-editor-environment/SKILL.md",
-      "sha256": "1a2a91f21e00011affaca68954b674fc149d365f42475b1715653db614a2d9cc",
-      "size": 2573
+      "sha256": "56a499b581968c72f0bf84cade7b0774d2031b21099703fcfdcb5485319a67b8",
+      "size": 1997
     },
     {
       "path": ".codex/skills/setup-video-editor-environment/agents/openai.yaml",
-      "sha256": "bb2269f4fb839d1a27d923d4e9c0c0d98e32959464e055d9df1464fd25f8d82b",
-      "size": 311
+      "sha256": "d4533a2ee43b3dbb0c21ca4f1ccfab97534eeedbe5fe34ebc6335730d781d05d",
+      "size": 296
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/SKILL.md",
-      "sha256": "0f75de5916b1c17035c481878bce8122f5f7f7fc39112f3d6578a9acd659a133",
-      "size": 12400
+      "sha256": "c5288ec19c7ec14d165825b3b6a0ff42becb8f6f1f02313b623f480086c588ec",
+      "size": 3416
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/agents/openai.yaml",
-      "sha256": "b56670224387ba3670b29ffe7a45ca6a30982f9e09f04e796eac026594145be5",
-      "size": 398
+      "sha256": "7a120fbdd6211fe396b157242223e232f1cf4dbe17c641482806fbee356e8b31",
+      "size": 317
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/references/tiktok-shop-video-compliance.md",
       "sha256": "7928beb6535ec98af5e920c4d2a334181957fab482c80191a9e8adb8d9a68c4a",
       "size": 4291
-    },
-    {
-      "path": ".codex/skills/tiktok-product-video-editor/scripts/download_material_urls.py",
-      "sha256": "35a082c63f6718f4a76a62df98556c3b452b9c15f593e72e772d0044ae89155e",
-      "size": 3189
     },
     {
       "path": ".codex/skills/tiktok-product-video-editor/scripts/make_video_run_manifest.py",
@@ -63,38 +58,48 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "5a323de3feccdb4ee8c437af6b60eeba05c32edbaa99ffdc049824d2730ea016",
-      "size": 3905
+      "sha256": "b63b2e59971108e093dc62297fe4ffc5cb263d6f87313020e88f3d05eb52b24d",
+      "size": 4046
     },
     {
       "path": ".github/workflows/windows-e2e.yml",
-      "sha256": "1e85ccfd568f7312f178a4d8985578588910d95fd590002a1eaeea9caf121ac3",
-      "size": 2998
+      "sha256": "87d16ce8949344a771f2609e8300a6b57a639fa9ca4e9bfc9c3379d2fdb3ed73",
+      "size": 3020
     },
     {
       "path": ".gitignore",
-      "sha256": "a89871031ad023ccebd2fbaae43f90ca3c0bde7dc8a72ebdca9b6ccacb38afe4",
-      "size": 253
+      "sha256": "aaa762c3f9e51cb0c49912e9fc41aa2210bd6a2f83c36180a586cb757546ae09",
+      "size": 415
+    },
+    {
+      "path": ".python-version",
+      "sha256": "7b55f8e67b5623c4bef3fa691288da9437d79d3aba156de48d481db32ac7d16d",
+      "size": 5
     },
     {
       "path": "AGENTS.md",
-      "sha256": "bdff0b5b5f6e4fde33a4a75eff0d4449474413f2273f2ce44cb6c8f66166d3df",
-      "size": 757
+      "sha256": "1b2bffd27830174930c8a6cd7a0c7691688c109702a854451de0382ff51d2167",
+      "size": 1629
     },
     {
       "path": "DEPLOYMENT.md",
-      "sha256": "f45a557f4c456d5879a9b333b90da8dab604eb6e4319701494e2bfd4a125e6c3",
-      "size": 2821
+      "sha256": "2f5da5078ac43fe28f52e0ee6e2016b094a6f81cc5334801ded6b8acbc05cb33",
+      "size": 3600
     },
     {
       "path": "README.md",
-      "sha256": "9dad3c948ff54f357b494bb30e33c11cc2806c7e12b1104d908b11660f9537ba",
-      "size": 13020
+      "sha256": "6af9ce36aee8e6b8f0616d0d394238c3272f21f6012f5a0994ff183446c13df8",
+      "size": 3587
     },
     {
       "path": "SOURCE-VALIDATION.md",
       "sha256": "efe694042f00d50b977fc748e11bc1da3bbb768232c533b14c31326a4538ea91",
       "size": 1705
+    },
+    {
+      "path": "UPGRADE-VALIDATION.md",
+      "sha256": "c0d1bd3d21d12cdb86277c38debbc7c4eabd4746d055680005d007ceb5a081fb",
+      "size": 4017
     },
     {
       "path": "VALIDATION.md",
@@ -103,7 +108,7 @@
     },
     {
       "path": "VERSION",
-      "sha256": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9",
+      "sha256": "d915cc95d6ca8f47ae297713ed46d4e5c5d99ddd29fc3c61e263bdf305f2b5b0",
       "size": 6
     },
     {
@@ -128,13 +133,23 @@
     },
     {
       "path": "config/capabilities.yaml",
-      "sha256": "48c595d84b0042d93f322944f12b11fb0fc35fde09ec4e86c6110c2d90a1f2e7",
-      "size": 306
+      "sha256": "519a92f35dd2956331ec3296de17b337af1b7265621fa503a4248f0027b40c08",
+      "size": 359
+    },
+    {
+      "path": "config/chatcut-mcp.macos.example.toml",
+      "sha256": "1e8f0ef6040d82c1b65c0939b83c53da8f7e69a26d64ef56f956d48e346d8627",
+      "size": 804
+    },
+    {
+      "path": "config/chatcut-mcp.windows.example.toml",
+      "sha256": "ca46fe451194572531fd160a0b369dded98c53e80a9dba84ab9f611d03212c4c",
+      "size": 796
     },
     {
       "path": "config/video-editor.example.yaml",
-      "sha256": "9fcf05644618fe3d3733ee57740faa04eee75f58fd8057913893a777b854c568",
-      "size": 1521
+      "sha256": "316e684575fb4c99a55b86214a6bebd0718ec7abd03e1fe776b46b15d699fbdc",
+      "size": 658
     },
     {
       "path": "config/video-showcase.example.json",
@@ -147,14 +162,39 @@
       "size": 482
     },
     {
+      "path": "docs/local-editing-workflow.md",
+      "sha256": "ee53d639d4c27b0d823eec8657ee44fbe45f5faa1471b40ef465b55dd02c6039",
+      "size": 4439
+    },
+    {
+      "path": "docs/superpowers/plans/2026-11-09-local-editing.md",
+      "sha256": "c705847d02540fb5c074ea8b098a725a3c69a0392e89c4a0c4c8871c9121e6a7",
+      "size": 3158
+    },
+    {
+      "path": "docs/superpowers/specs/2026-11-09-local-editing-design.md",
+      "sha256": "4a516e680ca4e3ffd49bcfed35a13f5b762e45aa8af447cb443bc8b9e14868b7",
+      "size": 2855
+    },
+    {
       "path": "pyproject.toml",
-      "sha256": "9fff8fe7c58a3aeb8b0c01539add61fcbbf3af4d5f74afdc3147f80f7827f6dc",
-      "size": 1045
+      "sha256": "1aa7a8ebd94cecfcc4c4b666379cf17b755c7dba8645147d95a5ab9e58c86e1d",
+      "size": 1634
+    },
+    {
+      "path": "scripts/__init__.py",
+      "sha256": "379c186c5f3835b1f05d27e4658e38ab32c0da903f0de9a8919806afdfeefc68",
+      "size": 52
     },
     {
       "path": "scripts/add-voiceover-subtitles.ps1",
       "sha256": "8ed0b357e05e07be7060d257e7d460ae6594431107be953af21bc6021d5cd13c",
       "size": 2893
+    },
+    {
+      "path": "scripts/analyze_video.py",
+      "sha256": "989b7436b6bd64d61b2a3958c60507fc12941ce3666b567f1d5eead4163e2d33",
+      "size": 2682
     },
     {
       "path": "scripts/analyze_video_repetition.py",
@@ -163,8 +203,33 @@
     },
     {
       "path": "scripts/bootstrap-video-editor-workspace.ps1",
-      "sha256": "aa5fb9329e5f09488f74895bd490a5050ae5f1ae132bc78a8efebd8ac25696ce",
-      "size": 7541
+      "sha256": "d08f6e379bfed56da3170896269406a5f1765d70c74b3020d3adb368beeb9fb4",
+      "size": 6938
+    },
+    {
+      "path": "scripts/chatcut_health.py",
+      "sha256": "8f1fdbd7c987912bba6abda2ed2cd35834829e1a820abca69e7406b60b3de809",
+      "size": 3675
+    },
+    {
+      "path": "scripts/check.py",
+      "sha256": "f353dcff51d026c8e818c668f828fd388d20eedc310405991e481a1846708893",
+      "size": 695
+    },
+    {
+      "path": "scripts/check_desktop_codex.cjs",
+      "sha256": "80cad984a96e39ba97ada78eda529323ab7769a6625779fd86d142a5701f4f2a",
+      "size": 2924
+    },
+    {
+      "path": "scripts/check_windows.bat",
+      "sha256": "6587b462c63dcc18088aa7ff5a637c3aec04036eade4dcb9b789a82648a7fc55",
+      "size": 574
+    },
+    {
+      "path": "scripts/check_windows_engine.py",
+      "sha256": "782848d5a2d7b5acdb60a4577418a9727d3cd91ff1448848a98d50f7cf4fd86b",
+      "size": 6788
     },
     {
       "path": "scripts/ci/windows-e2e.ps1",
@@ -172,9 +237,14 @@
       "size": 4508
     },
     {
+      "path": "scripts/deliver_chatcut.py",
+      "sha256": "6f966ce49839be38fa4408c015956b0d41196b98d061e086d2641175b548a658",
+      "size": 1291
+    },
+    {
       "path": "scripts/doctor-video-editor-workspace.ps1",
-      "sha256": "8a62d2443f24b88281677da0562796dc2ae1b9d7d28ae94eba874bc876ec8c97",
-      "size": 5551
+      "sha256": "e04e2b45834e98d3d62fead0a420b335850d8db254ff34d2993eadddae23eca4",
+      "size": 5290
     },
     {
       "path": "scripts/generate_delivery_manifest.py",
@@ -192,14 +262,79 @@
       "size": 1065
     },
     {
+      "path": "scripts/mcp.py",
+      "sha256": "01d67d715a867cb6d9d40a09c1e340a27562de6f72bec520683b0b3a1784cc3b",
+      "size": 251
+    },
+    {
+      "path": "scripts/plan_video.py",
+      "sha256": "86951b10be7ffbb5b3fe6bca7cb2d7d4ac1180496ed9b935e7b53c57f443fc22",
+      "size": 2785
+    },
+    {
+      "path": "scripts/prepare_chatcut.py",
+      "sha256": "9eaa483a80f8bc048ac62d37fe746a1a483b67a1309202ead581817280516deb",
+      "size": 9297
+    },
+    {
+      "path": "scripts/prepare_market_preflight.py",
+      "sha256": "33cef7842748b3249490534d95db962acebbd873128785a3f92f1dd82884b994",
+      "size": 3416
+    },
+    {
+      "path": "scripts/prepare_packaged_video.py",
+      "sha256": "7fa0ed6019ba0fca6684a028bcdab81e2874bcecc420f35f1cc92a3545199a22",
+      "size": 20480
+    },
+    {
+      "path": "scripts/prepare_publish.py",
+      "sha256": "3eb548f4de5c7fcd5c77478c7d35781be6dde5bec09bca151a16e39409836565",
+      "size": 1227
+    },
+    {
+      "path": "scripts/produce_video.py",
+      "sha256": "f9c563720c8fdeb489dec307f23bc4576cd56141e49f235435aacdd958100291",
+      "size": 16654
+    },
+    {
       "path": "scripts/render-video-showcase.ps1",
       "sha256": "51689466f2fed26aa7d711694ce025e86425ae4159850b8f22fd3849b9766666",
       "size": 4312
     },
     {
+      "path": "scripts/repair_video.py",
+      "sha256": "62aa2bf1710179f901772f526d08f1cd9e054ae9a36f4580533c5f06fcda7443",
+      "size": 1670
+    },
+    {
+      "path": "scripts/run_local_batch.py",
+      "sha256": "786300bd07f4b1b231c45a1b8647cdc6f58217902d8cb896d57aa54398680226",
+      "size": 9120
+    },
+    {
+      "path": "scripts/start.bat",
+      "sha256": "ac05efce86dafab949e83e2cdfaa14ba61f367d34d88800701d5d229172132a7",
+      "size": 460
+    },
+    {
+      "path": "scripts/start.sh",
+      "sha256": "75d036b5515f4c96a17df2baf2cb9912cf9d7186e93d053f5637da815cce29a3",
+      "size": 290
+    },
+    {
       "path": "scripts/verify-video-delivery.ps1",
       "sha256": "6749bfb31a781ca4a8da22e4c0d29af5807d99248137569b48477728cff35dfe",
       "size": 2377
+    },
+    {
+      "path": "scripts/verify_packaged_video.py",
+      "sha256": "e92536b1a520f693c899ab9722973be488739ba437a1aad5572e95d53575de65",
+      "size": 4296
+    },
+    {
+      "path": "scripts/workflow.py",
+      "sha256": "164b675e6444f49e6325a38603db8a07a61b71f0e61ffbc72e2905af191d79ab",
+      "size": 266
     },
     {
       "path": "src/tk_ops_workspace/__init__.py",
@@ -262,6 +397,11 @@
       "size": 27439
     },
     {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
       "path": "tests/e2e/plan.json",
       "sha256": "851b86188e685ef7bae7050c0be54d4b9d7550d5de9733aa3bc807594d055fd7",
       "size": 609
@@ -282,9 +422,154 @@
       "size": 204
     },
     {
+      "path": "tests/test_analysis.py",
+      "sha256": "6c8b0846974e28c4edf5fc5689cc05e51884ec1a7a9df27f6719ec6f30a4f15f",
+      "size": 4597
+    },
+    {
+      "path": "tests/test_analysis_integration.py",
+      "sha256": "fa5ac28352a441c35d969bf0db7b2aaa644b4b5bcc9de39ddd466926b5f1ab0a",
+      "size": 3905
+    },
+    {
+      "path": "tests/test_api.py",
+      "sha256": "e6c3f623f0084d713e5e59329b17fc3c3bd4f249a048904571aecbc72b656d47",
+      "size": 5687
+    },
+    {
+      "path": "tests/test_audio_channel_measurement.py",
+      "sha256": "bd61a262215b33ca0866dce84cf54f38e7dc6045c813527a89e6eb07520277f0",
+      "size": 847
+    },
+    {
+      "path": "tests/test_batch.py",
+      "sha256": "a5b258ddcc5bf6e13003b9e1c6f2b3b6c3b8d9ad728e441875cd8720bbd3d458",
+      "size": 8151
+    },
+    {
+      "path": "tests/test_chatcut_health.py",
+      "sha256": "209cf792146705cbc8a873ad7c33410012a4cc1b41970c538db269da1e835f9b",
+      "size": 10683
+    },
+    {
+      "path": "tests/test_chatcut_preparation.py",
+      "sha256": "6aef3e0d8f643fd4578a27da41a032222e07d4a47ecda4af33d805025004d7a9",
+      "size": 6378
+    },
+    {
       "path": "tests/test_cli.py",
       "sha256": "33fe572cf72a6f0c57ceb50a2f0ecfec8ff87d078264382b91ea89942f97a683",
       "size": 916
+    },
+    {
+      "path": "tests/test_codex_relay.py",
+      "sha256": "855a437c1612940b7cadf05219de12a05be21c39ddf515044cac0006c674246a",
+      "size": 4248
+    },
+    {
+      "path": "tests/test_configured_production.py",
+      "sha256": "f103e86cf5e74cbc3699b7a3e760b22d8573613a811f788a05b75c72b43e9d4d",
+      "size": 10711
+    },
+    {
+      "path": "tests/test_continuity.py",
+      "sha256": "4106c0a04fd1eb3d9b32f526710303063b4d5a644baeb153f63e2453857d250c",
+      "size": 1267
+    },
+    {
+      "path": "tests/test_creation.py",
+      "sha256": "b2aba1f231c04968bd0529dbdf89ff6064e389e1566ab5f1990c663ee370d877",
+      "size": 22341
+    },
+    {
+      "path": "tests/test_desktop_delivery.py",
+      "sha256": "ec3ee9cea97de15861f6170f77400307edb13019630639f3dc13fe032f52be7a",
+      "size": 12646
+    },
+    {
+      "path": "tests/test_lineage_resume.py",
+      "sha256": "6143622acfb416658bd4008a2bc1b7f9da36b7e75fa8870ac1015ffc837cac3b",
+      "size": 9009
+    },
+    {
+      "path": "tests/test_local_batch.py",
+      "sha256": "0b8722062e528bbe31092a1429170ad703f24c66966d24124910873b1fb7e218",
+      "size": 8382
+    },
+    {
+      "path": "tests/test_local_entrypoints.py",
+      "sha256": "8ad6281703e2b6695520226cae15d38d7adf3260bfa8e041167ee334906a9d20",
+      "size": 573
+    },
+    {
+      "path": "tests/test_local_only.py",
+      "sha256": "e3f97b196bab90052227913f8c033940cc04ca08bcc03cf2b060bde86b3ecbe3",
+      "size": 11060
+    },
+    {
+      "path": "tests/test_market_readiness.py",
+      "sha256": "a5c6acafe4e17ea9fbd3c72cd019692b4976d73a38107a54afd0d5cc81ced06d",
+      "size": 8382
+    },
+    {
+      "path": "tests/test_mcp.py",
+      "sha256": "0b36160f26331329561dcd8d7b8c08b7fd9dcfcb1346e5559e6fc96542579231",
+      "size": 5777
+    },
+    {
+      "path": "tests/test_multisource_creation.py",
+      "sha256": "040413dd0d017e14e1bbda9aff4729e08aeb06ed5a6e14701bfd219849c8519a",
+      "size": 3482
+    },
+    {
+      "path": "tests/test_narration_sync.py",
+      "sha256": "6b68fb9dc5fd2bc66cda68d9322fa08c95a9d47bbc80ac24bfdb564d006caf05",
+      "size": 17720
+    },
+    {
+      "path": "tests/test_packaged_preparation.py",
+      "sha256": "5d364a91662d412561abbdeb5aadde86cb4528a6db4a6d360d033baf7a4018b0",
+      "size": 9270
+    },
+    {
+      "path": "tests/test_pipeline.py",
+      "sha256": "1908009bd489f78075488865a89d656b6b3e763ab4c5b6985888a307f3dfc328",
+      "size": 21309
+    },
+    {
+      "path": "tests/test_pipeline_process.py",
+      "sha256": "2f2f750c3e61300287e5dc054bc9d269545c70b1faa9334e734bda44e6d8278f",
+      "size": 3556
+    },
+    {
+      "path": "tests/test_pipeline_reuse.py",
+      "sha256": "33a7c26bf6519baa1618bf17214c3118fd0e0b3ddf50a0ca6ff41277bea0e2ca",
+      "size": 3567
+    },
+    {
+      "path": "tests/test_platform_runtime.py",
+      "sha256": "f847a27bde29ebbf50a728cbe0e59db008da7351c8845a1a7fe6cc754d89319f",
+      "size": 4149
+    },
+    {
+      "path": "tests/test_production.py",
+      "sha256": "11fda2d3d3815e410e95df7641a2f101ed854364f6fd59bb1f640ca9c022da92",
+      "size": 32333
+    },
+    {
+      "path": "tests/test_production_library.py",
+      "sha256": "da16c0e8fc00391b759ecb4bdc106a1bce461fb60c94e5d219ec8dd15a02f1d2",
+      "size": 9294
+    },
+    {
+      "path": "tests/test_production_packaging.py",
+      "sha256": "c2763a4a227b7912128eb7e3f7981253a2b42f00ecc339361cdef299324d06a0",
+      "size": 3028
+    },
+    {
+      "path": "tests/test_publishing.py",
+      "sha256": "0d817de4493fe3832ab628ad3fcdf83882599b21a90860a36fad11b2f8603120",
+      "size": 11597
     },
     {
       "path": "tests/test_qa.py",
@@ -297,6 +582,21 @@
       "size": 6611
     },
     {
+      "path": "tests/test_repair.py",
+      "sha256": "8adcb928736d4889cf4df8bef06cc2d3cb7ae4355ec4526b6ab2d2027c35b7f7",
+      "size": 8833
+    },
+    {
+      "path": "tests/test_repair_device.py",
+      "sha256": "6e8a036cd876ad264e93ef55fa22404292ec647aa832637a25cae505f1d6cff8",
+      "size": 2505
+    },
+    {
+      "path": "tests/test_source_lineage.py",
+      "sha256": "78e9eaf555522f77d3692877b0184419a8259dd2097bfad5fa6ba997e3efe359",
+      "size": 8983
+    },
+    {
       "path": "tests/test_video_compliance.py",
       "sha256": "5605fd34f5a8c57d4d5550bd668d201f4181a0c6599afa6ce1554076fba14770",
       "size": 6955
@@ -307,9 +607,249 @@
       "size": 7300
     },
     {
+      "path": "tests/test_workflow_cli.py",
+      "sha256": "4567bd3927afcae3a96e6d65c7194a45d35223d449d5614ffda187e835e1c57c",
+      "size": 3736
+    },
+    {
       "path": "uv.lock",
-      "sha256": "286b72ba32bdbb58dbb6af59a1efd919f649611ec68de6c42125d1c58b5d9443",
-      "size": 645410
+      "sha256": "4a7eb7b131c79dd4aca7688b2b156dc5d8fe7070d8c6f0bb8522e657b4d922f1",
+      "size": 704118
+    },
+    {
+      "path": "workflow/__init__.py",
+      "sha256": "632051204db48d4d8e8def81b32a9b151cca2378f018fbd21375bcb39ea88581",
+      "size": 52
+    },
+    {
+      "path": "workflow/analysis/__init__.py",
+      "sha256": "ac81c3e9a0843ca45e1479ec35feae01fd9beb5837a51cbf4a52d21fb06919c3",
+      "size": 174
+    },
+    {
+      "path": "workflow/analysis/core.py",
+      "sha256": "1833348eb6ab14932c697d500f14b04e0ce1607065fb42572d226aa44f5eb49a",
+      "size": 15952
+    },
+    {
+      "path": "workflow/analysis_attachment.py",
+      "sha256": "1bad68b61f644f164b97b22269867123275aed7ff779baba13d7431d5584883d",
+      "size": 3091
+    },
+    {
+      "path": "workflow/api.py",
+      "sha256": "6189f28938f421738a504762266b135a19cf8628eceeca043ef76a6f04bb4ec8",
+      "size": 25541
+    },
+    {
+      "path": "workflow/batch.py",
+      "sha256": "6e97b570ef2cd5033cbcb841bf226299067d8d34494a985129cd899e71f077ce",
+      "size": 3848
+    },
+    {
+      "path": "workflow/chatcut/__init__.py",
+      "sha256": "0d9af9d26131233ba36cbc91934512a77a0c67f930b1b7a1cffde33c891c912b",
+      "size": 460
+    },
+    {
+      "path": "workflow/chatcut/health.py",
+      "sha256": "ea4823f3549e1c37c6b9afb6229e126a8fce94256cb599db3829f881de926d1e",
+      "size": 22976
+    },
+    {
+      "path": "workflow/cli.py",
+      "sha256": "5bf2a5470515ea340553656ff66cf15e5679493aea6153787cd8b773acbe230d",
+      "size": 8310
+    },
+    {
+      "path": "workflow/codex/__init__.py",
+      "sha256": "7fdc568ab6032336fa4af7ade67c0584867241b3c59f18ac62f47d05c54ea75a",
+      "size": 63
+    },
+    {
+      "path": "workflow/codex/relay.py",
+      "sha256": "ab1bb108f714ad96d796bbbbb9d91781d3df1a1b6eb1eed4f723832fcf75109f",
+      "size": 6645
+    },
+    {
+      "path": "workflow/creation/__init__.py",
+      "sha256": "00a5ba4ca5fb9b33d36aa0706db00828b3ba2fc1ec4ea4283582a289c2d45584",
+      "size": 257
+    },
+    {
+      "path": "workflow/creation/batch.py",
+      "sha256": "1e5c5a28dbcd144bbea052fcf07230103dc62f9da767c21e2c9e18ea6390a4f4",
+      "size": 5479
+    },
+    {
+      "path": "workflow/creation/core.py",
+      "sha256": "532e0077e76602b534b59a085d78b756c88f67507b34bbaddae28b4c4a6ee552",
+      "size": 29303
+    },
+    {
+      "path": "workflow/desktop_delivery.py",
+      "sha256": "4ec8952a224c1383ff907c2bc72b771c790c457e37aecf5eec1bf14b51cba7d4",
+      "size": 15929
+    },
+    {
+      "path": "workflow/markets.py",
+      "sha256": "316da19ca61620d2ac5031d1f4da06888ea6930c74fef423fdb9b9527d24c967",
+      "size": 2167
+    },
+    {
+      "path": "workflow/mcp_server.py",
+      "sha256": "ca6b959a52f6138343112724327fd7e79e08c70ab9ee8684f6824697aa4743f4",
+      "size": 9624
+    },
+    {
+      "path": "workflow/media.py",
+      "sha256": "38fa3c8abfd9995dbd992abd86e39b6db2ad6fdf83b39f734c21f3cc8919af30",
+      "size": 1892
+    },
+    {
+      "path": "workflow/orchestration/__init__.py",
+      "sha256": "be2847283cbded5a077b12ea94aa832e93217a72517eea504939626f551919f9",
+      "size": 153
+    },
+    {
+      "path": "workflow/orchestration/delivery.py",
+      "sha256": "e4655654c0a9008639fec7f8d95f254af634dfc021227310151b6b6c783019e1",
+      "size": 5956
+    },
+    {
+      "path": "workflow/orchestration/local.py",
+      "sha256": "9c027ec9c4143606cdd39c60a735770fc6432ae0825b9d9a60c46774831e5e43",
+      "size": 5025
+    },
+    {
+      "path": "workflow/orchestration/pipeline.py",
+      "sha256": "cccaece6bcef620b9190f5dc871a99be2181517ea324664d2ad2973eda2fcefc",
+      "size": 38828
+    },
+    {
+      "path": "workflow/orchestration/process.py",
+      "sha256": "9b39de7a1ab220bc5a17ee345060f3aa90fdd79ad1510140ef6a10d84651fd32",
+      "size": 1851
+    },
+    {
+      "path": "workflow/orchestration/repair.py",
+      "sha256": "a2e8787d6e0aee6a42bd88129ded4ffbb554fe6aaa2ed903aef7b64e143a79b6",
+      "size": 4731
+    },
+    {
+      "path": "workflow/orchestration/reuse.py",
+      "sha256": "7b8fedae9fe08b6480ac5e442c20480438cc2ca1f90a5704759bdaffcffe608e",
+      "size": 4223
+    },
+    {
+      "path": "workflow/platforms/__init__.py",
+      "sha256": "b3643c56c369cc75d936ab669b726ce719eb7bc35f3e5db268fbae0b3865cd48",
+      "size": 78
+    },
+    {
+      "path": "workflow/platforms/files.py",
+      "sha256": "4e4220873e1ec74f1d7b626a6e894008fa3128dc87312cb68854aa165778a8d9",
+      "size": 975
+    },
+    {
+      "path": "workflow/platforms/locks.py",
+      "sha256": "0c684c74b6d0677305b5d5b0650a90404773496a0cf6198a24073b722a20f461",
+      "size": 1152
+    },
+    {
+      "path": "workflow/platforms/runtime.py",
+      "sha256": "0038d9d23085bc63d2d619fe65411117f29536cf998f349b633a27d81594b165",
+      "size": 2078
+    },
+    {
+      "path": "workflow/platforms/windows_job.py",
+      "sha256": "ef28464afda2fb84fe6e19858ed4cca8809ee83876a95143232260df1e4246b6",
+      "size": 3438
+    },
+    {
+      "path": "workflow/production/__init__.py",
+      "sha256": "2636eb3f443e51b3fd25086e457bc2145b69428587418f8bcbbcc3b8188f62a7",
+      "size": 72
+    },
+    {
+      "path": "workflow/production/chatcut.py",
+      "sha256": "368182c25a357ced9fd96f2c1861e1d3ddbccef6be68981cf243d2cb48b65659",
+      "size": 14085
+    },
+    {
+      "path": "workflow/production/continuity.py",
+      "sha256": "1473e6c1a458442095f91b83ff17743a72c57b5089218c3a831d05f0366b092d",
+      "size": 1996
+    },
+    {
+      "path": "workflow/production/library.py",
+      "sha256": "8387555774c109e142c73eb988dbabd0b969c7415bae72aa119deb4039cdac9d",
+      "size": 19202
+    },
+    {
+      "path": "workflow/production/narration.py",
+      "sha256": "bef5b927d11737a2787111b715eaa3d8bbb0c8b798899e407e962668f5b2aa20",
+      "size": 18593
+    },
+    {
+      "path": "workflow/production/preparation.py",
+      "sha256": "bb46751253a135714edb6351dc3f7c98822f77859144b87e64d770788064935f",
+      "size": 13240
+    },
+    {
+      "path": "workflow/production/qa.py",
+      "sha256": "bcecf17cd2a5dba06ab8b1b3079f5195ab808ef3877edfea3d08f9f7f83c55fb",
+      "size": 2040
+    },
+    {
+      "path": "workflow/production/voices.py",
+      "sha256": "349377609c8e202cff37b23ad5464a864e837cf3e2bad95b0dd89f5fab017a2f",
+      "size": 16341
+    },
+    {
+      "path": "workflow/publishing/__init__.py",
+      "sha256": "7838efdf64cffa8ef301827b122dd3ab5d3e447c49f14fc1095a73a86af07292",
+      "size": 139
+    },
+    {
+      "path": "workflow/publishing/copy.py",
+      "sha256": "e735305587bbd2b412282dca72ad884ad98ca2a4000968901c881c78b7972cc8",
+      "size": 3990
+    },
+    {
+      "path": "workflow/publishing/prepare.py",
+      "sha256": "e1eedea55d5710fbf1bf36f819af2893e83df6bc75b610c65715ceccfed44196",
+      "size": 17083
+    },
+    {
+      "path": "workflow/references.py",
+      "sha256": "3621e3790610b7a0e93c8da578a4927dfd3d3421eaf24ddc58363cff8d7720a2",
+      "size": 2572
+    },
+    {
+      "path": "workflow/repair/__init__.py",
+      "sha256": "bdfbd50e8d4bf5a48b3f30f967effe247052964df52a0e9db7b216026408d10b",
+      "size": 586
+    },
+    {
+      "path": "workflow/repair/intervals.py",
+      "sha256": "9b0061105a69f0d21d5199225658739e7c5436a214b9c5ffe0e8ae7801cccf34",
+      "size": 1186
+    },
+    {
+      "path": "workflow/repair/pipeline.py",
+      "sha256": "13521cb5b240de1005073774450ee744b4338ee108ad5fb8c41f298c18ef3068",
+      "size": 22124
+    },
+    {
+      "path": "workflow/repair/requirements.txt",
+      "sha256": "807fdff24a4d88b5c6c58de127d8f0d6d3087b899884b84206085bc5d24df273",
+      "size": 97
+    },
+    {
+      "path": "workflow/store.py",
+      "sha256": "f62b4e5d6bc5b71a1d7296b295a962db23e7cb435ad36e30aaf5cf4bc07454eb",
+      "size": 7482
     }
   ]
 }

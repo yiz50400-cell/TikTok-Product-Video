@@ -1,0 +1,9 @@
+# 仅供合并 MCP 配置时参考；先核实本机可执行文件路径并替换 LOCAL_USER。
+# 不自动展开环境变量，不覆盖客户全局配置或账号，不修改模型设置。
+[mcp_servers.chatcut_desktop]
+command = "/Users/LOCAL_USER/Library/Application Support/ChatCut/chatcut-mcp"
+startup_timeout_sec = 120
+enabled_tools = ["list_projects", "get_active_project", "create_project", "target_project", "duplicate_project", "edit_project", "read_project", "browse_assets", "inspect_asset", "inspect_item", "push_asset", "manage_timelines", "edit_track", "edit_item", "split_item", "edit_captions", "read_captions", "preview_timeline", "export", "track_progress", "browse_library", "manage_transcript", "manage_markers"]
+
+[mcp_servers.chatcut_desktop.env]
+CHATCUT_MCP_CLIENT = "codex_app"

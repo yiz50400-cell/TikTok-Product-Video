@@ -113,7 +113,6 @@ $pythonCommand = Resolve-PythonForVideo
 $hasPython = $null -ne $pythonCommand
 $hasFfmpeg = (Test-LocalCommand "ffmpeg") -and (Test-NativeCommand { & ffmpeg -version })
 $hasFfprobe = (Test-LocalCommand "ffprobe") -and (Test-NativeCommand { & ffprobe -version })
-$hasYtDlp = ((Test-LocalCommand "yt-dlp") -and (Test-NativeCommand { & yt-dlp --version })) -or ((Test-LocalCommand "yt-dlp.exe") -and (Test-NativeCommand { & yt-dlp.exe --version }))
 $hasLocalConfig = Test-Path -LiteralPath $localConfig -PathType Leaf
 
 $ttsExtras = switch ($WithTts) { "kokoro" { @("kokoro") } "edge-tts" { @("edge-tts") } "all" { @("kokoro", "edge-tts") } default { @() } }
@@ -123,7 +122,6 @@ Add-PlanItem $plan "winget" ($(if ($hasWinget) { "ready" } else { "missing" })) 
 Add-PlanItem $plan "uv" ($(if ($hasUv) { "ready" } else { "missing" })) "Install official astral-sh.uv with winget." (-not $hasUv)
 Add-PlanItem $plan "python_3_12" ($(if ($hasPython) { "ready" } else { "missing" })) "Install Python 3.12 runtime through uv for video utility scripts." (-not $hasPython)
 Add-PlanItem $plan "ffmpeg_toolchain" ($(if ($hasFfmpeg -and $hasFfprobe) { "ready" } else { "missing" })) "Install Gyan.FFmpeg with winget; provides ffmpeg and ffprobe for probing, transcode, render, and freeze checks." (-not ($hasFfmpeg -and $hasFfprobe))
-Add-PlanItem $plan "yt_dlp" ($(if ($hasYtDlp) { "ready" } else { "missing" })) "Install yt-dlp with uv tool for accessible public material downloads." (-not $hasYtDlp)
 Add-PlanItem $plan "tts_optional" ($(if ($ttsExtras.Count -gt 0) { "requested" } else { "skipped" })) "Optional voiceover TTS: uv sync --extra kokoro (local, es-MX/pt-BR; downloads PyTorch + model on first use) and/or --extra edge-tts (online, all markets incl. id-ID). Select with -WithTts." ($ttsExtras.Count -gt 0)
 Add-PlanItem $plan "video_editor_config" ($(if ($hasLocalConfig) { "ready" } else { "missing" })) "Create config/video-editor.local.yaml from secret-free example." (-not $hasLocalConfig)
 
@@ -161,14 +159,6 @@ if (-not ($hasFfmpeg -and $hasFfprobe)) {
     Refresh-ProcessPath
 }
 
-if (-not $hasYtDlp) {
-    if (-not (Test-LocalCommand "uv")) {
-        throw "uv is unavailable; cannot install yt-dlp."
-    }
-    Invoke-Checked "yt-dlp installation" { & uv tool install yt-dlp }
-    Refresh-ProcessPath
-}
-
 if (-not $hasLocalConfig) {
     if (-not (Test-Path -LiteralPath $exampleConfig -PathType Leaf)) {
         throw "Missing config/video-editor.example.yaml."
@@ -177,11 +167,9 @@ if (-not $hasLocalConfig) {
     Copy-Item -LiteralPath $exampleConfig -Destination $localConfig
 }
 
-if ($ttsExtras.Count -gt 0) {
-    $syncArgs = @("sync", "--project", $workspaceRoot)
-    foreach ($extra in $ttsExtras) { $syncArgs += @("--extra", $extra) }
-    Invoke-Checked "TTS dependency installation" { & uv @syncArgs }
-}
+$syncArgs = @("sync", "--frozen", "--project", $workspaceRoot)
+foreach ($extra in $ttsExtras) { $syncArgs += @("--extra", $extra) }
+Invoke-Checked "Workflow dependency installation" { & uv @syncArgs }
 
 & (Join-Path $PSScriptRoot "doctor-video-editor-workspace.ps1")
 exit $LASTEXITCODE

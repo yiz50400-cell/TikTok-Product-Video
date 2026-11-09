@@ -1,190 +1,31 @@
 ---
 name: tiktok-product-video-editor
-description: Edit multi-market TikTok/TK Shop product short videos from user-provided clips or found product material. Use when the user or employee asks to剪辑产品视频, 剪一条/再剪一条, 找素材, 找各平台素材, 下载可用视频素材, 写/改口播文案, 做 TK 爆款感产品短视频, choose Mexico/Brazil/Indonesia or another target market, add voiceover/subtitles/cover, or deliver clickable final MP4/SRT files for ecommerce content.
+description: Edit customer-supplied local product footage using Codex Desktop and ChatCut Desktop. Use for TikTok product editing, local clip analysis, multi-market scripts, narration, captions, native editing, export, QA and MP4/SRT delivery.
 ---
 
-# TikTok Product Video Editor
+# 本地商品视频剪辑
 
-## Positioning
+客户默认入口为 Codex Desktop + 已登录的 ChatCut Desktop。先读项目 README、DEPLOYMENT 和 docs/local-editing-workflow.md。支持市场 MX/es-MX、BR/pt-BR、ID/id-ID、PH（任务语言按客户需求确定），数量 1–100。
 
-Use this skill as the product-video editing agent for TikTok Shop operation. The editing workflow stays the same across markets; only language, slang, CTA wording, currency/promo phrasing, and cultural framing change by target market.
+## 执行合同
 
-Supported default markets:
+只用客户明确提供的本地视频和本地参考；商品链接或图片不能替代视频素材。不搜索、下载视频或安装采集组件。缺料列明缺少的商品动作、角度、场景/时长，保存已完成进度并等待本地补充。
 
-- Mexico: Spanish, `es-MX`
-- Brazil: Portuguese, `pt-BR`
-- Indonesia: Indonesian, `id-ID`
+默认直接完成已授权制作，不逐步要求中文稿、音色或样片批准；客户明确要求「走对话精修」才逐步确认。内部审校不是客户审批，不虚构批准人、批准文本或试听证据。不擅自创建后台任务或代理。
 
-If the user names another market, adapt to that market if feasible. If the target market is not stated and cannot be inferred, ask one short question before final localization/rendering. Do not block early material inspection or Chinese draft planning.
+所有成片无 BGM：无口播则所有素材静音，有口播则仅口播轨。剪辑只走 ChatCut MCP；禁用应用内 AI、submit_* 生成和界面自动化。配音使用本机已配置 TTS；纯剪辑不等于服务离线。
 
-## Core rule
+## 顺序
 
-Move fast, but keep the checks that prevent bad videos:
+1. 核对本地路径、商品、市场、数量、风格；能从上下文确定则沿用。先导入素材并绑定真实 SHA256，保留原片。
+2. 检查每段可用镜头、商品一致性、清晰度、水印、连续动作起止和实际时长；为 hook、展示、动作、结果、CTA 选择合适片段，不强制把每段都塞入成片。
+3. 制定逐条镜头计划、去重差异和时长，口播只写可证实的卖点；参考 references/tiktok-shop-video-compliance.md。自行内部校对中文稿与目标语言，只有对话精修才向客户逐步确认。
+4. 准备口播音频和对应 SRT；检查当地语言、音色、时长、停顿和同步。缩短超长稿，不以冻结画面补时。静音版无需伪造口播字幕。
+5. ChatCut MCP 先用 list_projects 只读确认连通；新建项目或复制已有项目，明确 target_project。用当前工具 schema 导入本地媒体、编辑时间线/字幕/转场/原生效果，保留项目 ID。不要覆盖客户同名项目。
+6. 预览确认商品动作连续、主体裁切、字幕可读与安全区，核对所有原素材音轨静音。导出实际 MP4，记录项目与路径；导出完成前不报告成片。
+7. 独立检查 H.264、1080x1920、yuv420p、目标帧率、计划时长、冻结帧和音轨。逐条人工视觉复核；口播版逐条试听并核对字幕，不把技术 QA 当视觉验收。
+8. 使用 scripts/deliver_chatcut.py 登记真实成片、素材归属、字幕、中文说明与复核证据，按真实成功条数更新进度。失败保留证据和待办，成功文件不覆盖。交付可点击的本机绝对路径。
 
-1. Inspect/search material.
-2. Plan clip order and runtime.
-3. Show the exact Chinese voiceover draft and wait for approval.
-4. Localize to the selected market and render only after approval.
-5. QA freezes, pauses, codec/playability, subtitles, and delivery links.
+## 兼容与恢复
 
-Do not spawn subagents unless the user explicitly asks for subagents, delegation, or parallel agent work.
-
-## Input handling
-
-- If the user provides a bounded set of clips for “one new video”, use every provided clip by default. Assign each clip a role before scripting: hook, pain scene, product/action demo, result, CTA, or transition.
-- Do not drop any provided clip unless it is unusable. If dropping one, say why before the draft.
-- If the user says the clips are not sorted, decide the order yourself based on continuity and conversion flow.
-- If the user gives only a product, SKU, link, image, title, or general request, search for related material first.
-- If the user explicitly says “找素材”, start searching immediately. Prioritize quantity and usable files; do not only return links.
-- Do not present long material-classification tables by default. Decide internally how material will be used. Show details only if the user asks.
-
-## Material search standard
-
-Collect product-relevant material broadly: same product, similar appearance, same use case, similar pain scene, similar demo, or usable lifestyle/action footage.
-
-Prioritize:
-
-- vertical 9:16 video;
-- diverse creators, hands, rooms, scenes, platforms, and angles;
-- real demo/use footage over static product shots;
-- multiple platforms/sources when practical;
-- files that can be previewed directly by the user.
-
-Avoid:
-
-- only one actor/creator/source series;
-- horizontal/square clips as primary material unless there are not enough vertical options;
-- unrelated products;
-- low-resolution unreadable clips;
-- watermarks that dominate the frame;
-- AV1/VP9/HEVC/WebM/DASH fragments as final preview files.
-
-When delivering found material, transcode/remux primary preview files to broadly playable MP4:
-
-- H.264 video;
-- AAC audio if audio exists;
-- `yuv420p`;
-- `+faststart`.
-
-When a platform blocks simple download, do lightweight reverse analysis only: inspect HTML, embedded JSON, network/player manifests, CDN URLs, file signatures, and downloader logs. Use the user's already-authorized browser/session only when available. Do not do CAPTCHA cracking, credential theft, payment-gated bypass, or risky account automation.
-
-## Market selection and localization
-
-Ask or infer the target market before final voiceover/subtitles:
-
-- If user says 墨西哥/MX/Mexico: localize to Mexican Spanish.
-- If user says 巴西/BR/Brazil: localize to Brazilian Portuguese.
-- If user says 印尼/ID/Indonesia: localize to Indonesian.
-- If the user says multiple markets, produce one approved Chinese master script first, then localize separate versions per market.
-
-Localization must preserve the approved selling logic, not translate mechanically. Adjust:
-
-- natural spoken phrasing;
-- local household scene wording;
-- local CTA phrasing such as cart/order/promo;
-- currency or platform wording only when the user provides it or it is safe to infer;
-- voice tone for the product category and target audience.
-
-If market-specific claims, prices, promotions, shipping terms, compliance language, or platform rules are unknown, avoid inventing them. Use generic CTA such as “mira la oferta”, “confira a oferta”, or “cek promo di keranjang”.
-
-## Compliance gate
-
-Before final localization or rendering, read `references/tiktok-shop-video-compliance.md` and run the compliance check over the voiceover, subtitles, hashtags, and on-screen text. The check is a blocking gate:
-
-- absolute, guarantee, medical, expert/clinical endorsement, unrelated hashtag, and unverified promotion wording must be deleted or replaced;
-- every number, percentage, multiplier, capacity, time claim, ingredient, and benefit must match the PDP/INCI wording; unsupported claims do not ship;
-- AI content must be labeled before upload, and AI must not fabricate before/after results, skin transformations, or real-user testimonials;
-- for Mexico cosmetics, use indoor product/packaging/texture/application scenes by default, block medicalized beauty claims, and verify PDP/INCI consistency;
-- for Mexico cosmetics advertising, confirm 18+ targeting, the required disclaimer, and the local compliance readiness items before publishing.
-
-Use the local checker when structured text files are available:
-
-`tk-ops-workspace video-compliance check --market Mexico --category cosmetics --script script.txt --subtitles subtitles.txt --tags tags.txt --onscreen-text onscreen.txt --pdp pdp.txt --ai-generated --ai-label-enabled`
-
-Any `blocked` result requires revision and a new check. Keep the existing Chinese voiceover approval gate; compliance checking does not replace employee approval.
-
-## TK爆款口播 standard
-
-Before rendering, always show the exact Chinese voiceover draft and wait for approval, even if the user says “直接剪辑”. “直接” means short communication and no unnecessary process; it does not mean skipping copy approval. Only skip this if the user explicitly says not to show the script/voiceover first.
-
-The draft must fit the planned runtime. Do not write copy first and force it into the edit later.
-
-For TikTok commerce videos, the script must include:
-
-- strong hook in the first 1-2 seconds;
-- concrete real-life pain point;
-- household/lived conflict or embarrassment;
-- mistaken assumption or diagnosis twist;
-- visible try/use/action sequence;
-- before/after feeling or result;
-- direct order/cart/promo CTA at the end.
-
-Avoid stiff ad copy, neat slogan structure, pure feature explanations, domestic hard-sell phrasing, and vague “problem solved” lines. Write like a real person speaking from a specific annoyance.
-
-If the user says “不够爆款”, revise the voiceover first and show the new exact text for approval before rendering.
-
-If any approved copy, subtitle, timing, speed, cover text, or structure changes later, show the changed exact text/plan and wait for approval again.
-
-## Editing standard
-
-- Build a fast-paced vertical TikTok edit. Add speed-up where useful, especially low-information movement, setup, repeated hand action, long pans, or waiting shots.
-- Preserve action continuity. Do not speed up so much that product use becomes unclear.
-- Do not pad runtime with static product display, frozen phone screens, lights, empty tabletop, or dead reaction shots.
-- Voiceover should substantially fill the video. Avoid long pauses between lines and avoid voice ending far before the video ends.
-- Prefer active shots: hand use, before/after, compression, cleaning, plugging in, unboxing, close result, problem scene, and CTA shot.
-- Keep clip transitions simple and fast unless the user asks for a specific style.
-- Default final format is vertical 9:16 MP4.
-
-## Voice, subtitles, and cover
-
-- Use the fixed scripted step instead of ad-hoc TTS: after the Chinese draft is approved and localized, save the localized text (one phrase per line, or JSON like `config/voiceover.example.json`) and run `scripts/render-video-showcase.ps1 ... -VoiceoverScript <file> -Market <market> -Category <category> -ApprovedBy <approver>` or `scripts/add-voiceover-subtitles.ps1` on an existing render (CLI: `tk-ops-workspace voiceover build`).
-- The step refuses to run without an approver and blocks unless video-compliance returns `passed`; never fill `approved_by` before real approval and never raise `--max-tempo` to force an overlong script — shorten the script and re-approve instead.
-- Backend `auto` prefers local Kokoro (es-MX, pt-BR), else edge-tts (all markets, required for id-ID). `silent` is for tests only. Voice, speed, tempo and warnings are recorded in `<name>.voiceover-notes.json`.
-- Verify voiced deliveries with `scripts/verify-video-delivery.ps1 -Video <name>.voiced.mp4 -RequireAudio`, then listen and check subtitle placement.
-- Match voice language to the selected market.
-- Subtitles should be synced phrase-by-phrase, not as long multi-sentence blocks.
-- Keep subtitles fully visible and above the platform lower safety area.
-- If the user asks for no black subtitle background, remove it and keep readability with placement, stroke, shadow, and shorter lines.
-- Default delivery may include a clean video plus separate `.srt`; burn subtitles only if the user asks or the current workflow requires it.
-- Cover/title text must be centered, readable, and product-angle focused when created.
-
-## QA before delivery
-
-Run proportionate checks before saying the video is done:
-
-- verify all required user-provided clips were used, or explain exclusions;
-- check final duration and pacing against approved script;
-- inspect for dead air and frozen/static padding;
-- run `ffmpeg`/`ffprobe` checks when available;
-- run `freezedetect`; any freeze segment `>= 0.8s` must be inspected and recut rather than explained away. `render-video-showcase.ps1` does this automatically and writes `<name>.qa.json`; for other outputs run `scripts/verify-video-delivery.ps1 -Video <mp4> -ExpectedDuration <planned seconds>` (add `-RequireAudio` for voiced files). A failing QA means re-cut, not deliver;
-- never stretch a short source with frozen frames: the renderer rejects segments past the source duration — fix the segments JSON instead;
-- put per-product placement changes (title/CTA position and size, arrow/cart position, font) in the segments JSON `layout` section, not in the scripts;
-- verify final preview is H.264/AAC-compatible MP4 with `yuv420p` and faststart when possible;
-- open or sample the final output if practical.
-- complete the compliance gate and record its rule version and any blocked items in the run notes;
-- for AI-generated Mexico cosmetics, verify the upload AI label, indoor scene constraint, 18+ ad targeting when applicable, disclaimer, and the local compliance confirmations.
-
-## Output and handoff
-
-Save work outside the source-material folder, for example:
-
-- Employee workspace default: `outputs/video/<market>/<YYYY-MM-DD>/<run-id>/`
-
-- `F:\成片过程\<project>\analysis`
-- `F:\成片过程\<project>\outputs`
-- `E:\成片过程\<project>\analysis`
-- `E:\成片过程\<project>\outputs`
-
-Do not put analysis, render scripts, subtitle files, or outputs back into the user's raw material folder.
-Allocate a unique run ID for every edit or retry. 不覆盖历史成片、字幕、分析记录或失败记录。
-
-Final response must include:
-
-- selected target market and language;
-- clickable local link to final MP4;
-- clickable local link to subtitle file when created;
-- exact final voiceover text unless the user explicitly said not to show it;
-- concise material-role map when the user provided a bounded file set;
-- short source note when material was searched by Codex.
-
-Update durable memory when the user gives feedback that should affect future edits, especially: market selection, script approval rules, material search preferences, codec/playability problems, subtitle placement, pacing, CTA expectations, and repeated editing mistakes.
+scripts/workflow.py 用于任务创建、导入、分析/计划登记；run 为显式调试/交互流水线，可能要求真实审批，不是自动 ChatCut 渲染入口。旧 tk-ops-workspace FFmpeg 工具保留调试兼容，不冒充原生 ChatCut 项目。断点续作先核对素材哈希和已交付 ordinal，不重算或覆盖已验证成果。发布上传由客户手动完成。

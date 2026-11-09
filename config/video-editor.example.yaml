@@ -1,19 +1,16 @@
-# Copy to config/video-editor.local.yaml (doctor checks that the local file exists).
-# All keys are DESCRIPTIVE: they document employee preferences for Codex and the skill.
-# No script reads them. Script behaviour comes from CLI/PowerShell parameters and from the
-# "layout" section of the segments JSON (see config/video-showcase.example.json).
-# No secrets here.
+# 描述性客户偏好；脚本不读取这些键。实际运行使用 CLI 参数与 ChatCut 项目设置。
+# 本地配置不存在时再复制，保留已有配置；不要填写密钥。
 video_editor:
-  default_market: ""                      # Mexico | Brazil | Indonesia | blank = ask; -Market / --market
-  output_root: "outputs/video"            # convention for -RunDir (one new run dir per edit)
-  require_chinese_script_approval: true   # enforced by voiceover: -ApprovedBy is mandatory
-  prefer_vertical_9x16: true              # render layout width/height (default 1080x1920)
-  render_preview_first: true              # skill workflow preference
-  final_video_codec: "h264"               # fixed in render (libx264, yuv420p, +faststart)
-  final_audio_codec: "aac"                # fixed in voiceover mux
-  downloader: "yt-dlp"                    # used by the skill's download_material_urls.py
-  tts_provider: "local_kokoro_if_available"  # voiceover --backend auto: kokoro -> edge-tts; silent = test only
-  tts_max_tempo: 1.25                     # voiceover --max-tempo default
-  default_delivery: "clean_mp4_plus_srt"  # burn subtitles only on request (-BurnSubtitles)
-  voiceover_example: "config/voiceover.example.json"
-  fontfile: ""                            # set $env:TK_VIDEO_FONTFILE or layout.fontfile / -FontFile instead
+  default_market: "" # MX | BR | ID | PH；空值由本次任务确定
+  output_root: "outputs/video"
+  material_source: "customer_local_files"
+  desktop_editor: "chatcut"
+  interactive_refinement: false
+  prefer_vertical_9x16: true
+  background_music: false
+  audio_mode: "narration_or_silent"
+  final_video_codec: "h264"
+  final_audio_codec: "aac"
+  tts_provider: "configured_local_or_edge_tts"
+  default_delivery: "clean_mp4_plus_srt"
+  fontfile: ""

@@ -10,6 +10,7 @@ on:
   pull_request:
     paths:
       - "src/**"
+      - "workflow/**"
       - "scripts/**"
       - "tests/e2e/**"
       - "pyproject.toml"

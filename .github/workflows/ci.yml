@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -24,12 +24,15 @@ jobs:
       - name: Install FFmpeg (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
       - name: uv sync --frozen
         run: uv sync --frozen --extra dev
       - name: pytest
-        run: uv run --frozen pytest -q
+        run: uv run --frozen --extra dev pytest -q
       - name: ruff
-        run: uv run --frozen ruff check .
+        run: uv run --frozen --extra dev ruff check .
       - name: Delivery manifest up to date
         run: uv run --frozen python scripts/generate_delivery_manifest.py --check
 

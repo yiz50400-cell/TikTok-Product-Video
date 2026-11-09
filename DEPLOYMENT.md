@@ -1,46 +1,52 @@
-# Windows 客户部署
+# macOS / Windows 客户部署与升级
 
-## 下载
+v0.3.0 为本地候选版，尚未发布。使用本次完整源码目录，不以历史 v0.2.0 压缩包代替。保留 `.codex`、`workflow`、`src`、`scripts`、`config`、`assets`、`pyproject.toml` 和 `uv.lock`。
 
-从本仓库 [Releases](https://github.com/yiz50400-cell/TikTok-Product-Video/releases) 下载 TikTok-Product-Video-Editor-Delivery-v0.2.0.zip，完整解压到一个独立目录，例如 D:\TikTokVideoEditor。保留 .codex、src、scripts、assets、config 等目录结构。
+## 环境
 
-## 配置环境
+两平台均需要 Codex Desktop、已登录并打开的 ChatCut Desktop、Python 3.12+、uv、FFmpeg 和 FFprobe。客户使用自己的登录与凭据；不要复制他人的全局 Codex `auth.json`、`config.toml` 或密钥。
 
-本项目使用 Windows 10/11、Python 3.12+、uv、FFmpeg 和 FFprobe。素材下载流程另外需要 yt-dlp。
+macOS：用现有包管理器安装 uv 与 FFmpeg，确认当前终端能找到命令；不把 Windows `.exe` 路径套用到 macOS。
 
-在解压后的项目目录打开 PowerShell，执行：
+Windows 10/11：在项目目录打开 PowerShell。可先查看只读安装计划和诊断：
 
-~~~powershell
+```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-video-editor-workspace.ps1
-~~~
-
-核对安装计划后，如需自动补齐环境，执行：
-
-~~~powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-video-editor-workspace.ps1 -Apply -Confirmed
-uv sync --frozen --project .
-# 需要配音时二选一或都装（Kokoro 体积大，首次运行会下载模型）：
-# uv sync --frozen --project . --extra kokoro
-# uv sync --frozen --project . --extra edge-tts
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\doctor-video-editor-workspace.ps1
-~~~
+```
 
-如需手工创建本机配置，且该文件尚不存在：
+用户已要求补齐环境时可执行 `bootstrap-video-editor-workspace.ps1 -Apply -Confirmed`。FFmpeg/FFprobe 可位于当前用户 PATH 或项目 `.tools/bin/`，不随源码包提供。
 
-~~~powershell
-Copy-Item .\config\video-editor.example.yaml .\config\video-editor.local.yaml
-~~~
+两平台在项目目录执行：
 
-## 使用和验收
+```sh
+uv sync --frozen
+ffmpeg -version
+ffprobe -version
+uv run python scripts/workflow.py capabilities
+```
 
-将完整项目目录作为 Codex 工作区，按 .codex/skills/setup-video-editor-environment/SKILL.md 检查环境，按 .codex/skills/tiktok-product-video-editor/SKILL.md 执行剪辑。可先发送：
+edge-tts 已包含在核心安装中，联网服务仍须客户本机可达。需要本地 Kokoro 时执行 `uv sync --frozen --extra kokoro`；开发检查使用 `--extra dev`。不要为剪辑部署素材采集组件。
 
-> 请读取本项目 README 和剪辑环境 Skill，检查并补齐这台电脑的剪辑环境。
+## 配置 ChatCut
 
-使用客户自己的素材，按 README 的渲染示例生成一个视频，并执行 scripts/verify-video-delivery.ps1，再检查播放、画面和文字。渲染脚本会在渲染前校验片段是否超出素材时长，渲染后自动生成 `<名>.qa.json`（冻结画面、时长、帧率、编码）。字体默认使用 C:\Windows\Fonts\arialbd.ttf，可用 `-FontFile` 或环境变量 TK_VIDEO_FONTFILE 指定。winget 只在需要自动安装缺失工具时才用到，缺少时 doctor 只给警告。不带 -VoiceoverScript 时固定渲染脚本输出无音频的画面展示版本；带 -VoiceoverScript（需已审批、合规通过）时会额外输出 .voiced.mp4 和 .srt，用 `verify-video-delivery.ps1 -RequireAudio` 检查音轨，并人工试听配音、核对字幕位置和时间轴。也可在 bootstrap 时加 `-WithTts kokoro|edge-tts|all` 安装配音依赖。
+在 Codex 打开完整项目目录，读取项目剪辑 Skill。优先使用当前已接通的 ChatCut Desktop MCP。需要手动接入时参考 `config/chatcut-mcp.macos.example.toml` 或 `config/chatcut-mcp.windows.example.toml`，把 command 改成本机真实可执行文件绝对路径；样例不是可直接复制覆盖全局配置的文件，也不会自动展开占位符。
 
-## 本地维护
+通过 `list_projects` 等只读调用确认 MCP 有实际响应；进程存在不等于健康。失败时保留错误、修复连接，不绕到应用内 AI 或界面操作。Windows 需用户手动保持/重启 ChatCut。
 
-需要排错时，在这台电脑上保留完整项目目录和错误信息，由维护者使用 Codex 修改本地源码。更换交付版本前保留本地修改和配置的备份。
+`config/video-editor.local.yaml` 不存在时才从 example 复制。该模板仅描述偏好，不是运行参数；保留已有配置，真实密钥不写入项目。
 
-客户使用自己的素材、账号和本机配置。完整文件清单及校验值见 DELIVERY-MANIFEST.json。
+## 客户机器验收
+
+1. 验证锁定依赖安装、FFmpeg/FFprobe 和 ChatCut MCP 只读连通。
+2. 使用客户本地素材创建一个任务，经 ChatCut 导入、剪辑、导出，登记真实 MP4 与字幕。
+3. 检查编码、尺寸、帧率、时长、冻结帧；人工看画面/商品/字幕安全区并试听。验证交付数量和恢复记录。
+4. 逐项报告实际结果。只完成依赖安装或合成视频测试时，不宣称客户部署或真实批量质量验收成功。
+
+## 升级和回滚
+
+关闭正在写入该项目的任务，记录未交付数量。先把旧项目完整复制到独立备份目录，保留原始素材位置、客户本地配置、运行数据库、输出与本地修改。新版本解压到并列目录，重新 `uv sync --frozen`；按新模板逐项迁移需要的本地路径，核对后才继续任务。不要把旧版采集配置并入新任务。
+
+首次验收使用独立输出目录与备份后的运行状态，不覆盖旧成果。失败时停止新任务，切回旧目录及与它匹配的备份数据库/配置；保留新版本日志供排错，不把新旧状态文件盲目混用。全局账号凭据不属于项目升级迁移内容。
+
+详细制作和导出登记见 [本地剪辑流程](docs/local-editing-workflow.md)。

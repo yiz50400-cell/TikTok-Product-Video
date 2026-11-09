@@ -24,3 +24,15 @@ __pycache__/
 .env.*
 !.env.example
 .DS_Store
+
+# Local workflow tasks, credentials, caches and review backups
+.runtime/
+projects/
+.superpowers/
+*.token
+*.sqlite3
+*.db
+auth.json
+**/auth.json
+dist/
+*.egg-info/

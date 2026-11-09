@@ -77,7 +77,6 @@ $hasWinget = Test-LocalCommand "winget"
 $hasUv = Test-LocalCommand "uv"
 $hasFfmpeg = Test-LocalCommand "ffmpeg"
 $hasFfprobe = Test-LocalCommand "ffprobe"
-$hasYtDlp = (Test-LocalCommand "yt-dlp") -or (Test-LocalCommand "yt-dlp.exe")
 $hasConfig = Test-Path -LiteralPath $configPath -PathType Leaf
 
 $pythonCommand = Resolve-PythonForVideo
@@ -85,7 +84,6 @@ $pythonRunnable = $null -ne $pythonCommand
 
 $ffmpegRunnable = $hasFfmpeg -and (Test-NativeCommand { & ffmpeg -version })
 $ffprobeRunnable = $hasFfprobe -and (Test-NativeCommand { & ffprobe -version })
-$ytDlpRunnable = $hasYtDlp -and (Test-NativeCommand { & yt-dlp --version })
 
 # Optional TTS backends (informational; missing TTS does not fail doctor because the visual-only path still works).
 $kokoroReady = $false
@@ -107,7 +105,6 @@ if (-not $hasUv) { $failureCodes.Add("uv_missing") }
 if (-not $pythonRunnable) { $failureCodes.Add("python_missing") }
 if (-not $ffmpegRunnable) { $failureCodes.Add("ffmpeg_missing") }
 if (-not $ffprobeRunnable) { $failureCodes.Add("ffprobe_missing") }
-if (-not $ytDlpRunnable) { $failureCodes.Add("yt_dlp_missing") }
 if (-not $hasConfig) { $failureCodes.Add("video_editor_config_missing") }
 
 [pscustomobject]@{
@@ -121,7 +118,6 @@ if (-not $hasConfig) { $failureCodes.Add("video_editor_config_missing") }
         python_path = $pythonCommand
         ffmpeg_available = $ffmpegRunnable
         ffprobe_available = $ffprobeRunnable
-        yt_dlp_available = $ytDlpRunnable
         config_exists = $hasConfig
         failure_codes = @($failureCodes)
         warnings = @($environmentWarnings)
