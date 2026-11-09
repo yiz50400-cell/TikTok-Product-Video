@@ -1,8 +1,8 @@
-# TikTok Product Video Editor · v0.3.0 本地候选版
+# TikTok Product Video Editor · v0.3.0 本地素材纯剪辑版
 
 客户默认入口是 **Codex Desktop + ChatCut Desktop**。提供本地素材、商品、市场、数量和风格，Codex 完成导入、分析筛选、策划、本地化口播、配音字幕、ChatCut 原生剪辑、导出、逐条检查和本机交付。支持 MX、BR、ID、PH，任务数量 1–100。
 
-> 本次 v0.3.0 尚未发布；请使用本次完整候选源码目录。旧 v0.2.0 发布包不包含本次升级。历史记录 [SOURCE-VALIDATION.md](SOURCE-VALIDATION.md) 和 [VALIDATION.md](VALIDATION.md) 仅描述旧版验证，不代表本版或客户机器已验收。
+> 使用本仓库 v0.3.0 完整源码或 Releases 中的 `TikTok-Product-Video-v0.3.0-local-only.zip`。旧 v0.2.0 发布包不包含本次升级。历史记录 [SOURCE-VALIDATION.md](SOURCE-VALIDATION.md) 和 [VALIDATION.md](VALIDATION.md) 仅描述旧版验证，不代表本版或客户机器已验收。
 
 先看 [部署与升级](DEPLOYMENT.md)，再看 [完整本地剪辑流程](docs/local-editing-workflow.md)。本次结果见 [升级验证记录](UPGRADE-VALIDATION.md)。
 

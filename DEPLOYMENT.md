@@ -1,6 +1,6 @@
 # macOS / Windows 客户部署与升级
 
-v0.3.0 为本地候选版，尚未发布。使用本次完整源码目录，不以历史 v0.2.0 压缩包代替。保留 `.codex`、`workflow`、`src`、`scripts`、`config`、`assets`、`pyproject.toml` 和 `uv.lock`。
+从本仓库 Releases 获取 `TikTok-Product-Video-v0.3.0-local-only.zip`，或使用 v0.3.0 完整源码目录，不以历史 v0.2.0 压缩包代替。保留 `.codex`、`workflow`、`src`、`scripts`、`config`、`assets`、`pyproject.toml` 和 `uv.lock`。
 
 ## 环境
 

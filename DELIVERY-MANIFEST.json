@@ -83,13 +83,13 @@
     },
     {
       "path": "DEPLOYMENT.md",
-      "sha256": "2f5da5078ac43fe28f52e0ee6e2016b094a6f81cc5334801ded6b8acbc05cb33",
-      "size": 3600
+      "sha256": "f3e409972c8a0cd5a1d7ab230e5ba7b4b9fe358c3eb94dc5fd6eb9dd1d3fccd2",
+      "size": 3638
     },
     {
       "path": "README.md",
-      "sha256": "6af9ce36aee8e6b8f0616d0d394238c3272f21f6012f5a0994ff183446c13df8",
-      "size": 3587
+      "sha256": "64f125b4d173b930a5985d45cc2719f348d0782a950ccc5700147d65065d41a6",
+      "size": 3627
     },
     {
       "path": "SOURCE-VALIDATION.md",
@@ -98,8 +98,8 @@
     },
     {
       "path": "UPGRADE-VALIDATION.md",
-      "sha256": "c0d1bd3d21d12cdb86277c38debbc7c4eabd4746d055680005d007ceb5a081fb",
-      "size": 4017
+      "sha256": "63426712ead7bc0f5270084574f7a7fdda11a3c03b429601ff329a0ce9b95276",
+      "size": 4055
     },
     {
       "path": "VALIDATION.md",
