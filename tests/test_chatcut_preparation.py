@@ -106,20 +106,20 @@ def test_cli_writes_preview_only_and_rejects_rebinding_existing_output(tmp_path)
     import sys
     root = Path(__file__).resolve().parents[1]
     for name, value in [('plan', plan()), ('assets', ASSETS), ('tracks', TRACKS)]:
-        (tmp_path / f'{name}.json').write_text(json.dumps(value))
+        (tmp_path / f'{name}.json').write_text(json.dumps(value), encoding='utf-8', newline='\n')
     command = [sys.executable, str(root / 'scripts/prepare_chatcut.py'),
                '--plan', str(tmp_path / 'plan.json'), '--assets', str(tmp_path / 'assets.json'),
                '--tracks', str(tmp_path / 'tracks.json'), '--output', str(tmp_path / 'pack')]
-    first = subprocess.run(command, capture_output=True, text=True)
+    first = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
     assert first.returncode == 0, first.stderr
-    batch = json.loads((tmp_path / 'pack/edit-batch.preview.json').read_text())
+    batch = json.loads((tmp_path / 'pack/edit-batch.preview.json').read_text(encoding='utf-8'))
     assert batch['validateOnly'] is True
     assert len(batch['adds']) == 5
-    repeat = subprocess.run(command, capture_output=True, text=True)
+    repeat = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
     assert repeat.returncode == 0, repeat.stderr
     assert json.loads(repeat.stdout)['reused'] is True
     changed = plan(); changed['voice_gain_db'] = 2
-    (tmp_path / 'plan.json').write_text(json.dumps(changed))
-    failure = subprocess.run(command, capture_output=True, text=True)
+    (tmp_path / 'plan.json').write_text(json.dumps(changed), encoding='utf-8', newline='\n')
+    failure = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
     assert failure.returncode != 0 and 'new run directory' in failure.stderr
-    assert json.loads((tmp_path / 'pack/edit-batch.preview.json').read_text()) == batch
+    assert json.loads((tmp_path / 'pack/edit-batch.preview.json').read_text(encoding='utf-8')) == batch

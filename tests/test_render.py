@@ -137,7 +137,7 @@ def test_render_e2e_and_short_source_failure(tmp_path):
     plan.write_text(json.dumps({"title": "Título de prueba", "cta": "Pídelo",
                                 "segments": [{"start": 0, "end": 4, "speed": 1.5},
                                              {"start": 4.5, "end": 8.5, "speed": 1.2}]}),
-                    encoding="utf-8")
+                    encoding="utf-8", newline='\n')
     result = render_showcase(source=src, run_dir=tmp_path / "run 1", segments_json=plan)
     assert result["qa"]["passed"], result["qa"]
     assert Path(result["qa"]["qa_json"]).is_file()

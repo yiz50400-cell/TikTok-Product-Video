@@ -20,10 +20,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         result = prepare_publish(args.request, args.output, workspace=args.workspace)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print(json.dumps(result, ensure_ascii=True, indent=2))
         return 0
     except (ValueError, OSError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
-        print(json.dumps({"ok":False,"error_zh":str(exc),"platform_action":False},ensure_ascii=False),file=sys.stderr)
+        print(json.dumps({"ok":False,"error_zh":str(exc),"platform_action":False},ensure_ascii=True),file=sys.stderr)
         return 1
 
 

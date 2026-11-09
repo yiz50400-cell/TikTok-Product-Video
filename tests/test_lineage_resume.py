@@ -66,11 +66,11 @@ def snapshot(directory):
 def rebind_fixture_approval(directory):
     """Keep synthetic approvals valid when arranging a malformed source fixture."""
     approval = directory / 'zh-approval.json'
-    value = json.loads(approval.read_text())
+    value = json.loads(approval.read_text(encoding='utf-8'))
     value['version_sha256'] = digest(directory / 'creative.json')
     write_json(approval, value)
     audit = directory / 'localization-audit-v0001.json'
-    value = json.loads(audit.read_text())
+    value = json.loads(audit.read_text(encoding='utf-8'))
     value.update(creative_sha256=digest(directory / 'creative.json'),
                  zh_approval_sha256=digest(approval))
     write_json(audit, value)
@@ -95,7 +95,7 @@ def test_resume_rejects_shared_original_before_ready(lineage_pipeline, kind, ado
         # A duplicate entry must not inflate sources even when hashes belong to the task.
         for name in ('creative.json', 'execution.json'):
             path = directory / name
-            value = json.loads(path.read_text())
+            value = json.loads(path.read_text(encoding='utf-8'))
             config = value.get('production', value)
             config['sources'][1] = copy.deepcopy(config['sources'][0])
             write_json(path, value)
@@ -112,7 +112,7 @@ def test_resume_rejects_changed_saved_lineage_even_when_sources_remain_distinct(
     bind_originals(pipeline, assets, ['a' * 64, 'b' * 64])
     directory = resume_bundle(lineage_pipeline, upstream=location == 'upstream')
     if location == 'production_source':
-        creative = json.loads((directory / 'creative.json').read_text())
+        creative = json.loads((directory / 'creative.json').read_text(encoding='utf-8'))
         creative['production']['sources'][1]['original_sha256'] = 'b' * 64
         write_json(directory / 'creative.json', creative)
         rebind_fixture_approval(directory)
@@ -128,7 +128,7 @@ def test_resume_requires_bound_upstream_evidence(lineage_pipeline, change):
     _, _, job, _, _, _, _ = lineage_pipeline
     directory = resume_bundle(lineage_pipeline, upstream=True)
     path = directory / 'upstream-v0001.json'
-    version = json.loads(path.read_text())
+    version = json.loads(path.read_text(encoding='utf-8'))
     if change == 'swapped_sources':
         version['sources'].reverse()
     elif change == 'foreign_job':
@@ -137,7 +137,7 @@ def test_resume_requires_bound_upstream_evidence(lineage_pipeline, change):
         version['sources'][0]['original_sha256'] = 'c' * 64
     write_json(path, version)
     if change != 'changed_hash':
-        creative = json.loads((directory / 'creative.json').read_text())
+        creative = json.loads((directory / 'creative.json').read_text(encoding='utf-8'))
         creative['upstream_version_sha256'] = digest(path)
         write_json(directory / 'creative.json', creative)
         rebind_fixture_approval(directory)
@@ -150,7 +150,7 @@ def test_resume_requires_bound_upstream_evidence(lineage_pipeline, change):
 def test_resume_checks_execution_sources_as_well_as_creative(lineage_pipeline):
     directory = resume_bundle(lineage_pipeline)
     path = directory / 'execution.json'
-    execution = json.loads(path.read_text())
+    execution = json.loads(path.read_text(encoding='utf-8'))
     execution['sources'][1]['sha256'] = 'f' * 64
     write_json(path, execution)
     before = snapshot(directory)

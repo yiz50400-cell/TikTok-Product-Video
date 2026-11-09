@@ -15,7 +15,7 @@ from workflow.store import Job, database
 @pytest.fixture
 def local_client(tmp_path):
     with TestClient(create_app(tmp_path / 'data')) as client:
-        client.headers.update({'Authorization': 'Bearer ' + (client.app.state.data_dir / 'access.token').read_text().strip(),
+        client.headers.update({'Authorization': 'Bearer ' + (client.app.state.data_dir / 'access.token').read_text(encoding='utf-8').strip(),
                                'X-Workflow-Client': 'studio'})
         yield client
 
@@ -28,7 +28,7 @@ def test_url_input_rejected_and_empty_legacy_source_list_allowed(local_client):
     assert '本地' in job['next_action']
     caps = local_client.get('/api/capabilities').json()
     assert 'collection' not in caps['standalone_modules']
-    assert caps['version'] == (Path(__file__).resolve().parents[1] / 'VERSION').read_text().strip()
+    assert caps['version'] == (Path(__file__).resolve().parents[1] / 'VERSION').read_text(encoding='utf-8').strip()
     assert caps['mode'] == 'local_material_editing'
     assert caps['source_policy'] == 'local_files_only'
     assert caps['default_editor'] == 'ChatCut Desktop'

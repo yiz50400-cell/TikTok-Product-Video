@@ -1,3 +1,41 @@
+# v0.4.0 ChatCut + Remotion 协同版验证
+
+验证日期：2026-11-09（Asia/Shanghai）。本版在 `e417b1f76b00f60787c02b161e637cd8c3bcd7f1` 上增加用户确认的 **ChatCut 导出 → Remotion 包装 → 成片交付**。下方 v0.3.0 部分保留为历史记录。
+
+## 变化
+
+- ChatCut 保留镜头、节奏、裁切、转场和口播同步；Remotion 对干净本地底片制作标题、卖点卡、字幕和 CTA，保持底片时序。
+- `package_remotion.py` 提供 prepare/render/batch；批量支持 1–100 条，逐条失败继续、同输入完整复用、不同输入或模板版本拒绝覆盖。
+- 输入绑定任务原素材、ChatCut 项目、底片、SRT、包装参数；输出绑定模板版本、视频、字幕及 QA 哈希。渲染记录自身也有完整性指纹。
+- 渲染成功状态为 `RENDERED_PENDING_REVIEW`，交付模板默认未复核；`deliver_video.py` 检查真实复核与 Remotion 血缘后才更新交付数量。旧 ChatCut 直接交付入口保留。
+- 文字按浏览器实际字体测量换行及缩字号；仍超出安全区时停止渲染，避免静默裁字。
+- 修复 Windows JSON 命令输出和 UTF-8/LF 测试夹具；macOS CI 使用提供 drawtext/subtitles 的 ffmpeg-full。
+
+## 本机实测
+
+环境：macOS ARM64、Python 3.12.14、Node.js 26.8.1、Remotion 4.0.541、已锁定 npm/uv 依赖。
+
+| 检查 | 结果 |
+| --- | --- |
+| 全量 pytest，设置 `REMOTION_SMOKE=1`，包含真实 Chromium 渲染 | **476 passed, 3 skipped，93.84 秒** |
+| 静音底片 → 包装 → 全解码 → 复用 → 交付登记 | 通过 |
+| 合成音轨底片 → 包装 → 音轨/SRT检查 → 交付登记 | 通过，合成音轨不是自然口播验收 |
+| 不带真实复核、损坏成片/记录、网址输入、错误素材归属 | 正确拒绝 |
+| 超长 CTA 实际渲染 | 明确失败，不发布部分成片 |
+| `npm --prefix remotion run lint` | TypeScript 与 ESLint 通过 |
+| `uv run ruff check .`、`git diff --check` | 通过 |
+| 客户文档本地链接 | 核对通过 |
+| 独立代码审查 | 完整性与排版问题修复后，无未解决的重要问题 |
+| npm 生产依赖 audit | 0 已知漏洞（本次查询结果） |
+
+本机实际查看了合成底片包装抽帧，标题、卖点卡、字幕、CTA 在各自区域可读。这是技术布局检查，不代表真实商品画面验收。首次 Chromium 下载曾被网络中断，重试下载完成后真实渲染通过。
+
+远程 CI 配置在 Windows/Linux/macOS 均启用真实 Remotion smoke 与回归；具体结果以该发布提交对应的 GitHub Actions 记录为准。Windows 客户真机、真实商品镜头、完整 ChatCut 项目导出、在线 TTS 和自然听感尚需客户环境验收。未将真实客户素材、运行数据、工具二进制或凭据纳入源码。
+
+维护备份在本机 `.git/migration-backups/remotion-cooperation/before.tar`，包含升级前完整受控源码；测试日志也在该忽略目录。回滚按 DEPLOYMENT.md 使用独立旧目录与匹配数据备份，不覆盖客户数据。
+
+---
+
 # v0.3.0 纯剪辑版升级验证
 
 验证日期：2026-11-09（Asia/Shanghai）。以下记录发布前的本机验证；远程构建结果以该发布提交对应的 GitHub Actions 记录为准。
@@ -18,7 +56,7 @@
 
 ChatCut 实际导出可通过 `scripts/deliver_chatcut.py` 登记，校验真实 MP4、源素材归属及哈希、SRT 时序、音轨模式、完整解码与真实复核记录。不可变交付包包含视频、适用字幕、中文说明、中文文案和证据清单；每次复用核对已交付文件及素材，进度按实际条目计算。内部技术/视觉复核不冒充客户审批。
 
-安装统一使用 `pyproject.toml` + `uv.lock`，Python 3.12+。本次选择 3.12；客户无需部署采集服务。CI 配置覆盖 Windows、Linux、macOS；远程 CI 尚未运行。
+安装统一使用 `pyproject.toml` + `uv.lock`，Python 3.12+。本次选择 3.12；客户无需部署采集服务。这是 v0.3.0 发布前本机记录；其后远程 CI 暴露的 Windows 默认编码及 macOS 精简 FFmpeg 问题，已在 v0.4.0 修复。
 
 ## 实际验证结果
 

@@ -1,11 +1,11 @@
 ---
 name: tiktok-product-video-editor
-description: Edit customer-supplied local product footage using Codex Desktop and ChatCut Desktop. Use for TikTok product editing, local clip analysis, multi-market scripts, narration, captions, native editing, export, QA and MP4/SRT delivery.
+description: Edit customer-supplied local product footage using Codex Desktop, ChatCut Desktop and Remotion. Use for TikTok product editing, local clip analysis, multi-market scripts, narration, captions, native editing, export, QA and MP4/SRT delivery.
 ---
 
 # 本地商品视频剪辑
 
-客户默认入口为 Codex Desktop + 已登录的 ChatCut Desktop。先读项目 README、DEPLOYMENT 和 docs/local-editing-workflow.md。支持市场 MX/es-MX、BR/pt-BR、ID/id-ID、PH（任务语言按客户需求确定），数量 1–100。
+客户默认入口为 Codex Desktop + 已登录的 ChatCut Desktop + Remotion。先读项目 README、DEPLOYMENT 和 docs/local-editing-workflow.md。支持市场 MX/es-MX、BR/pt-BR、ID/id-ID、PH（任务语言按客户需求确定），数量 1–100。
 
 ## 执行合同
 
@@ -13,7 +13,7 @@ description: Edit customer-supplied local product footage using Codex Desktop an
 
 默认直接完成已授权制作，不逐步要求中文稿、音色或样片批准；客户明确要求「走对话精修」才逐步确认。内部审校不是客户审批，不虚构批准人、批准文本或试听证据。不擅自创建后台任务或代理。
 
-所有成片无 BGM：无口播则所有素材静音，有口播则仅口播轨。剪辑只走 ChatCut MCP；禁用应用内 AI、submit_* 生成和界面自动化。配音使用本机已配置 TTS；纯剪辑不等于服务离线。
+所有成片无 BGM：无口播则所有素材静音，有口播则仅口播轨。镜头剪辑走 ChatCut MCP，字幕与视觉包装走本地 Remotion；禁用应用内 AI、submit_* 生成和界面自动化。配音使用本机已配置 TTS；纯剪辑不等于服务离线。
 
 ## 顺序
 
@@ -22,10 +22,13 @@ description: Edit customer-supplied local product footage using Codex Desktop an
 3. 制定逐条镜头计划、去重差异和时长，口播只写可证实的卖点；参考 references/tiktok-shop-video-compliance.md。自行内部校对中文稿与目标语言，只有对话精修才向客户逐步确认。
 4. 准备口播音频和对应 SRT；检查当地语言、音色、时长、停顿和同步。缩短超长稿，不以冻结画面补时。静音版无需伪造口播字幕。
 5. ChatCut MCP 先用 list_projects 只读确认连通；新建项目或复制已有项目，明确 target_project。用当前工具 schema 导入本地媒体、编辑时间线/字幕/转场/原生效果，保留项目 ID。不要覆盖客户同名项目。
-6. 预览确认商品动作连续、主体裁切、字幕可读与安全区，核对所有原素材音轨静音。导出实际 MP4，记录项目与路径；导出完成前不报告成片。
-7. 独立检查 H.264、1080x1920、yuv420p、目标帧率、计划时长、冻结帧和音轨。逐条人工视觉复核；口播版逐条试听并核对字幕，不把技术 QA 当视觉验收。
-8. 使用 scripts/deliver_chatcut.py 登记真实成片、素材归属、字幕、中文说明与复核证据，按真实成功条数更新进度。失败保留证据和待办，成功文件不覆盖。交付可点击的本机绝对路径。
+6. 按 docs/chatcut-remotion-workflow.md 先从 ChatCut 导出不烧字幕的底片与独立 SRT，再用 package_remotion.py 准备和渲染标题、卖点卡、字幕及 CTA。镜头顺序和配音时间保持底片一致。包装模板失败保留日志与待办。
+7. 预览确认商品动作连续、主体裁切、字幕可读与安全区，核对所有原素材音轨静音。导出实际 MP4，记录项目与路径；导出完成前不报告成片。
+8. 独立检查 H.264、1080x1920、yuv420p、目标帧率、计划时长、冻结帧和音轨。逐条人工视觉复核；口播版逐条试听并核对字幕，不把技术 QA 当视觉验收。
+9. 使用 scripts/deliver_video.py 登记真实成片、素材归属、字幕、中文说明与复核证据，按真实成功条数更新进度。失败保留证据和待办，成功文件不覆盖。交付可点击的本机绝对路径。
 
 ## 兼容与恢复
 
 scripts/workflow.py 用于任务创建、导入、分析/计划登记；run 为显式调试/交互流水线，可能要求真实审批，不是自动 ChatCut 渲染入口。旧 tk-ops-workspace FFmpeg 工具保留调试兼容，不冒充原生 ChatCut 项目。断点续作先核对素材哈希和已交付 ordinal，不重算或覆盖已验证成果。发布上传由客户手动完成。
+
+Remotion 精修针对排版、字幕、卡片和动效；镜头节奏问题回 ChatCut 修改后重新包装。不要把合成MP4描述为自动还原的多轨工程。渲染清单模板必须填入真实复核结果才可交付。

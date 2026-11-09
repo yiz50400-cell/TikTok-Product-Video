@@ -89,7 +89,7 @@ def test_tampered_reuse_and_overwrite(delivery):
 def test_stale_source_and_bad_subtitles(delivery, tmp_path):
     data, sessions, manifest = delivery
     srt = tmp_path / 'bad.srt'
-    srt.write_text('1\n00:00:00,000 --> 00:00:02,000\n测试\n', encoding='utf-8')
+    srt.write_text('1\n00:00:00,000 --> 00:00:02,000\n测试\n', encoding='utf-8', newline='\n')
     manifest['srt_path'] = str(srt)
     with pytest.raises(ValueError, match='超出'):
         register_delivery(data, sessions, 'job_test', 1, manifest)
@@ -106,7 +106,7 @@ def test_narration_requires_audio_listening_and_valid_srt(delivery, tmp_path):
                     '-f', 'lavfi', '-i', 'sine=frequency=440:duration=1', '-c:v', 'copy',
                     '-c:a', 'aac', '-shortest', '-y', str(audio_video)], check=True)
     srt = tmp_path / 'narrated.srt'
-    srt.write_text('1\n00:00:00,000 --> 00:00:00,900\n测试\n', encoding='utf-8')
+    srt.write_text('1\n00:00:00,000 --> 00:00:00,900\n测试\n', encoding='utf-8', newline='\n')
     manifest.update(audio_mode='narration', video_path=str(audio_video), srt_path=str(srt))
     with pytest.raises(ValueError, match='listening'):
         register_delivery(data, sessions, 'job_test', 1, manifest)
@@ -125,7 +125,7 @@ def test_narration_requires_audio_listening_and_valid_srt(delivery, tmp_path):
 def test_malformed_subtitle_times_and_empty_text(tmp_path, content):
     from workflow.desktop_delivery import validate_subtitles
     path = tmp_path / 'invalid.srt'
-    path.write_text(content, encoding='utf-8')
+    path.write_text(content, encoding='utf-8', newline='\n')
     with pytest.raises(ValueError):
         validate_subtitles(path, 1)
 
@@ -137,12 +137,12 @@ def test_standalone_cli_persists_job(delivery, tmp_path):
     import sys
     data, sessions, manifest = delivery
     path = tmp_path / 'manifest.json'
-    path.write_text(json.dumps(manifest, ensure_ascii=False), encoding='utf-8')
+    path.write_text(json.dumps(manifest, ensure_ascii=False), encoding='utf-8', newline='\n')
     script = Path(__file__).resolve().parents[1] / 'scripts' / 'deliver_chatcut.py'
     result = subprocess.run([sys.executable, str(script), '--job-id', 'job_test',
                              '--ordinal', '1', '--manifest', str(path)],
                             env={**os.environ, 'WORKFLOW_DATA_DIR': str(data)},
-                            text=True, capture_output=True)
+                            text=True, capture_output=True, encoding='utf-8')
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)['rendered_count'] == 1
     with sessions() as session:
@@ -156,7 +156,7 @@ def test_chinese_text_files_are_packaged_and_integrity_checked(delivery):
     explanation = Path(result['paths']['交付说明.txt'])
     assert explanation.read_text(encoding='utf-8').strip() == manifest['delivery_explanation_zh']
     assert Path(result['paths']['交付文案.txt']).read_text(encoding='utf-8').strip() == manifest['delivery_text_zh']
-    explanation.write_text('篡改', encoding='utf-8')
+    explanation.write_text('篡改', encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match='损坏'):
         register_delivery(data, sessions, 'job_test', 2, manifest)
 
@@ -220,7 +220,7 @@ def test_corrupt_stored_json_is_value_error(delivery):
     from pathlib import Path
     data, sessions, manifest = delivery
     result = register_delivery(data, sessions, 'job_test', 1, manifest)
-    (Path(result['paths']['video.mp4']).parent / 'manifest.json').write_text('{invalid', encoding='utf-8')
+    (Path(result['paths']['video.mp4']).parent / 'manifest.json').write_text('{invalid', encoding='utf-8', newline='\n')
     with pytest.raises(ValueError):
         register_delivery(data, sessions, 'job_test', 1, manifest)
 
@@ -260,3 +260,11 @@ def test_chinese_export_path_uses_explicit_safe_utf8_decode(delivery, tmp_path, 
     monkeypatch.setattr(desktop_delivery.subprocess, 'run', checked_run)
     assert register_delivery(data, sessions, 'job_test', 1, manifest)['media_qa']['pixel_format'] == 'yuv420p'
     assert calls
+
+
+def test_remotion_project_requires_bound_render_record():
+    from workflow.desktop_delivery import validate_manifest
+    manifest = {'project_id': 'remotion:fixture', 'delivery_explanation_zh': '测试说明',
+                'delivery_text_zh': '测试文案'}
+    with pytest.raises(ValueError, match='render_record_path'):
+        validate_manifest(manifest)

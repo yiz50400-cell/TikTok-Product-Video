@@ -139,29 +139,29 @@ def test_actual_full_chain_waits_at_approval_and_delivers_then_recovers(pipeline
     submitted=pipeline_client.post(route+'/pipeline/inputs',json={'items':[inputs]})
     assert submitted.status_code == 200,submitted.text
     state=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
-    manifest=json.loads(Path(state['analysis_manifest']).read_text())
+    manifest=json.loads(Path(state['analysis_manifest']).read_text(encoding='utf-8'))
     observations=tmp_path/'observations.json'
     observations.write_text(json.dumps({'source_sha256':manifest['source']['sha256'],'observer':'test_author',
         'observed_at':'2026-10-14T00:00:00Z','segments':[{'kind':'action','evidence_status':'observed',
             'start_seconds':0,'end_seconds':6,'description':'合成动态测试图，仅用于工具测试',
             'frame_ids':[f['id'] for f in manifest['frames']]}],
-        'known_facts':[],'popularity_hypotheses':[],'unknowns':[],'risks':[]}))
+        'known_facts':[],'popularity_hypotheses':[],'unknowns':[],'risks':[]}), encoding='utf-8', newline='\n')
     if source_count == 2:
         inputs['sources'][0]['observations_path']=str(observations)
-        second_manifest=json.loads(Path(state['source_analyses'][1]['analysis_manifest']).read_text())
+        second_manifest=json.loads(Path(state['source_analyses'][1]['analysis_manifest']).read_text(encoding='utf-8'))
         second_observations=tmp_path/'observations2.json'
-        data=json.loads(observations.read_text())
+        data=json.loads(observations.read_text(encoding='utf-8'))
         data['source_sha256']=second_manifest['source']['sha256']
         data['segments'][0]['frame_ids']=[f['id'] for f in second_manifest['frames']]
-        second_observations.write_text(json.dumps(data))
+        second_observations.write_text(json.dumps(data), encoding='utf-8', newline='\n')
         inputs['sources'][1]['observations_path']=str(second_observations)
     else:
         inputs['observations_path']=str(observations)
     pipeline_client.post(route+'/pipeline/inputs',json={'items':[inputs]})
     state=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
     assert state['status']=='WAITING_DRAFT',state
-    observed=json.loads(Path(state['analysis_path']).read_text())
-    observed_manifest=json.loads(Path(observed['manifest_path']).read_text())
+    observed=json.loads(Path(state['analysis_path']).read_text(encoding='utf-8'))
+    observed_manifest=json.loads(Path(observed['manifest_path']).read_text(encoding='utf-8'))
     spec=tmp_path/'spec.json'
     spec.write_text(json.dumps({'job_id':job['id'],'product_series':'测试商品','author':'test_author','market':'BR',
         'voiceover_locale':'pt-BR','angle':'测试演示','hook':'先看商品','buyer_concern':'想看实际动作',
@@ -175,9 +175,9 @@ def test_actual_full_chain_waits_at_approval_and_delivers_then_recovers(pipeline
                                  'shots':[{'index':1,'source_sha256':manifest['source']['sha256'],
                                            'source_start':0,'source_end':6,'internal_cuts':[],'action_complete':True}]},
                              'voice_options':{'rate':'+0%','volume':'+0%','pitch':'+0Hz'},
-                             'width':180,'height':320,'encoder':'libx264','packaging':[]}}))
+                             'width':180,'height':320,'encoder':'libx264','packaging':[]}}), encoding='utf-8', newline='\n')
     if source_count == 2:
-        data=json.loads(spec.read_text())
+        data=json.loads(spec.read_text(encoding='utf-8'))
         data['sources']=[{'edit_video_path':data.pop('edit_video_path')},
                          {'edit_video_path':second_manifest['source']['path']}]
         data['min_unique_sources']=2
@@ -190,17 +190,17 @@ def test_actual_full_chain_waits_at_approval_and_delivers_then_recovers(pipeline
         continuity[0]['source_end']=3
         continuity.append({'index':2,'source_sha256':second_manifest['source']['sha256'],
                            'source_start':3,'source_end':6,'internal_cuts':[],'action_complete':True})
-        spec.write_text(json.dumps(data))
+        spec.write_text(json.dumps(data), encoding='utf-8', newline='\n')
     inputs['spec_path']=str(spec)
     audit=tmp_path/'audit.json';audit.write_text(json.dumps({'reviewer':'test_reviewer','verdict':'pass',
         'checks':{'spoken_naturalness':True,'evidence_accuracy':True,'runtime_fit':True,
-                  'cta_truthfulness':True,'commercial_attractiveness':True},'notes':['合成工具测试审核，不代表真实内容审核']}))
+                  'cta_truthfulness':True,'commercial_attractiveness':True},'notes':['合成工具测试审核，不代表真实内容审核']}), encoding='utf-8', newline='\n')
     inputs['audit_path']=str(audit)
     pipeline_client.post(route+'/pipeline/inputs',json={'items':[inputs]})
     state=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
     assert state['status']=='WAITING_ZH_APPROVAL',state
     directory=Path(state['production_directory']);creative_sha=digest(directory/'creative.json')
-    configuration=json.loads((directory/'creative.json').read_text())['production']
+    configuration=json.loads((directory/'creative.json').read_text(encoding='utf-8'))['production']
     assert len(configuration['sources'])==source_count
     assert [w['source_index'] for w in configuration['windows']]==list(range(source_count))
     calls=[]
@@ -214,9 +214,9 @@ def test_actual_full_chain_waits_at_approval_and_delivers_then_recovers(pipeline
         elif script=='produce_video.py':
             render_attempts.append('render')
             if len(render_attempts)==1:raise RuntimeError('test temporary render failure')
-            render_plan(json.loads((directory/'execution.json').read_text()))
+            render_plan(json.loads((directory/'execution.json').read_text(encoding='utf-8')))
         else:verify(directory)
-        log.write_text('test process executed real media stage')
+        log.write_text('test process executed real media stage', encoding='utf-8', newline='\n')
     monkeypatch.setattr(run_local_batch,'_run',local_stage)
     monkeypatch.setattr(Pipeline,'_run_production',lambda self,d:run_local_batch.run_batch(d))
     pipeline_client.post(route+'/pipeline/run',json={})
@@ -251,8 +251,8 @@ def test_actual_full_chain_waits_at_approval_and_delivers_then_recovers(pipeline
     assert Path(state['video_path']).stat().st_mtime_ns==before and calls==['audio']
     assert render_attempts==['render','render']
     # Simulate interruption after the atomic video rename but before stage success is saved.
-    stage_file=directory/'stage-state.json';stages=json.loads(stage_file.read_text())
-    stages['render']['status']='RUNNING';stage_file.write_text(json.dumps(stages))
+    stage_file=directory/'stage-state.json';stages=json.loads(stage_file.read_text(encoding='utf-8'))
+    stages['render']['status']='RUNNING';stage_file.write_text(json.dumps(stages), encoding='utf-8', newline='\n')
     recovered=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
     assert recovered['status']=='LOCAL_DELIVERED',recovered
     assert render_attempts==['render','render','render'] and calls==['audio']
@@ -293,7 +293,7 @@ def test_optional_repair_waits_for_exact_review_then_analyzes_without_repairing_
     subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-v','error','-f','lavfi','-i',
                     'testsrc2=size=180x320:rate=30','-t','3','-c:v','libx264','-preset','ultrafast',str(source)],check=True)
     asset=pipeline_client.post(route+'/assets',files={'file':('source.mp4',source.read_bytes(),'video/mp4')}).json()['asset']
-    mask=tmp_path/'mask.json';mask.write_text('{}');model=tmp_path/'model.pt';model.write_bytes(b'test mock model')
+    mask=tmp_path/'mask.json';mask.write_text('{}', encoding='utf-8', newline='\n');model=tmp_path/'model.pt';model.write_bytes(b'test mock model')
     calls=[]
     def fake_execute(workspace,raw,settings,directory):
         calls.append('repair');task=directory/'task.json'
@@ -309,7 +309,7 @@ def test_optional_repair_waits_for_exact_review_then_analyzes_without_repairing_
     pipeline_client.post(route+'/pipeline/inputs',json={'items':[item]})
     row=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
     assert row['status']=='WAITING_REPAIR_REVIEW' and calls==['repair']
-    task=json.loads(Path(row['repair_task_path']).read_text());review=tmp_path/'review.json'
+    task=json.loads(Path(row['repair_task_path']).read_text(encoding='utf-8'));review=tmp_path/'review.json'
     write_json(review,{'status':'passed_internal_visual_review','reviewer':'test_only',
         'task_sha256':digest(row['repair_task_path']),'repaired_sha256':task['outputs']['repaired.mp4']['sha256'],
         'full_playback':True,'product_action_preserved':True,'outside_mask_review':True})
@@ -323,6 +323,6 @@ def test_optional_repair_waits_for_exact_review_then_analyzes_without_repairing_
         assert clean.metadata_json['original_sha256']==asset['sha256']
         assert clean.metadata_json['original_offset']==1
     engine.dispose()
-    review_data=json.loads(review.read_text());review_data['repaired_sha256']='stale';write_json(review,review_data)
+    review_data=json.loads(review.read_text(encoding='utf-8'));review_data['repaired_sha256']='stale';write_json(review,review_data)
     stale=pipeline_client.post(route+'/pipeline/run',json={}).json()['pipeline']['items'][0]
     assert stale['status']=='FAILED' and '复核' in stale['error_zh'] and calls==['repair']

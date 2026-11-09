@@ -47,9 +47,9 @@ def main(argv=None):
                       "rendered_count": result["batch"]["rendered_count"],
                       "representative_count": result["batch"]["representative_count"]}
     except (ValueError, OSError, KeyError, json.JSONDecodeError) as exc:
-        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=True), file=sys.stderr)
         return 1
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=True, indent=2))
     return 0
 
 

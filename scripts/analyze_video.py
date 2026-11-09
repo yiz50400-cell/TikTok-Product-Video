@@ -42,10 +42,10 @@ def main(argv=None) -> int:
                        "media_analysis_status": result["media_analysis_status"]}
         else:
             summary = save_observations(args.manifest, args.observations)
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        print(json.dumps(summary, ensure_ascii=True, indent=2))
         return 0
     except (ValueError, OSError, json.JSONDecodeError) as exc:
-        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=True), file=sys.stderr)
         return 1
 
 

@@ -16,7 +16,7 @@ def digest(path):
 
 
 def write(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+    path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8", newline='\n')
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def publication(tmp_path):
     write(audit, {"status":"passed_independent_internal_text_review", "market":"BR", "locale":"pt-BR",
                   "creative_sha256":digest(creative), "localization_sha256":digest(loc),
                   "zh_approval_sha256":digest(approval), "material_changes_to_approved_meaning":[]})
-    srt = source / "video.srt"; srt.write_text("1\n00:00:00,000 --> 00:00:01,000\nVou testar.\n", encoding="utf-8")
+    srt = source / "video.srt"; srt.write_text("1\n00:00:00,000 --> 00:00:01,000\nVou testar.\n", encoding="utf-8", newline='\n')
     execution = source / "execution.json"
     write(execution, {"job_id":"test-job", "output":str(video), "srt":str(srt), "duration":1,
                       "localization_sha256":digest(loc), "subtitle_cues":[[0,1,"Vou testar."]],
@@ -63,7 +63,7 @@ def test_real_package_preserves_video_and_keeps_platform_states_unexecuted(publi
     from workflow.publishing import prepare_publish
     request, output, source = publication
     result = prepare_publish(request, output, workspace=ROOT)
-    manifest = json.loads((output / "manifest.json").read_text())
+    manifest = json.loads((output / "manifest.json").read_text(encoding='utf-8'))
     assert digest(output / "video.mp4") == digest(source / "video.mp4")
     assert (output / "cover.jpg").stat().st_size > 100
     assert manifest["state"] == "LOCAL_PREPARED"
@@ -73,10 +73,10 @@ def test_real_package_preserves_video_and_keeps_platform_states_unexecuted(publi
     assert manifest["eligibility"]["ready_for_upload"] is False
     assert result["reused"] is False
     assert all(Path(p).is_absolute() for p in result["artifacts"].values())
-    copy = json.loads((output / "internal" / "publish-copy.json").read_text())
+    copy = json.loads((output / "internal" / "publish-copy.json").read_text(encoding='utf-8'))
     assert copy["title"] == "Blush líquido Color Bloom | Qual lado você prefere?"
     assert copy["hashtags"] == ["#ColorBloom", "#BlushLiquido"]
-    preview = (output / "中文发布预览.md").read_text()
+    preview = (output / "中文发布预览.md").read_text(encoding='utf-8')
     assert "Color Bloom 液体腮红｜你选哪一边？" in preview
     assert "Qual lado" not in preview
     assert "Blush líquido" not in preview
@@ -96,23 +96,23 @@ def test_real_package_preserves_video_and_keeps_platform_states_unexecuted(publi
 def test_invalid_inputs_fail_before_creating_package(publication, change, expected):
     from workflow.publishing import prepare_publish
     request, output, source = publication
-    data = json.loads(request.read_text())
+    data = json.loads(request.read_text(encoding='utf-8'))
     if change == "approval":
         write(source / "zh-approval.json", {"status":"approved", "version_sha256":"stale"})
     elif change == "localization":
-        (source / "localization.json").write_text("{}")
+        (source / "localization.json").write_text("{}", encoding='utf-8', newline='\n')
     elif change == "audit":
-        audit=json.loads((source / "audit.json").read_text()); audit["material_changes_to_approved_meaning"]=["new promise"]
+        audit=json.loads((source / "audit.json").read_text(encoding='utf-8')); audit["material_changes_to_approved_meaning"]=["new promise"]
         write(source / "audit.json",audit)
     elif change == "video":
         (source / "video.mp4").write_bytes(b"changed")
     elif change == "execution":
-        execution=json.loads((source / "execution.json").read_text()); execution["duration"]=2
+        execution=json.loads((source / "execution.json").read_text(encoding='utf-8')); execution["duration"]=2
         write(source / "execution.json", execution)
     elif change == "market": data["market"]="MX"; data["locale"]="es-MX"
     elif change == "copy": data["title"]="去皱一整天"
     elif change == "cover": data["cover_seconds"]=1.5
-    elif change == "subtitle": (source / "video.srt").write_text("wrong words")
+    elif change == "subtitle": (source / "video.srt").write_text("wrong words", encoding='utf-8', newline='\n')
     write(request,data)
     with pytest.raises(ValueError, match=expected): prepare_publish(request,output,workspace=ROOT)
     assert not output.exists()
@@ -125,10 +125,10 @@ def test_retry_reuses_and_changed_inputs_or_corrupt_outputs_require_new_director
     before=(output/"video.mp4").stat().st_mtime_ns
     assert prepare_publish(request,output,workspace=ROOT)["reused"]
     assert (output/"video.mp4").stat().st_mtime_ns == before
-    data=json.loads(request.read_text()); data["cover_seconds"]=0.6; write(request,data)
+    data=json.loads(request.read_text(encoding='utf-8')); data["cover_seconds"]=0.6; write(request,data)
     with pytest.raises(ValueError,match="新编号"):prepare_publish(request,output,workspace=ROOT)
     data["cover_seconds"]=0.5;write(request,data)
-    (output/"internal"/"caption.txt").write_text("changed")
+    (output/"internal"/"caption.txt").write_text("changed", encoding='utf-8', newline='\n')
     with pytest.raises(ValueError,match="损坏"):prepare_publish(request,output,workspace=ROOT)
 
 
@@ -136,7 +136,7 @@ def test_retry_reuses_and_changed_inputs_or_corrupt_outputs_require_new_director
 def test_external_method_is_rejected_without_platform_result(publication, method):
     from workflow.publishing import prepare_publish
     request,output,_=publication
-    data=json.loads(request.read_text());data["delivery_method"]=method;write(request,data)
+    data=json.loads(request.read_text(encoding='utf-8'));data["delivery_method"]=method;write(request,data)
     with pytest.raises(ValueError,match="仅支持本地"):prepare_publish(request,output,workspace=ROOT)
     assert not output.exists()
 
@@ -152,7 +152,7 @@ def test_output_cannot_cover_source_directory(publication):
 def test_cli_runs_from_other_directory_and_only_returns_chinese_preview(publication,tmp_path):
     request,output,_=publication
     completed=subprocess.run([sys.executable,str(ROOT/"scripts/prepare_publish.py"),str(request),"--output",str(output)],
-                             cwd=tmp_path,capture_output=True,text=True)
+                             cwd=tmp_path,capture_output=True,text=True, encoding='utf-8')
     assert completed.returncode==0, completed.stderr
     result=json.loads(completed.stdout)
     assert result["state"]=="LOCAL_PREPARED"
@@ -163,9 +163,9 @@ def test_cli_runs_from_other_directory_and_only_returns_chinese_preview(publicat
 def test_lock_prevents_second_writer_without_removing_first_writers_lock(publication):
     from workflow.publishing import prepare_publish
     request,output,_=publication
-    lock=output.with_name(output.name+".prepare.lock");lock.write_text("existing process")
+    lock=output.with_name(output.name+".prepare.lock");lock.write_text("existing process", encoding='utf-8', newline='\n')
     with pytest.raises(ValueError,match="已有锁"):prepare_publish(request,output,workspace=ROOT)
-    assert lock.read_text()=="existing process"
+    assert lock.read_text(encoding='utf-8')=="existing process"
     assert not output.exists()
 
 
@@ -180,7 +180,7 @@ def test_cover_failure_leaves_retryable_record_and_no_partial_package(publicatio
     assert not output.exists()
     assert not list(output.parent.glob(output.name+".partial-*"))
     assert not output.with_name(output.name+".prepare.lock").exists()
-    failure=json.loads(output.with_name(output.name+".prepare-failure.json").read_text())
+    failure=json.loads(output.with_name(output.name+".prepare-failure.json").read_text(encoding='utf-8'))
     assert failure["state"]=="LOCAL_PREPARE_FAILED"
     assert failure["platform_action"] is False
     assert digest(source/"video.mp4")==original
@@ -194,7 +194,7 @@ def test_changed_request_during_preparation_cannot_bind_old_preview_to_new_reque
     real_validate=module.validate_request
     def change_after_validation(*args):
         result=real_validate(*args)
-        data=json.loads(request.read_text());data["cover_seconds"]=0.75;write(request,data)
+        data=json.loads(request.read_text(encoding='utf-8'));data["cover_seconds"]=0.75;write(request,data)
         return result
     monkeypatch.setattr(module,"validate_request",change_after_validation)
     with pytest.raises(ValueError,match="请求输入变化"):module.prepare_publish(request,output,workspace=ROOT)
@@ -205,6 +205,6 @@ def test_manifest_tampering_is_detected_on_resume(publication):
     from workflow.publishing import prepare_publish
     request,output,_=publication
     prepare_publish(request,output,workspace=ROOT)
-    manifest=json.loads((output/"manifest.json").read_text());manifest["platform"]["draft"]="saved"
+    manifest=json.loads((output/"manifest.json").read_text(encoding='utf-8'));manifest["platform"]["draft"]="saved"
     write(output/"manifest.json",manifest)
     with pytest.raises(ValueError,match="损坏"):prepare_publish(request,output,workspace=ROOT)

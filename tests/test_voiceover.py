@@ -123,7 +123,7 @@ def _ns(tmp_path, video, script, **kw):
 
 def test_approval_gate_blocks_before_any_output(tmp_path):
     script = tmp_path / "s.txt"
-    script.write_text("Hola\n", encoding="utf-8")
+    script.write_text("Hola\n", encoding="utf-8", newline='\n')
     video = tmp_path / "v.mp4"
     video.write_bytes(b"x")
     with pytest.raises(VoiceoverError, match="approval"):
@@ -133,7 +133,7 @@ def test_approval_gate_blocks_before_any_output(tmp_path):
 
 def test_compliance_gate_blocks(tmp_path):
     script = tmp_path / "s.txt"
-    script.write_text("El mejor producto, 100% natural y garantizado\n", encoding="utf-8")
+    script.write_text("El mejor producto, 100% natural y garantizado\n", encoding="utf-8", newline='\n')
     video = tmp_path / "v.mp4"
     video.write_bytes(b"x")
     with pytest.raises(VoiceoverError, match="compliance"):
@@ -148,13 +148,13 @@ def test_end_to_end_silent_backend(tmp_path):
                     str(video)], check=True)
     script = tmp_path / "s.txt"
     script.write_text("Mira esta pasta dental\nTu sonrisa más fresca\nPídela en el carrito\n",
-                      encoding="utf-8")
+                      encoding="utf-8", newline='\n')
     ns = _ns(tmp_path, video, script, approved_by="IZ", burn_subtitles=True)
     notes = build_voiceover(ns)
     out = Path(notes["outputs"]["burned"])
     probe = json.loads(subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,codec_name,pix_fmt",
-         "-of", "json", str(out)], capture_output=True, text=True, check=True).stdout)
+         "-of", "json", str(out)], capture_output=True, text=True, check=True, encoding='utf-8').stdout)
     kinds = {s["codec_type"]: s for s in probe["streams"]}
     assert kinds["audio"]["codec_name"] == "aac" and kinds["video"]["pix_fmt"] == "yuv420p"
     assert Path(notes["outputs"]["srt"]).read_text(encoding="utf-8").startswith("1\n00:00:00,300")

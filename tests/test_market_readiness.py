@@ -6,7 +6,7 @@ import pytest
 from workflow.production import voices,chatcut
 
 def save(path,obj):
- path.write_text(json.dumps(obj));return hashlib.sha256(path.read_bytes()).hexdigest()
+ path.write_text(json.dumps(obj), encoding='utf-8', newline='\n');return hashlib.sha256(path.read_bytes()).hexdigest()
 
 def pool(tmp_path):
  policy=tmp_path/'policy.json'
@@ -28,13 +28,13 @@ def test_delegated_review_accepts_customer_scoped_evidence_and_locks_retry(tmp_p
 @pytest.mark.parametrize('fault',['wrong-customer','tampered-delegation','metrics-only','tampered-audio','wrong-language'])
 def test_delegated_review_blocks_unproven_or_cross_scope_selection(tmp_path,fault):
  p,policy,review=pool(tmp_path)
- if fault=='tampered-delegation':policy.write_text('{}')
+ if fault=='tampered-delegation':policy.write_text('{}', encoding='utf-8', newline='\n')
  if fault=='tampered-audio':(tmp_path/'sample.wav').write_bytes(b'changed')
  if fault in ['metrics-only','wrong-language']:
-  r=json.loads(review.read_text())
+  r=json.loads(review.read_text(encoding='utf-8'))
   if fault=='metrics-only':r['evidence_kind']='signal_metrics_only'
   else:r['locale']='pt-BR'
-  rh=save(review,r);q=json.loads(p.read_text());q['reviewed_auditions'][0]['review']['sha256']=rh;save(p,q)
+  rh=save(review,r);q=json.loads(p.read_text(encoding='utf-8'));q['reviewed_auditions'][0]['review']['sha256']=rh;save(p,q)
  with pytest.raises(ValueError):choose(p,tmp_path/'selection.json',customer_id='customer-b' if fault=='wrong-customer' else 'customer-a')
  assert not (tmp_path/'selection.json').exists()
 
@@ -71,9 +71,9 @@ def test_cli_native_recipe_is_emitted_with_current_asset_bindings(tmp_path):
  cmd=[sys.executable,str(root/'scripts/prepare_chatcut.py')]
  for n in ['plan','assets','tracks']:cmd+=['--'+n,str(tmp_path/(n+'.json'))]
  cmd+=['--output',str(tmp_path/'pack'),'--caption-style',str(tmp_path/'style.json'),'--export-dir',str(tmp_path/'delivery')]
- r=subprocess.run(cmd,capture_output=True,text=True)
+ r=subprocess.run(cmd,capture_output=True,text=True, encoding='utf-8')
  assert r.returncode==0,r.stderr
- result=json.loads((tmp_path/'pack/native-session.json').read_text())
+ result=json.loads((tmp_path/'pack/native-session.json').read_text(encoding='utf-8'))
  assert result['edit_preview']['adds'][1]['assetId']=='speech-id'
  assert result['export_video']['outputPath']==str(tmp_path/'delivery/video.mp4')
 
@@ -95,7 +95,7 @@ def test_market_probe_cli_dry_run_does_not_generate_audio(tmp_path):
  root=Path(__file__).resolve().parents[1]
  save(tmp_path/'catalog.json',{'candidates':{'ID':[{'ShortName':'id-ID-GadisNeural','Locale':'id-ID'}]}})
  save(tmp_path/'text.json',{'id-ID':'Ini tes suara.'})
- r=subprocess.run([sys.executable,str(root/'scripts/prepare_market_preflight.py'),'--catalog',str(tmp_path/'catalog.json'),'--texts',str(tmp_path/'text.json'),'--output',str(tmp_path/'probes')],capture_output=True,text=True)
+ r=subprocess.run([sys.executable,str(root/'scripts/prepare_market_preflight.py'),'--catalog',str(tmp_path/'catalog.json'),'--texts',str(tmp_path/'text.json'),'--output',str(tmp_path/'probes')],capture_output=True,text=True, encoding='utf-8')
  assert r.returncode==0,r.stderr
  assert json.loads(r.stdout)['network_requests']==0
  assert not list((tmp_path/'probes').rglob('*.mp3'))

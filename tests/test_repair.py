@@ -28,7 +28,7 @@ def fixture(tmp_path, spec=None):
     regions.write_text(json.dumps(spec or {
         "dimensions": [64, 64],
         "regions": [{"name": "mark", "mode": "box", "box": [8, 8, 12, 12]}],
-    }))
+    }), encoding='utf-8', newline='\n')
     return source, model, regions
 
 
@@ -59,10 +59,10 @@ def test_invalid_specs_and_time_range(tmp_path):
         {"dimensions": [64, 64], "regions": [{"name": "bad", "mode": "keyframes", "keyframes": []}]},
         {"dimensions": [64, 64], "regions": []},
     ):
-        regions.write_text(json.dumps(spec))
+        regions.write_text(json.dumps(spec), encoding='utf-8', newline='\n')
         with pytest.raises(ValueError):
             load_spec(regions, (64, 64), .6)
-    regions.write_text(json.dumps({"dimensions": [64, 64], "regions": [{"name": "ok", "mode": "box", "box": [8, 8, 12, 12]}]}))
+    regions.write_text(json.dumps({"dimensions": [64, 64], "regions": [{"name": "ok", "mode": "box", "box": [8, 8, 12, 12]}]}), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError):
         execute(tmp_path, source, model, regions, duration=1.0)
     with pytest.raises(ValueError, match="MD5"):
@@ -114,7 +114,7 @@ def test_failed_attempt_is_recorded_and_can_retry(tmp_path):
                    expected_model_md5=hashlib.md5(model.read_bytes()).hexdigest())
     records = list((tmp_path / "outputs").glob("*/task.json"))
     assert len(records) == 1
-    failed = json.loads(records[0].read_text())
+    failed = json.loads(records[0].read_text(encoding='utf-8'))
     assert failed["status"] == "FAILED"
     assert failed["error"]["message"] == "inference failed"
     assert not (records[0].parent / "repaired.mp4").exists()
@@ -138,7 +138,7 @@ def test_interruption_does_not_look_complete(tmp_path):
         run_repair(source, regions, model, tmp_path / "outputs", 0, .4,
                    engine_factory=InterruptingEngine,
                    expected_model_md5=hashlib.md5(model.read_bytes()).hexdigest())
-    record = json.loads(next((tmp_path / "outputs").glob("*/task.json")).read_text())
+    record = json.loads(next((tmp_path / "outputs").glob("*/task.json")).read_text(encoding='utf-8'))
     assert record["status"] == "INTERRUPTED"
 
 
@@ -188,7 +188,7 @@ def test_empty_detected_mask_is_failure(tmp_path):
     regions.write_text(json.dumps({
         "dimensions": [64, 64],
         "regions": [{"name": "blank", "mode": "mask_image", "file": "blank.png"}],
-    }))
+    }), encoding='utf-8', newline='\n')
     cv2.imwrite(str(tmp_path / "blank.png"), np.full((64, 64), 1, np.uint8))
     with pytest.raises(RuntimeError, match="no masked pixels"):
         execute(tmp_path, source, model, regions)
@@ -224,8 +224,8 @@ def test_abandoned_running_status_is_marked_interrupted(tmp_path):
     folder.mkdir(parents=True)
     record = {"task_id": "example", "status": "RUNNING", "attempt": 1,
               "updated_at": "old"}
-    (folder / "task.json").write_text(json.dumps(record))
+    (folder / "task.json").write_text(json.dumps(record), encoding='utf-8', newline='\n')
     result = task_status(tmp_path / "outputs", "example")
     assert result[0]["status"] == "INTERRUPTED"
     assert result[0]["error"]["type"] == "AbandonedRun"
-    assert json.loads((folder / "task.json").read_text())["status"] == "INTERRUPTED"
+    assert json.loads((folder / "task.json").read_text(encoding='utf-8'))["status"] == "INTERRUPTED"

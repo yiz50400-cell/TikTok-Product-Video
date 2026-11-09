@@ -174,10 +174,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         print(json.dumps(run_batch(args.directory, stages=set(args.stage) if args.stage else None),
-                         ensure_ascii=False, indent=2))
+                         ensure_ascii=True, indent=2))
         return 0
     except (ValueError, OSError, RuntimeError, json.JSONDecodeError) as error:
-        print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=True), file=sys.stderr)
         return 1
 
 

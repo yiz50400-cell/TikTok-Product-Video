@@ -85,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
             "restart_attempted": bool(args.apply),
             "restarted": False,
         }
-        print(json.dumps(payload, ensure_ascii=False))
+        print(json.dumps(payload, ensure_ascii=True))
         return 2
 
     payload = health.to_dict()
@@ -100,7 +100,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.write_report:
         payload["report_path"] = _write_report(payload)
-    print(json.dumps(payload, ensure_ascii=False))
+    print(json.dumps(payload, ensure_ascii=True))
     final_health = result.health if result.attempted else health
     return 0 if final_health.healthy else 2
 

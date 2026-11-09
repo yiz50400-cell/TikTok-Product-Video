@@ -25,7 +25,7 @@ def main():
  rows=plan_voice_probes(catalog.get('candidates',catalog),texts)
  out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  if not a.generate:
-  print(json.dumps({'plan':rows,'network_requests':0},ensure_ascii=False));return
+  print(json.dumps({'plan':rows,'network_requests':0},ensure_ascii=True));return
  from scripts.prepare_packaged_video import audio_stage
  from workflow.production.qa import measure_audio
  began=time.time();qa_version=digest(ROOT/'workflow/production/qa.py')
@@ -51,6 +51,6 @@ def main():
  result={'scope':'technical_preflight_not_full_video_acceptance','started_epoch':began,'rows':asyncio.run(run())}
  result.update(completed_epoch=time.time(),wall_seconds=time.time()-began)
  logs=out/'runs';logs.mkdir(exist_ok=True);path=logs/(str(time.time_ns())+'.json');atomic_json(path,result)
- print(json.dumps({'report':str(path),'wall_seconds':result['wall_seconds'],'passed':sum(r['technical_pass'] for r in result['rows']),'total':len(rows),'audio_cache_hits':sum(r.get('reused',False) for r in result['rows']),'rows':[{k:r.get(k) for k in ['market','locale','voice','path','technical_pass','elapsed_seconds','error_type']} for r in result['rows']]},ensure_ascii=False))
+ print(json.dumps({'report':str(path),'wall_seconds':result['wall_seconds'],'passed':sum(r['technical_pass'] for r in result['rows']),'total':len(rows),'audio_cache_hits':sum(r.get('reused',False) for r in result['rows']),'rows':[{k:r.get(k) for k in ['market','locale','voice','path','technical_pass','elapsed_seconds','error_type']} for r in result['rows']]},ensure_ascii=True))
  if not all(r['technical_pass'] for r in result['rows']):sys.exit(1)
 if __name__=='__main__':main()

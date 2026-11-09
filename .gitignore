@@ -36,3 +36,12 @@ auth.json
 **/auth.json
 dist/
 *.egg-info/
+
+# Remotion build/runtime artifacts
+node_modules/
+remotion/out/
+remotion/build/
+remotion/.cache/
+remotion/public/
+
+.remotion/

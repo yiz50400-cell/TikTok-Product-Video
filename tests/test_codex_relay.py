@@ -16,7 +16,7 @@ requires_openai_auth = false
 experimental_bearer_token = "private-test-key"
 [model_providers.unselected]
 experimental_bearer_token = "wrong-provider-key"
-''',encoding='utf-8')
+''',encoding='utf-8', newline='\n')
     return path
 
 
@@ -32,8 +32,8 @@ def test_import_preserves_selected_provider_and_hides_credential(config):
 
 def test_environment_key_is_used_without_importing_other_providers(config,monkeypatch):
     from workflow.codex.relay import load_relay
-    config.write_text(config.read_text().replace('experimental_bearer_token = "private-test-key"',
-                                               'env_key = "EMPLOYEE_RELAY_KEY"'))
+    config.write_text(config.read_text(encoding='utf-8').replace('experimental_bearer_token = "private-test-key"',
+                                               'env_key = "EMPLOYEE_RELAY_KEY"'), encoding='utf-8', newline='\n')
     monkeypatch.setenv('EMPLOYEE_RELAY_KEY','employee-key')
     assert load_relay(config).key=='employee-key'
     monkeypatch.delenv('EMPLOYEE_RELAY_KEY')
@@ -58,7 +58,7 @@ assert '--ephemeral' in sys.argv
 assert sys.stdin.read()
 print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'RELAY_CONNECTION_OK'}}))
 print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tokens':3}}))
-''',encoding='utf-8')
+''',encoding='utf-8', newline='\n')
     before=config.read_bytes()
     result=check_relay([sys.executable,str(fake)],config,timeout=10)
     assert result['status']=='passed'
@@ -70,7 +70,7 @@ print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tok
 def test_failed_probe_does_not_persist_raw_credentials(config,tmp_path):
     from workflow.codex.relay import check_relay
     fake=tmp_path/'fake.py'
-    fake.write_text("import os,sys; print(os.environ['WORKFLOW_RELAY_KEY']); print('Bearer '+os.environ['WORKFLOW_RELAY_KEY'],file=sys.stderr); sys.exit(1)")
+    fake.write_text("import os,sys; print(os.environ['WORKFLOW_RELAY_KEY']); print('Bearer '+os.environ['WORKFLOW_RELAY_KEY'],file=sys.stderr); sys.exit(1)", encoding='utf-8', newline='\n')
     result=check_relay([sys.executable,str(fake)],config,timeout=10)
     assert result['status']=='failed'
     assert 'private-test-key' not in json.dumps(result)
@@ -80,7 +80,7 @@ def test_failed_probe_does_not_persist_raw_credentials(config,tmp_path):
 def test_text_claim_does_not_count_as_a_local_tool_execution(config,tmp_path):
     from workflow.codex.relay import check_relay
     fake=tmp_path/'fake.py'
-    fake.write_text("import json; print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'CODEX_LOCAL_TOOL_OK'}})); print(json.dumps({'type':'turn.completed'}))")
+    fake.write_text("import json; print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'CODEX_LOCAL_TOOL_OK'}})); print(json.dumps({'type':'turn.completed'}))", encoding='utf-8', newline='\n')
     assert check_relay([sys.executable,str(fake)],config,timeout=10,mode='tool')['status']=='failed'
 
 
@@ -91,6 +91,6 @@ def test_text_claim_does_not_count_as_a_local_tool_execution(config,tmp_path):
 ])
 def test_unsupported_auth_or_transport_fails_without_exposing_values(config,replacement):
     from workflow.codex.relay import load_relay
-    config.write_text(config.read_text().replace(*replacement))
+    config.write_text(config.read_text(encoding='utf-8').replace(*replacement), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError) as error:load_relay(config)
     assert 'private-test-key' not in str(error.value)

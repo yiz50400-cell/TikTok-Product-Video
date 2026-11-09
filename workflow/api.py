@@ -125,7 +125,7 @@ def create_app(data_dir=None):
         existing = session.get(JobAsset, (job.id, asset.id))
         if not existing:
             if job.payload.get('desktop_delivery') and job.status != 'PARTIALLY_DELIVERED':
-                raise HTTPException(409, '已有ChatCut本地交付，请新建任务导入素材，保留交付证据')
+                raise HTTPException(409, '已有本地成片交付，请新建任务导入素材，保留交付证据')
             session.add(JobAsset(job_id=job.id, asset_id=asset.id))
             session.add(Activity(job_id=job.id, kind='asset_imported',
                                  message=f'已导入 {asset.filename} · 元数据与预览已读取'))
@@ -136,12 +136,12 @@ def create_app(data_dir=None):
     @app.get('/api/capabilities')
     def capabilities():
         return {'version': VERSION, 'mode': 'local_material_editing',
-                'source_policy': 'local_files_only', 'default_editor': 'ChatCut Desktop',
+                'source_policy': 'local_files_only', 'default_editor': 'ChatCut Desktop', 'packaging_engine': 'Remotion',
                 'implemented': ['job_create', 'job_query', 'local_video_import',
                                 'sha256_dedup', 'metadata', 'source_preview', 'mcp',
                                 'analysis_attach', 'analysis_query', 'market_profiles',
                                 'batch_intake', 'batch_concept_registry', 'pipeline_inputs',
-                                'pipeline_run', 'pipeline_evidence', 'local_delivery'],
+                                'pipeline_run', 'pipeline_evidence', 'local_delivery', 'remotion_packaging'],
                 'pending': ['asr', 'ocr', 'real_batch_quality_acceptance'],
                 'out_of_scope': ['video_discovery', 'video_download', 'account_access', 'platform_upload', 'platform_draft',
                                  'product_attachment', 'publishing', 'team_auth'],
@@ -152,9 +152,13 @@ def create_app(data_dir=None):
                              'quality_acceptance': 'per_video_review_required',
                              'semantic_steps': 'codex_observation_creation_and_independent_review'},
                 'standalone_modules': {
-                    'desktop_delivery': {'entry': str(ROOT / 'scripts/deliver_chatcut.py'),
+                    'remotion_packaging': {'entry': str(ROOT / 'scripts/package_remotion.py'),
+                                          'input': 'clean_local_chatcut_mp4_and_srt',
+                                          'integrated': True, 'commands': ['prepare', 'render', 'batch'],
+                                          'review_required': True, 'platform_action': False},
+                    'desktop_delivery': {'entry': str(ROOT / 'scripts/deliver_video.py'),
                                          'integrated': True, 'source_binding': 'job_owned_asset_ids_and_sha256',
-                                         'editor': 'ChatCut Desktop', 'platform_action': False},
+                                         'editor': 'ChatCut Desktop + Remotion', 'platform_action': False},
                     'repair': {'entry': str(ROOT / 'scripts/repair_video.py'),
                                'engine': 'local_lama', 'isolated_dependencies': True,
                                'automatic_watermark_detection': False, 'integrated': True,
@@ -306,7 +310,7 @@ def create_app(data_dir=None):
             if job.payload.get('reference_package') == payload.package:
                 return job_dict(session, job)
             if job.payload.get('desktop_delivery'):
-                raise HTTPException(409, '已有ChatCut本地交付，请新建任务修改参考包，保留交付证据')
+                raise HTTPException(409, '已有本地成片交付，请新建任务修改参考包，保留交付证据')
             saved = dict(job.payload)
             saved['reference_package'] = payload.package
             job.payload = saved
@@ -367,7 +371,7 @@ def create_app(data_dir=None):
         with sessions() as session:
             job = require_job(session, job_id)
             if job.payload.get('desktop_delivery') and job.status != 'PARTIALLY_DELIVERED':
-                raise HTTPException(409, '已有ChatCut本地交付，请新建任务接入新的分析，保留交付证据')
+                raise HTTPException(409, '已有本地成片交付，请新建任务接入新的分析，保留交付证据')
         snapshot = payload.model_dump()
         try:
             validate_snapshot(snapshot)
@@ -387,7 +391,7 @@ def create_app(data_dir=None):
             if existing:
                 return {'analysis': analysis_dict(existing), 'duplicate': True}
             if job.payload.get('desktop_delivery') and job.status != 'PARTIALLY_DELIVERED':
-                raise HTTPException(409, '已有ChatCut完整交付，请新建任务接入新的分析')
+                raise HTTPException(409, '已有完整成片交付，请新建任务接入新的分析')
             record = Analysis(id=analysis_id, job_id=job_id, asset_id=asset.id, payload=snapshot)
             session.add(record)
             if not job.payload.get('desktop_delivery'):
@@ -404,7 +408,7 @@ def create_app(data_dir=None):
             if job.status == 'CANCELLED':
                 raise HTTPException(409, '任务已取消。')
             if job.payload.get('desktop_delivery') and job.status != 'PARTIALLY_DELIVERED':
-                raise HTTPException(409, '已有ChatCut本地交付，请新建任务导入素材，保留交付证据')
+                raise HTTPException(409, '已有本地成片交付，请新建任务导入素材，保留交付证据')
         filename = Path((file.filename or 'video.mp4').replace('\\', '/')).name[:200]
         suffix = Path(filename).suffix.lower()
         if suffix not in VIDEO_EXTENSIONS:

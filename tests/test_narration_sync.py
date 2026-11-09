@@ -191,7 +191,7 @@ def cli_fixture(tmp_path):
     paths={}
     for key,value in [('plan',p),('recordings',records),('pause-policy',policy),
                       ('assets',assets),('tracks',{'picture':'V1','voice':'A1'}),('previous-plan',deepcopy(p))]:
-        paths[key]=tmp_path/(key+'.json');paths[key].write_text(json.dumps(value))
+        paths[key]=tmp_path/(key+'.json');paths[key].write_text(json.dumps(value), encoding='utf-8', newline='\n')
     command=[sys.executable,str(Path(__file__).resolve().parents[1]/'scripts/prepare_chatcut.py')]
     for key in ['plan','assets','tracks','recordings','pause-policy']:command += ['--'+key,str(paths[key])]
     command += ['--output',str(tmp_path/'pack')]
@@ -199,14 +199,14 @@ def cli_fixture(tmp_path):
 
 
 def run_cli(command):
-    return subprocess.run(command,capture_output=True,text=True)
+    return subprocess.run(command,capture_output=True,text=True, encoding='utf-8')
 
 
 def test_direct_builder_cannot_skip_supplied_speech_fit(tmp_path):
     p,records,policy,paths,cmd=cli_fixture(tmp_path)
     p['voice_measurements']=[{'asset_key':s['asset_key'],'speech_seconds':3,'lead_seconds':0,'tail_seconds':0} for s in p['scenes']]
     with pytest.raises(ValueError,match='exceeds'):
-        chatcut.build_edit_batch(p,json.loads(paths['assets'].read_text()),json.loads(paths['tracks'].read_text()))
+        chatcut.build_edit_batch(p,json.loads(paths['assets'].read_text(encoding='utf-8')),json.loads(paths['tracks'].read_text(encoding='utf-8')))
 
 
 def test_current_voice_configuration_must_match_recording_evidence(tmp_path):
@@ -219,13 +219,13 @@ def test_current_voice_configuration_must_match_recording_evidence(tmp_path):
 def test_revised_cli_writes_current_audit_and_reuses_same_safe_run(tmp_path):
     p,records,policy,paths,cmd=cli_fixture(tmp_path)
     prior=deepcopy(p);prior['scenes'][0]['text']='Old sentence.'
-    paths['previous-plan'].write_text(json.dumps(prior));cmd += ['--previous-plan',str(paths['previous-plan'])]
+    paths['previous-plan'].write_text(json.dumps(prior), encoding='utf-8', newline='\n');cmd += ['--previous-plan',str(paths['previous-plan'])]
     first=run_cli(cmd);assert first.returncode==0,first.stderr
-    report=json.loads((tmp_path/'pack/narration-audit.json').read_text())
-    change=json.loads((tmp_path/'pack/revision-impact.json').read_text())
+    report=json.loads((tmp_path/'pack/narration-audit.json').read_text(encoding='utf-8'))
+    change=json.loads((tmp_path/'pack/revision-impact.json').read_text(encoding='utf-8'))
     assert report['status']=='passed_technical_timing' and report['auditory_approval'] is False
     assert change['regenerate_audio']==['a'] and change['reuse_audio']==['b']
-    assert json.loads((tmp_path/'pack/edit-batch.preview.json').read_text())['validateOnly'] is True
+    assert json.loads((tmp_path/'pack/edit-batch.preview.json').read_text(encoding='utf-8'))['validateOnly'] is True
     assert json.loads(run_cli(cmd).stdout)['reused'] is True
 
 
@@ -240,7 +240,7 @@ def test_cli_blocks_bad_current_evidence_before_preview(tmp_path,fault):
         old=records[1];records[1]=pcm(tmp_path,'b','Second.',duration=3,active=((.1,2.6),));records[1]['asset_id']=old['asset_id']
     if fault=='wrong-asset':records[0]['asset_id']='old-import'
     if fault=='missing-asset-binding':records[0].pop('asset_id')
-    paths['plan'].write_text(json.dumps(p));paths['recordings'].write_text(json.dumps(records))
+    paths['plan'].write_text(json.dumps(p), encoding='utf-8', newline='\n');paths['recordings'].write_text(json.dumps(records), encoding='utf-8', newline='\n')
     r=run_cli(cmd);assert r.returncode!=0
     assert not (tmp_path/'pack/edit-batch.preview.json').exists()
     assert list((tmp_path/'pack/rejected').glob('*.json'))
@@ -250,7 +250,7 @@ def test_bad_new_input_cannot_overwrite_previous_successful_preview(tmp_path):
     p,records,policy,paths,cmd=cli_fixture(tmp_path)
     first=run_cli(cmd);assert first.returncode==0,first.stderr
     before={x.name:x.read_bytes() for x in (tmp_path/'pack').glob('*.json')}
-    p['scenes'][0]['text']='Changed';paths['plan'].write_text(json.dumps(p))
+    p['scenes'][0]['text']='Changed';paths['plan'].write_text(json.dumps(p), encoding='utf-8', newline='\n')
     assert run_cli(cmd).returncode!=0
     assert before=={x.name:x.read_bytes() for x in (tmp_path/'pack').glob('*.json')}
 
@@ -275,19 +275,19 @@ def test_legacy_cli_does_not_claim_new_audit_passed(tmp_path):
     for flag in ['--recordings','--pause-policy']:
         i=cmd.index(flag);del cmd[i:i+2]
     r=run_cli(cmd);assert r.returncode==0,r.stderr
-    checklist=json.loads((tmp_path/'pack/native-caption-review.json').read_text())
+    checklist=json.loads((tmp_path/'pack/native-caption-review.json').read_text(encoding='utf-8'))
     assert checklist['narration_timing']=='not_checked_recordings_and_pause_policy_required'
 
 
 def test_proposal_cli_produces_review_artifact_not_shortened_edit(tmp_path):
     p,records,policy,paths,cmd=cli_fixture(tmp_path)
     bounds={k:{'min_picture_frames':30,'max_picture_frames':90,'lead_frames':0,'tail_frames':0} for k in ['a','b']}
-    path=tmp_path/'bounds.json';path.write_text(json.dumps(bounds));cmd += ['--picture-bounds',str(path)]
+    path=tmp_path/'bounds.json';path.write_text(json.dumps(bounds), encoding='utf-8', newline='\n');cmd += ['--picture-bounds',str(path)]
     r=run_cli(cmd);assert r.returncode==0,r.stderr
-    proposal=json.loads((tmp_path/'pack/narration-schedule.proposal.json').read_text())
+    proposal=json.loads((tmp_path/'pack/narration-schedule.proposal.json').read_text(encoding='utf-8'))
     assert proposal['status']=='requires_visual_plan_review'
     assert proposal['duration_frames']<p['duration_frames']
-    batch=json.loads((tmp_path/'pack/edit-batch.preview.json').read_text())
+    batch=json.loads((tmp_path/'pack/edit-batch.preview.json').read_text(encoding='utf-8'))
     assert [(x['startFrame'],x['durationFrames']) for x in batch['adds'] if x['type']=='audio']==[(0,60),(60,60)]
 
 
@@ -324,7 +324,7 @@ def test_cli_checks_native_caption_reference_without_changing_editor(tmp_path):
     cards={'max_offset_seconds':.15,'cards':[
         {'asset_key':'a','text':'First.','start_seconds':.1,'end_seconds':1.8},
         {'asset_key':'b','text':'Second.','start_seconds':2.1,'end_seconds':3.8}]}
-    path=tmp_path/'captions.json';path.write_text(json.dumps(cards));cmd+=['--caption-cards',str(path)]
+    path=tmp_path/'captions.json';path.write_text(json.dumps(cards), encoding='utf-8', newline='\n');cmd+=['--caption-cards',str(path)]
     first=run_cli(cmd);assert first.returncode==0,first.stderr
-    report=json.loads((tmp_path/'pack/caption-sync-audit.json').read_text())
+    report=json.loads((tmp_path/'pack/caption-sync-audit.json').read_text(encoding='utf-8'))
     assert report['status']=='passed_technical_caption_sync' and report['editor_mutated'] is False

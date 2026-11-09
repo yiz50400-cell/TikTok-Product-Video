@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tiktok-product-video"
 dynamic = ["version"]
-description = "Local-material Codex + ChatCut product video workflow with batch editing, narration, captions and delivery."
+description = "Local-material Codex + ChatCut + Remotion product video workflow with batch editing, narration, captions and delivery."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

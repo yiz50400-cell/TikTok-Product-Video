@@ -15,7 +15,7 @@ def test_speech_connection_uses_working_endpoint_and_bounded_timeouts(tmp_path, 
             if kwargs.get('connect_timeout') != 15 or kwargs.get('receive_timeout') != 25:
                 raise RuntimeError('unbounded service wait')
         async def save(self, audio, metadata):
-            Path(audio).write_bytes(b'audio'); Path(metadata).write_text('words')
+            Path(audio).write_bytes(b'audio'); Path(metadata).write_text('words', encoding='utf-8', newline='\n')
     monkeypatch.setattr('scripts.prepare_packaged_video.edge_tts.Communicate', Service)
     sel = {'voice':'pt-BR-FranciscaNeural','rate':'+15%','volume':'+0%','pitch':'+0Hz'}
     result = asyncio.run(audio_stage(tmp_path, {'segments':[{'text':'teste'}]}, sel))
@@ -28,7 +28,7 @@ def test_successful_tts_lines_are_reused_and_only_changed_line_runs(tmp_path,mon
         def __init__(self,text,voice,**kwargs): self.text=text
         async def save(self,audio,metadata):
             calls.append(self.text)
-            Path(audio).write_bytes(self.text.encode());Path(metadata).write_text('words '+self.text)
+            Path(audio).write_bytes(self.text.encode());Path(metadata).write_text('words '+self.text, encoding='utf-8', newline='\n')
     monkeypatch.setattr('scripts.prepare_packaged_video.edge_tts.Communicate',Service)
     sel={'voice':'pt-BR-FranciscaNeural','rate':'+15%','volume':'+0%','pitch':'+0Hz'}
     loc={'segments':[{'text':'a'},{'text':'b'}]}
@@ -56,7 +56,7 @@ def test_failed_tts_does_not_replace_successful_cached_line(tmp_path,monkeypatch
     original=(tmp_path/'line-audio/01.mp3').read_bytes()
     with pytest.raises(RuntimeError): asyncio.run(audio_stage(tmp_path,{'segments':[{'text':'bad'}]},sel))
     assert (tmp_path/'line-audio/01.mp3').read_bytes()==original
-    assert json.loads((tmp_path/'line-audio/01-cache.json').read_text())['inputs']['text']=='good'
+    assert json.loads((tmp_path/'line-audio/01-cache.json').read_text(encoding='utf-8'))['inputs']['text']=='good'
 
 @pytest.mark.parametrize('cache_text',['{','{}'])
 def test_broken_cache_manifest_regenerates_only_that_line(tmp_path,monkeypatch,cache_text):
@@ -64,12 +64,12 @@ def test_broken_cache_manifest_regenerates_only_that_line(tmp_path,monkeypatch,c
     class Service:
         def __init__(self,text,voice,**kwargs): self.text=text
         async def save(self,audio,metadata):
-            calls.append(self.text);Path(audio).write_bytes(self.text.encode());Path(metadata).write_text(self.text)
+            calls.append(self.text);Path(audio).write_bytes(self.text.encode());Path(metadata).write_text(self.text, encoding='utf-8', newline='\n')
     monkeypatch.setattr('scripts.prepare_packaged_video.edge_tts.Communicate',Service)
     sel={'voice':'pt-BR-FranciscaNeural','rate':'+15%','volume':'+0%','pitch':'+0Hz'}
     loc={'segments':[{'text':'a'},{'text':'b'}]}
     asyncio.run(audio_stage(tmp_path,loc,sel))
-    (tmp_path/'line-audio/02-cache.json').write_text(cache_text)
+    (tmp_path/'line-audio/02-cache.json').write_text(cache_text, encoding='utf-8', newline='\n')
     result=asyncio.run(audio_stage(tmp_path,loc,sel))
     assert calls==['a','b','b']
     assert result[0]['reused'] and not result[1]['reused']
@@ -79,20 +79,20 @@ def test_approval_gate_remains_active_under_optimized_python(tmp_path):
     import subprocess
     import sys
     d=tmp_path
-    (d/'creative.json').write_text('{}')
-    (d/'zh-approval.json').write_text(json.dumps({'status':'approved','version_sha256':'wrong'}))
-    (d/'localization-v0001.json').write_text('{}')
-    (d/'audit.json').write_text('{}')
+    (d/'creative.json').write_text('{}', encoding='utf-8', newline='\n')
+    (d/'zh-approval.json').write_text(json.dumps({'status':'approved','version_sha256':'wrong'}), encoding='utf-8', newline='\n')
+    (d/'localization-v0001.json').write_text('{}', encoding='utf-8', newline='\n')
+    (d/'audit.json').write_text('{}', encoding='utf-8', newline='\n')
     code="from pathlib import Path; from scripts.prepare_packaged_video import verify_approvals; d=Path(__import__('sys').argv[1]); verify_approvals(d,d/'localization-v0001.json',d/'audit.json')"
-    result=subprocess.run([sys.executable,'-O','-c',code,str(d)],capture_output=True,text=True)
+    result=subprocess.run([sys.executable,'-O','-c',code,str(d)],capture_output=True,text=True, encoding='utf-8')
     assert result.returncode!=0 and 'Chinese approval' in result.stderr
 
 
 def test_existing_version_is_protected_before_asset_generation(tmp_path):
     from scripts.prepare_packaged_video import protect_existing_version
     output=tmp_path/'existing.mp4';output.write_bytes(b'original')
-    loc=tmp_path/'localization-v0002.json';loc.write_text('new localization')
-    (tmp_path/'execution.json').write_text(json.dumps({'output':str(output),'localization_sha256':'old'}))
+    loc=tmp_path/'localization-v0002.json';loc.write_text('new localization', encoding='utf-8', newline='\n')
+    (tmp_path/'execution.json').write_text(json.dumps({'output':str(output),'localization_sha256':'old'}), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError,match='new numbered version'):
         protect_existing_version(tmp_path,loc)
     assert output.read_bytes()==b'original'
@@ -114,7 +114,7 @@ def test_rate_limit_retries_failed_lines_serially_without_repeating_success(tmp_
             active+=1
             if attempts[self.text]>1: retry_active.append(active)
             await real_sleep(0)
-            Path(audio).write_bytes(self.text.encode()); Path(metadata).write_text('words')
+            Path(audio).write_bytes(self.text.encode()); Path(metadata).write_text('words', encoding='utf-8', newline='\n')
             active-=1
     monkeypatch.setattr('scripts.prepare_packaged_video.edge_tts.Communicate',Service)
     monkeypatch.setattr('scripts.prepare_packaged_video.asyncio.sleep',backoff)
@@ -135,7 +135,7 @@ def test_persistent_rate_limit_stops_and_keeps_successful_line_cache(tmp_path, m
         async def save(self,audio,metadata):
             attempts[self.text]=attempts.get(self.text,0)+1
             if self.text=='bad': raise WSServerHandshakeError(None,(),status=429)
-            Path(audio).write_bytes(b'complete'); Path(metadata).write_text('words')
+            Path(audio).write_bytes(b'complete'); Path(metadata).write_text('words', encoding='utf-8', newline='\n')
     monkeypatch.setattr('scripts.prepare_packaged_video.edge_tts.Communicate',Service)
     monkeypatch.setattr('scripts.prepare_packaged_video.asyncio.sleep',backoff)
     sel={'voice':'pt-BR-FranciscaNeural','rate':'+15%','volume':'+0%','pitch':'+0Hz'}

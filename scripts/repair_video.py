@@ -29,11 +29,11 @@ def main(argv=None):
                                 args.output_root, args.start, args.duration, device=args.device)
         else:
             result = task_status(args.output_root, args.task_id)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print(json.dumps(result, ensure_ascii=True, indent=2))
         return 0
     except (ValueError, RuntimeError, OSError, json.JSONDecodeError) as error:
         print(json.dumps({"status": "ERROR", "type": type(error).__name__, "message": str(error)},
-                         ensure_ascii=False), file=sys.stderr)
+                         ensure_ascii=True), file=sys.stderr)
         return 1
 
 

@@ -166,7 +166,7 @@ def test_codex_cli_can_import_and_find_local_candidates(tmp_path, capsys):
     from scripts.produce_video import main
     source = asset(tmp_path, "source.mp4", b"source")
     manifest = tmp_path / "manifest.json"
-    manifest.write_text(json.dumps({"assets": [source]}))
+    manifest.write_text(json.dumps({"assets": [source]}), encoding='utf-8', newline='\n')
     common = ["--workspace", str(tmp_path), "--library", "local/library.sqlite3"]
     assert main(["library", "import", str(manifest), *common]) == 0
     capsys.readouterr()

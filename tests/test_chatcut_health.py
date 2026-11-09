@@ -33,7 +33,7 @@ def unhealthy(reason: str = "timeout") -> HealthReport:
 
 def test_probe_healthy_uses_read_only_tool(tmp_path: Path) -> None:
     launcher = tmp_path / "chatcut-mcp"
-    launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+    launcher.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
     calls: list[tuple[Path, str, float]] = []
 
     def rpc_probe(path: Path, tool: str, timeout: float) -> None:
@@ -54,7 +54,7 @@ def test_probe_healthy_uses_read_only_tool(tmp_path: Path) -> None:
 
 def test_probe_timeout_is_unhealthy_even_when_process_exists(tmp_path: Path) -> None:
     launcher = tmp_path / "chatcut-mcp"
-    launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+    launcher.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
 
     def rpc_probe(path: Path, tool: str, timeout: float) -> None:
         raise TimeoutError("hung")
@@ -125,7 +125,7 @@ def test_apply_calls_quit_then_open_and_waits_for_health() -> None:
 
 def test_reopen_project_runs_only_after_mcp_is_healthy(tmp_path: Path) -> None:
     launcher = tmp_path / "chatcut-mcp"
-    launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+    launcher.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
     actions: list[str] = []
     healthy = HealthReport(
         status="healthy",
@@ -162,7 +162,7 @@ def test_reopen_project_runs_only_after_mcp_is_healthy(tmp_path: Path) -> None:
 )
 def test_probe_rejects_dangerous_or_mutating_tool_names(tool_name: str, tmp_path: Path) -> None:
     launcher = tmp_path / "chatcut-mcp"
-    launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+    launcher.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
 
     with pytest.raises(ValueError, match="unsafe or unsupported"):
         probe_chatcut(
@@ -176,10 +176,10 @@ def test_probe_rejects_dangerous_or_mutating_tool_names(tool_name: str, tmp_path
 
 def test_find_launcher_prefers_environment(tmp_path: Path) -> None:
     configured = tmp_path / "custom-chatcut-mcp"
-    configured.write_text("#!/bin/sh\n", encoding="utf-8")
+    configured.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
     default = tmp_path / "Library/Application Support/ChatCut/chatcut-mcp"
     default.parent.mkdir(parents=True)
-    default.write_text("#!/bin/sh\n", encoding="utf-8")
+    default.write_text("#!/bin/sh\n", encoding="utf-8", newline='\n')
 
     assert find_mcp_launcher(
         env={"CHATCUT_MCP": str(configured)},

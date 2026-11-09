@@ -29,7 +29,7 @@ def lineage_pipeline(pipeline_client, mixed, tmp_path):
                  angle='合成测试', hook='先看动作', buyer_concern='想看动作',
                  proof_action='展示合成画面', cta_direction='查看商品')
     spec_path = tmp_path / 'spec.json'
-    spec_path.write_text(json.dumps(mixed))
+    spec_path.write_text(json.dumps(mixed), encoding='utf-8', newline='\n')
     item = {'ordinal': 1, 'sources': [{'asset_id': a['id']} for a in assets],
             'spec_path': str(spec_path)}
     engine, sessions = database(pipeline_client.app.state.data_dir)
@@ -82,7 +82,7 @@ def test_draft_records_originals_and_changes_cache_when_lineage_changes(lineage_
     analyses = [s['analysis_path'] for s in spec['sources']]
     bind_originals(pipeline, assets, ['a' * 64, 'b' * 64])
     first = pipeline._draft(root, job, item, analyses)
-    version = json.loads(Path(first['version_path']).read_text())
+    version = json.loads(Path(first['version_path']).read_text(encoding='utf-8'))
     assert [s['original_sha256'] for s in version['sources']] == ['a' * 64, 'b' * 64]
     assert [s['analysis']['source_sha256'] for s in version['sources']] == [a['sha256'] for a in assets]
     assert version['source_diversity'] == {'used_unique_originals': 2, 'minimum_required': 2,
@@ -94,7 +94,7 @@ def test_draft_records_originals_and_changes_cache_when_lineage_changes(lineage_
     assert changed['reused'] is False
     assert changed['version_path'] != first['version_path']
     assert Path(first['version_path']).read_bytes() == before
-    assert json.loads(Path(changed['version_path']).read_text())['sources'][1]['original_sha256'] == 'c' * 64
+    assert json.loads(Path(changed['version_path']).read_text(encoding='utf-8'))['sources'][1]['original_sha256'] == 'c' * 64
 
 
 @pytest.mark.parametrize('placement', ['source', 'top_level'])
@@ -111,7 +111,7 @@ def test_spec_cannot_declare_trusted_original_identity(mixed, tmp_path, placemen
 
 def test_standalone_multisource_states_file_hash_check_boundary(mixed, tmp_path):
     result = create_version(mixed, tmp_path / 'versions')
-    version = json.loads(Path(result['version_path']).read_text())
+    version = json.loads(Path(result['version_path']).read_text(encoding='utf-8'))
     assert version['source_diversity']['lineage_check'] == 'file_sha256_only'
 
 
@@ -139,12 +139,12 @@ def test_legacy_single_source_keeps_hash_fields_and_approval_bytes(sample, tmp_p
     assert 'original_sha256' not in version['sources'][0]
     # Simulate an existing immutable approval bound to exact draft bytes.
     approval = tmp_path / 'approval.json'
-    approval.write_text(json.dumps({'status': 'approved', 'version_sha256': digest(path)}))
+    approval.write_text(json.dumps({'status': 'approved', 'version_sha256': digest(path)}), encoding='utf-8', newline='\n')
     approval_before = approval.read_bytes()
     create_version(copy.deepcopy(spec), tmp_path / 'versions')
     assert path.read_bytes() == before
     assert approval.read_bytes() == approval_before
-    assert json.loads(approval.read_text())['version_sha256'] == digest(path)
+    assert json.loads(approval.read_text(encoding='utf-8'))['version_sha256'] == digest(path)
 
 
 def test_pipeline_reuses_legacy_single_source_fingerprint_and_approval(lineage_pipeline):
@@ -155,7 +155,7 @@ def test_pipeline_reuses_legacy_single_source_fingerprint_and_approval(lineage_p
     legacy.pop('min_unique_sources')
     for shot in legacy['shots']:
         shot['source_index'] = 0
-    Path(item['spec_path']).write_text(json.dumps(legacy))
+    Path(item['spec_path']).write_text(json.dumps(legacy), encoding='utf-8', newline='\n')
     single_item = {'ordinal': 1, 'asset_id': item['sources'][0]['asset_id'],
                    'spec_path': item['spec_path']}
     # Seed the pre-fix cache key using the independent legacy creation entry.
@@ -168,11 +168,11 @@ def test_pipeline_reuses_legacy_single_source_fingerprint_and_approval(lineage_p
     path = Path(cached['version_path'])
     before = path.read_bytes()
     approval = path.with_name('zh-approval.json')
-    approval.write_text(json.dumps({'status': 'approved', 'version_sha256': digest(path)}))
+    approval.write_text(json.dumps({'status': 'approved', 'version_sha256': digest(path)}), encoding='utf-8', newline='\n')
     approval_before = approval.read_bytes()
     recovered = pipeline._draft(root, job, single_item, [source['analysis_path']])
     assert recovered['reused'] is True
     assert recovered['version_path'] == str(path)
     assert path.read_bytes() == before
     assert approval.read_bytes() == approval_before
-    assert json.loads(approval.read_text())['version_sha256'] == digest(path)
+    assert json.loads(approval.read_text(encoding='utf-8'))['version_sha256'] == digest(path)

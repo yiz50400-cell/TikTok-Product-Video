@@ -76,7 +76,7 @@ def test_render_accepts_distinct_shot_and_voice_windows_and_writes_short_cues(re
         result["output"], "-vf", "scale=2:2,format=gray", "-an", "-f", "rawvideo", "-"],
         capture_output=True, check=True).stdout
     assert len(frames) // 4 == 60
-    assert Path(result["srt"]).read_text() == (
+    assert Path(result["srt"]).read_text(encoding='utf-8') == (
         "1\n00:00:00,000 --> 00:00:00,500\nTest\n\n"
         "2\n00:00:00,500 --> 00:00:01,000\ncue.\n"
     )
@@ -220,16 +220,16 @@ def test_persisted_voice_survives_retries_and_rejects_changed_localization(tmp_p
             {"voice": "pt-BR-FranciscaNeural", "sha256": "audio-a", "file": "a.mp3"},
             {"voice": "pt-BR-ThalitaMultilingualNeural", "sha256": "audio-b", "file": "b.mp3"},
         ],
-    }))
+    }), encoding='utf-8', newline='\n')
     selection = tmp_path / "selection.json"
     first = select_voice(approval, selection, "job_test", 1)
     saved = selection.read_bytes()
     assert first["voice"] in ("pt-BR-FranciscaNeural", "pt-BR-ThalitaMultilingualNeural")
     assert select_voice(approval, selection, "job_test", 1) == first
     assert selection.read_bytes() == saved
-    content = json.loads(approval.read_text())
+    content = json.loads(approval.read_text(encoding='utf-8'))
     content["localization_sha256"] = "localization-v3"
-    approval.write_text(json.dumps(content))
+    approval.write_text(json.dumps(content), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match="selection|approval"):
         select_voice(approval, selection, "job_test", 1)
 
@@ -241,7 +241,7 @@ def test_new_market_pool_requires_its_own_real_audition_confirmation(tmp_path):
     approval.write_text(json.dumps({'market':'MX','locale':'es-MX','status':'user_approved_voice_pool',
         'user_reply':'测试音色认可','source_turn_id':'test-only',
         'approved_auditions':[{'voice':'es-MX-DaliaNeural','file':audition.name,
-                               'sha256':hashlib.sha256(audition.read_bytes()).hexdigest()}]}))
+                               'sha256':hashlib.sha256(audition.read_bytes()).hexdigest()}]}), encoding='utf-8', newline='\n')
     options={'approval_scope':'market_pool','localization_sha256':'test-script','market':'MX','locale':'es-MX'}
     selected=select_voice(approval,tmp_path/'selection.json','job_mx',1,**options)
     assert selected['market']=='MX' and selected['voice']=='es-MX-DaliaNeural'
@@ -252,7 +252,7 @@ def test_new_market_pool_requires_its_own_real_audition_confirmation(tmp_path):
 
 def test_render_rejects_bound_file_tampering(render_input, tmp_path):
     evidence = tmp_path / "evidence.json"
-    evidence.write_text("{}")
+    evidence.write_text("{}", encoding='utf-8', newline='\n')
     render_input["bound_files"] = [{"path": str(evidence), "sha256": "wrong"}]
     with pytest.raises(ValueError, match="hash"):
         render_plan(render_input)
@@ -265,7 +265,7 @@ def test_audio_qa_measures_pcm_and_true_peak_with_saved_log(render_input, tmp_pa
     assert metrics["sample_peak_dbfs"] == pytest.approx(-18.06, abs=.1)
     assert metrics["true_peak_dbfs"] == pytest.approx(-18.1, abs=.2)
     assert metrics["decoded_duration_seconds"] == 1
-    assert "True peak:" in (tmp_path / "audio.log").read_text()
+    assert "True peak:" in (tmp_path / "audio.log").read_text(encoding='utf-8')
 
 
 def test_approved_voice_pool_can_record_new_script_and_lock_its_hash(tmp_path):
@@ -277,7 +277,7 @@ def test_approved_voice_pool_can_record_new_script_and_lock_its_hash(tmp_path):
         "approved_auditions": [
             {"voice": "pt-BR-FranciscaNeural", "sha256": "audition", "file": "a.mp3"},
         ],
-    }))
+    }), encoding='utf-8', newline='\n')
     selection = tmp_path / "selection.json"
     first = select_voice(approval, selection, "job_test", 1,
                          localization_sha256="new-script")
@@ -313,7 +313,7 @@ def rotation_approval(tmp_path):
             {"voice": "pt-BR-FranciscaNeural", "sha256": "audio-a", "file": "a.mp3"},
             {"voice": "pt-BR-ThalitaMultilingualNeural", "sha256": "audio-b", "file": "b.mp3"},
         ],
-    }))
+    }), encoding='utf-8', newline='\n')
     return path
 
 
@@ -363,9 +363,9 @@ def test_batch_voice_state_rejects_other_approval_or_selection_path(rotation_app
     with pytest.raises(ValueError, match="selection"):
         select_voice(rotation_approval, selection, "new_job", 1,
                      **{**options, "batch_state_path": tmp_path / "other-batch.json"})
-    content = json.loads(rotation_approval.read_text())
+    content = json.loads(rotation_approval.read_text(encoding='utf-8'))
     content["localization_sha256"] = "modified-approval"
-    rotation_approval.write_text(json.dumps(content))
+    rotation_approval.write_text(json.dumps(content), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match="batch|approval"):
         select_voice(rotation_approval, tmp_path / "next.json", "another-job", 2, **options)
     assert before == (selection.read_bytes(), (tmp_path / "batch.json").read_bytes())
@@ -391,16 +391,16 @@ def test_cli_render_reuses_market_pool_voice_options(render_input, rotation_appr
     selection, words, recording = [tmp_path / name for name in ("selection.json", "words.json", "recording.json")]
     saved = select_voice(rotation_approval, selection, "new_job", 1,
                          localization_sha256="new-script", **{**options, "batch_state_path": tmp_path / "batch.json"})
-    words.write_text("{}")
+    words.write_text("{}", encoding='utf-8', newline='\n')
     recording.write_text(json.dumps({**saved, "audio_sha256": render_input["voice_audio_sha256"],
         "voice_selection_sha256": hashlib.sha256(selection.read_bytes()).hexdigest(),
-        "word_metadata_sha256": hashlib.sha256(words.read_bytes()).hexdigest()}))
+        "word_metadata_sha256": hashlib.sha256(words.read_bytes()).hexdigest()}), encoding='utf-8', newline='\n')
     render_input.update(job_id="new_job", ordinal=1, localization_sha256="new-script",
                         voice_approval=str(rotation_approval), voice_selection="selection.json",
                         voice_recording="recording.json", word_metadata="words.json", voice_options=options,
                         bound_files=[{"path": str(recording), "sha256": hashlib.sha256(recording.read_bytes()).hexdigest()}])
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps(render_input))
+    plan.write_text(json.dumps(render_input), encoding='utf-8', newline='\n')
     assert main(["render", str(plan), "--workspace", str(tmp_path)]) == 0
     assert Path(render_input["output"]).is_file()
 
@@ -423,7 +423,7 @@ def test_batch_voice_recovers_interrupted_selection_write(rotation_approval, tmp
     with pytest.raises(OSError, match="interrupted"):
         voices.select_voice(rotation_approval, selection, "new_job", 1, **options)
     assert not selection.exists()
-    state = json.loads((tmp_path / "batch.json").read_text())
+    state = json.loads((tmp_path / "batch.json").read_text(encoding='utf-8'))
     reserved = state["selections"][str(selection.resolve())]
     monkeypatch.setattr(os, "fsync", original_fsync)
     assert voices.select_voice(rotation_approval, selection, "new_job", 1, **options) == reserved
@@ -454,7 +454,7 @@ def localization_revision(rotation_approval, tmp_path):
     evidence = tmp_path / "review.json"
     evidence.write_text(json.dumps({"status": "passed_independent_internal_text_review",
         "previous_localization_sha256": old, "localization_sha256": new,
-        "material_changes_to_approved_meaning": []}))
+        "material_changes_to_approved_meaning": []}), encoding='utf-8', newline='\n')
     return selection, old, new, evidence, saved, options
 
 
@@ -485,16 +485,16 @@ def test_localization_revision_rejects_unbound_review_without_writes(localizatio
     if change == "old":
         old = "c" * 64
     elif change == "batch":
-        state = json.loads(Path(options["batch_state_path"]).read_text())
+        state = json.loads(Path(options["batch_state_path"]).read_text(encoding='utf-8'))
         state["selections"][str(selection.resolve())]["voice"] = "changed"
-        Path(options["batch_state_path"]).write_text(json.dumps(state))
+        Path(options["batch_state_path"]).write_text(json.dumps(state), encoding='utf-8', newline='\n')
     elif change == "archive":
-        (selection.parent / f"voice-selection-before-{old[:12]}.json").write_text("changed")
+        (selection.parent / f"voice-selection-before-{old[:12]}.json").write_text("changed", encoding='utf-8', newline='\n')
     else:
-        review = json.loads(evidence.read_text())
+        review = json.loads(evidence.read_text(encoding='utf-8'))
         review[{"status": "status", "new": "localization_sha256", "meaning": "material_changes_to_approved_meaning"}[change]] = {
             "status": "pending", "new": "c" * 64, "meaning": ["new claim"]}[change]
-        evidence.write_text(json.dumps(review))
+        evidence.write_text(json.dumps(review), encoding='utf-8', newline='\n')
     before = selection.read_bytes(), Path(options["batch_state_path"]).read_bytes()
     with pytest.raises(ValueError, match="revision|archive|batch"):
         revise_localization_binding(selection, old, new, evidence)
@@ -515,7 +515,7 @@ def test_localization_revision_recovers_between_batch_and_selection(localization
         voices.revise_localization_binding(selection, old, new, evidence)
     monkeypatch.setattr(os, "replace", original)
     result = voices.revise_localization_binding(selection, old, new, evidence)
-    state = json.loads(Path(options["batch_state_path"]).read_text())
+    state = json.loads(Path(options["batch_state_path"]).read_text(encoding='utf-8'))
     assert result == state["selections"][str(selection.resolve())]
     assert result["voice"] == saved["voice"]
 
@@ -525,7 +525,7 @@ def test_localization_revision_rejects_changed_review_on_retry(localization_revi
     selection, old, new, evidence, saved, options = localization_revision
     revise_localization_binding(selection, old, new, evidence)
     before = selection.read_bytes(), Path(options["batch_state_path"]).read_bytes()
-    evidence.write_text(evidence.read_text() + "\n")
+    evidence.write_text(evidence.read_text(encoding='utf-8') + "\n", encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match="revision"):
         revise_localization_binding(selection, old, new, evidence)
     assert before == (selection.read_bytes(), Path(options["batch_state_path"]).read_bytes())
@@ -542,11 +542,11 @@ def test_cli_render_automatically_records_registered_local_sources(render_input,
         "review_status": "sampled_visual_review_passed", "rights_status": "unverified", "clips": []}]})
     render_input.update(job_id="job_test", ordinal=1)
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps(render_input))
+    plan.write_text(json.dumps(render_input), encoding='utf-8', newline='\n')
     context = tmp_path / "context.json"
     context.write_text(json.dumps({"product": "test-product", "market": "BR",
         "employee": "local-test", "angle": "test-angle", "hook": "看一下",
-        "chinese_lines": ["看看实际动作。"]}))
+        "chinese_lines": ["看看实际动作。"]}), encoding='utf-8', newline='\n')
     argv = ["render", str(plan), "--workspace", str(tmp_path), "--library", str(db),
             "--context", str(context)]
     assert main(argv) == 0
@@ -558,11 +558,11 @@ def test_library_rejects_unregistered_source_before_render_creates_output(render
     from scripts.produce_video import main
     render_input.update(job_id="job_test", ordinal=1)
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps(render_input))
+    plan.write_text(json.dumps(render_input), encoding='utf-8', newline='\n')
     context = tmp_path / "context.json"
     context.write_text(json.dumps({"product": "test-product", "market": "BR",
         "employee": "local-test", "angle": "test-angle", "hook": "看一下",
-        "chinese_lines": ["看看实际动作。"]}))
+        "chinese_lines": ["看看实际动作。"]}), encoding='utf-8', newline='\n')
     assert main(["render", str(plan), "--workspace", str(tmp_path), "--library",
                  str(tmp_path / "library.sqlite3"), "--context", str(context)]) == 1
     assert not Path(render_input["output"]).exists()
@@ -573,7 +573,7 @@ def test_cached_render_checks_evidence_and_restores_subtitles(render_input, tmp_
     import scripts.produce_video as producer
     from workflow.production.library import LocalLibrary
     evidence = tmp_path / "approval.json"
-    evidence.write_text('{"approved": true}')
+    evidence.write_text('{"approved": true}', encoding='utf-8', newline='\n')
     render_input.update(job_id="job_test", ordinal=1,
                         bound_files=[{"path": str(evidence),
                                       "sha256": hashlib.sha256(evidence.read_bytes()).hexdigest()}])
@@ -583,9 +583,9 @@ def test_cached_render_checks_evidence_and_restores_subtitles(render_input, tmp_
         "duration": 1, "review_status": "sampled_visual_review_passed", "rights_status": "unverified"}]})
     context = tmp_path / "context.json"
     context.write_text(json.dumps({"product": "test-product", "market": "BR", "employee": "test",
-        "angle": "test", "hook": "看一下", "chinese_lines": ["看看实际动作。"]}))
+        "angle": "test", "hook": "看一下", "chinese_lines": ["看看实际动作。"]}), encoding='utf-8', newline='\n')
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps(render_input))
+    plan.write_text(json.dumps(render_input), encoding='utf-8', newline='\n')
     argv = ["render", str(plan), "--workspace", str(tmp_path), "--library", "library.sqlite3",
             "--context", str(context)]
     assert producer.main(argv) == 0
@@ -597,11 +597,11 @@ def test_cached_render_checks_evidence_and_restores_subtitles(render_input, tmp_
     if change == "voice":
         Path(render_input["voice_audio"]).write_bytes(b"changed")
     elif change == "binding":
-        evidence.write_text('{"approved": false}')
+        evidence.write_text('{"approved": false}', encoding='utf-8', newline='\n')
     elif change == "missing_srt":
         srt.unlink()
     else:
-        srt.write_text("incorrect captions")
+        srt.write_text("incorrect captions", encoding='utf-8', newline='\n')
     def no_render(_):
         pytest.fail("cached MP4 must not be re-rendered")
     monkeypatch.setattr(producer, "render_plan", no_render)

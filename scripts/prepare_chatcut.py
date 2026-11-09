@@ -136,7 +136,7 @@ def main():
                 'scope': 'mechanical_preparation_not_full_video_production'}
 
     result = StageStore(output).run('native-preparation', fingerprint, prepare)
-    print(json.dumps(result, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=True))
 
 
 if __name__ == '__main__':

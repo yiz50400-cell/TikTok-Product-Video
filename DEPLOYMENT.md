@@ -1,12 +1,12 @@
 # macOS / Windows 客户部署与升级
 
-从本仓库 Releases 获取 `TikTok-Product-Video-v0.3.0-local-only.zip`，或使用 v0.3.0 完整源码目录，不以历史 v0.2.0 压缩包代替。保留 `.codex`、`workflow`、`src`、`scripts`、`config`、`assets`、`pyproject.toml` 和 `uv.lock`。
+从本仓库 Releases 获取 `TikTok-Product-Video-v0.4.0-chatcut-remotion.zip`，或使用 v0.4.0 完整源码目录，不以历史 v0.2.0 压缩包代替。保留 `.codex`、`workflow`、`src`、`scripts`、`config`、`assets`、`remotion`、`pyproject.toml` 和 `uv.lock`。
 
 ## 环境
 
-两平台均需要 Codex Desktop、已登录并打开的 ChatCut Desktop、Python 3.12+、uv、FFmpeg 和 FFprobe。客户使用自己的登录与凭据；不要复制他人的全局 Codex `auth.json`、`config.toml` 或密钥。
+两平台均需要 Codex Desktop、已登录并打开的 ChatCut Desktop、Python 3.12+、uv、FFmpeg/FFprobe 和 Node.js 22.13+（推荐 22/24 LTS）。客户使用自己的登录与凭据；不要复制他人的全局 Codex `auth.json`、`config.toml` 或密钥。
 
-macOS：用现有包管理器安装 uv 与 FFmpeg，确认当前终端能找到命令；不把 Windows `.exe` 路径套用到 macOS。
+macOS：用现有包管理器安装 uv 与 FFmpeg；旧版文字渲染依赖 drawtext/subtitles 滤镜，Homebrew 请安装 ffmpeg-full 并将其 bin 加入 PATH，确认当前终端能找到命令；不把 Windows `.exe` 路径套用到 macOS。
 
 Windows 10/11：在项目目录打开 PowerShell。可先查看只读安装计划和诊断：
 
@@ -21,6 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\doctor-video-edito
 
 ```sh
 uv sync --frozen
+npm --prefix remotion ci
 ffmpeg -version
 ffprobe -version
 uv run python scripts/workflow.py capabilities
@@ -39,7 +40,7 @@ edge-tts 已包含在核心安装中，联网服务仍须客户本机可达。�
 ## 客户机器验收
 
 1. 验证锁定依赖安装、FFmpeg/FFprobe 和 ChatCut MCP 只读连通。
-2. 使用客户本地素材创建一个任务，经 ChatCut 导入、剪辑、导出，登记真实 MP4 与字幕。
+2. 使用客户本地素材创建一个任务，经 ChatCut 导入、剪辑、导出干净底片，再按[协同指南](docs/chatcut-remotion-workflow.md)用 Remotion 包装并登记最终 MP4 与字幕。
 3. 检查编码、尺寸、帧率、时长、冻结帧；人工看画面/商品/字幕安全区并试听。验证交付数量和恢复记录。
 4. 逐项报告实际结果。只完成依赖安装或合成视频测试时，不宣称客户部署或真实批量质量验收成功。
 
@@ -50,3 +51,5 @@ edge-tts 已包含在核心安装中，联网服务仍须客户本机可达。�
 首次验收使用独立输出目录与备份后的运行状态，不覆盖旧成果。失败时停止新任务，切回旧目录及与它匹配的备份数据库/配置；保留新版本日志供排错，不把新旧状态文件盲目混用。全局账号凭据不属于项目升级迁移内容。
 
 详细制作和导出登记见 [本地剪辑流程](docs/local-editing-workflow.md)。
+
+Remotion 首次渲染可能下载 Chromium，已有兼容 Chrome 可用 REMOTION_BROWSER_EXECUTABLE 指定。工具安装与 TTS 可能联网，素材始终只用本地文件。商业部署核对 Remotion 当前许可及团队规模。

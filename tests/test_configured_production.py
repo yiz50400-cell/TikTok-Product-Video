@@ -11,7 +11,7 @@ import pytest
 from workflow.publishing.prepare import digest
 
 def save(path, data):
-    path.write_text(json.dumps(data, ensure_ascii=False))
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8', newline='\n')
 
 
 def make_voice_pool(directory):
@@ -77,7 +77,7 @@ def fake_audio(directory, localization, selection):
         audio=directory/f'test-{index}.wav'; meta=directory/f'test-{index}.jsonl'
         subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-v','error','-f','lavfi','-i',
                         'sine=frequency=440:sample_rate=48000','-t','0.5',str(audio)],check=True)
-        meta.write_text(json.dumps({'type':'WordBoundary','offset':0,'duration':5000000,'text':seg['text']})+'\n')
+        meta.write_text(json.dumps({'type':'WordBoundary','offset':0,'duration':5000000,'text':seg['text']})+'\n', encoding='utf-8', newline='\n')
         rows.append({'line':index,'path':str(audio),'metadata_path':str(meta),'reused':False})
     return rows
 
@@ -93,13 +93,13 @@ def test_generic_prepare_and_actual_render_accept_two_lines_and_request_identity
     assert plan['duration']==6
     result=render_plan(plan)
     assert Path(result['output']).is_file()
-    assert Path(result['srt']).read_text().count('-->')==2
+    assert Path(result['srt']).read_text(encoding='utf-8').count('-->')==2
 
 
 def test_invalid_localized_window_is_rejected_before_audio(configured, monkeypatch):
     from workflow.production import preparation
-    loc=configured/'localization-v0001.json'; data=json.loads(loc.read_text()); data['segments'][1]['window']=[2,6];save(loc,data)
-    audit=configured/'localization-audit-v0001.json'; data=json.loads(audit.read_text());data['localization_sha256']=digest(loc);save(audit,data)
+    loc=configured/'localization-v0001.json'; data=json.loads(loc.read_text(encoding='utf-8')); data['segments'][1]['window']=[2,6];save(loc,data)
+    audit=configured/'localization-audit-v0001.json'; data=json.loads(audit.read_text(encoding='utf-8'));data['localization_sha256']=digest(loc);save(audit,data)
     async def forbidden(*args): raise AssertionError('TTS called before gate')
     monkeypatch.setattr(preparation,'audio_stage',forbidden)
     with pytest.raises(ValueError,match='window'):
@@ -113,11 +113,11 @@ def test_voice_rotation_is_reserved_by_item_and_remains_locked(configured):
     sibling=configured/'third'; sibling.mkdir()
     for name in ('creative.json','zh-approval.json','localization-v0001.json','localization-audit-v0001.json'):
         (sibling/name).write_bytes((configured/name).read_bytes())
-    creative=json.loads((sibling/'creative.json').read_text()); creative['ordinal']=3;save(sibling/'creative.json',creative)
+    creative=json.loads((sibling/'creative.json').read_text(encoding='utf-8')); creative['ordinal']=3;save(sibling/'creative.json',creative)
     for name,fields in [('zh-approval.json',{'version_sha256':digest(sibling/'creative.json')}),
                         ('localization-v0001.json',{'creative_sha256':digest(sibling/'creative.json')})]:
-        d=json.loads((sibling/name).read_text());d.update(fields);save(sibling/name,d)
-    audit=json.loads((sibling/'localization-audit-v0001.json').read_text());audit.update(
+        d=json.loads((sibling/name).read_text(encoding='utf-8'));d.update(fields);save(sibling/name,d)
+    audit=json.loads((sibling/'localization-audit-v0001.json').read_text(encoding='utf-8'));audit.update(
         creative_sha256=digest(sibling/'creative.json'),zh_approval_sha256=digest(sibling/'zh-approval.json'),
         localization_sha256=digest(sibling/'localization-v0001.json'));save(sibling/'localization-audit-v0001.json',audit)
     second=reserve_voice(sibling,state)
@@ -127,11 +127,11 @@ def test_voice_rotation_is_reserved_by_item_and_remains_locked(configured):
 
 def rebind(configured):
     creative_sha=digest(configured/'creative.json')
-    approved=json.loads((configured/'zh-approval.json').read_text());approved['version_sha256']=creative_sha
+    approved=json.loads((configured/'zh-approval.json').read_text(encoding='utf-8'));approved['version_sha256']=creative_sha
     save(configured/'zh-approval.json',approved)
-    loc=json.loads((configured/'localization-v0001.json').read_text());loc['creative_sha256']=creative_sha
+    loc=json.loads((configured/'localization-v0001.json').read_text(encoding='utf-8'));loc['creative_sha256']=creative_sha
     save(configured/'localization-v0001.json',loc)
-    audit=json.loads((configured/'localization-audit-v0001.json').read_text());audit.update(
+    audit=json.loads((configured/'localization-audit-v0001.json').read_text(encoding='utf-8'));audit.update(
         creative_sha256=creative_sha,zh_approval_sha256=digest(configured/'zh-approval.json'),
         localization_sha256=digest(configured/'localization-v0001.json'))
     save(configured/'localization-audit-v0001.json',audit)
@@ -149,12 +149,12 @@ def test_actual_configured_packaging_and_sound_render(configured,monkeypatch):
     sound=configured/'sfx.wav'
     subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-v','error','-f','lavfi','-i',
                     'sine=frequency=880:sample_rate=48000','-t','0.2',str(sound)],check=True)
-    creative=json.loads((configured/'creative.json').read_text());creative['lines'][0]['visible_zh']='试一下'
+    creative=json.loads((configured/'creative.json').read_text(encoding='utf-8'));creative['lines'][0]['visible_zh']='试一下'
     creative['production']['packaging']=[{'line':1,'font':str(font),'font_sha256':digest(font),'font_size':24,'x':8,'y':200}]
     creative['production']['sound_effects']=[{'path':str(sound),'sha256':digest(sound),'start':0,'duration':0.2,
                                              'volume':0.1,'description_zh':'测试提示音'}]
     save(configured/'creative.json',creative)
-    loc=json.loads((configured/'localization-v0001.json').read_text());loc['segments'][0]['visible_text']='Teste'
+    loc=json.loads((configured/'localization-v0001.json').read_text(encoding='utf-8'));loc['segments'][0]['visible_text']='Teste'
     save(configured/'localization-v0001.json',loc);rebind(configured)
     async def synth(*args):return fake_audio(*args)
     monkeypatch.setattr(preparation,'audio_stage',synth)
@@ -167,12 +167,12 @@ def test_actual_configured_packaging_and_sound_render(configured,monkeypatch):
 
 def test_actual_speech_overflow_stops_without_changing_approved_rate(configured,monkeypatch):
     from workflow.production import preparation
-    creative=json.loads((configured/'creative.json').read_text());creative['lines'][0]['window']=[0,0.2]
+    creative=json.loads((configured/'creative.json').read_text(encoding='utf-8'));creative['lines'][0]['window']=[0,0.2]
     save(configured/'creative.json',creative)
-    loc=json.loads((configured/'localization-v0001.json').read_text());loc['segments'][0]['window']=[0,0.2]
+    loc=json.loads((configured/'localization-v0001.json').read_text(encoding='utf-8'));loc['segments'][0]['window']=[0,0.2]
     save(configured/'localization-v0001.json',loc);rebind(configured)
     async def synth(*args):return fake_audio(*args)
     monkeypatch.setattr(preparation,'audio_stage',synth)
     with pytest.raises(ValueError,match='approved window'):preparation.prepare_configured(configured)
-    assert json.loads((configured/'voice-selection.json').read_text())['rate']=='+0%'
+    assert json.loads((configured/'voice-selection.json').read_text(encoding='utf-8'))['rate']=='+0%'
     assert not (configured/'execution.json').exists()

@@ -388,7 +388,7 @@ def main() -> None:
         "with_internal_3s_repeats": sum(1 for x in report_items if x["static_segments"]),
         "cross_video_3s_matches": len(cross),
         "output": str(out_dir),
-    }, ensure_ascii=False, indent=2))
+    }, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":

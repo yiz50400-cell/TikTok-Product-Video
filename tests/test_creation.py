@@ -41,7 +41,7 @@ def sample(tmp_path):
         "known_facts": [], "popularity_hypotheses": [], "unknowns": [], "risks": [],
     }
     supplied = tmp_path / "observations-input.json"
-    supplied.write_text(json.dumps(observations), encoding="utf-8")
+    supplied.write_text(json.dumps(observations), encoding="utf-8", newline='\n')
     save_observations(analysis_dir / "manifest.json", supplied)
     first_frame = next(frame["id"] for frame in manifest["frames"]
                        if frame["source_time_seconds"] < 1)
@@ -115,11 +115,11 @@ def test_verified_transcode_uses_distinct_edit_and_analysis_hashes(sample, tmp_p
         "method": "transcode",
         "results": {edit.stem: {"sha256": digest(edit), "duration": 2,
                               "full_decode": "passed"}},
-    }), encoding="utf-8")
+    }), encoding="utf-8", newline='\n')
     spec["edit_video_path"] = str(edit.resolve())
     spec["transcode_verification_path"] = str(verification.resolve())
     result = create_version(spec, tmp_path / "creation")
-    saved = json.loads(Path(result["version_path"]).read_text())
+    saved = json.loads(Path(result["version_path"]).read_text(encoding='utf-8'))
     assert saved["media_relationship"]["kind"] == "verified_transcode"
     assert saved["analysis"]["source_sha256"] != saved["edit_video"]["sha256"]
     assert saved["media_relationship"]["verification_sha256"] == digest(verification)
@@ -144,7 +144,7 @@ def test_revision_preserves_old_version_and_does_not_inherit_audit(sample, tmp_p
     assert Path(audited["audit_path"]).is_file()
     spec["script_lines"][0]["text"] = "点上去，用刷子晕开。"
     second = create_version(spec, output)
-    saved = json.loads(Path(second["version_path"]).read_text())
+    saved = json.loads(Path(second["version_path"]).read_text(encoding='utf-8'))
     assert saved["version"] == 2
     assert saved["parent_version"] == 1
     assert saved["parent_sha256"] == first_hash
@@ -179,7 +179,7 @@ def test_changed_prior_draft_breaks_version_chain(sample, tmp_path):
     first = create_version(spec, output)
     second = create_version(spec, output)
     first_path = Path(first["version_path"])
-    first_path.write_text(first_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    first_path.write_text(first_path.read_text(encoding="utf-8") + " ", encoding="utf-8", newline='\n')
     with pytest.raises(ValueError, match="version chain"):
         show_version(Path(second["version_path"]))
     with pytest.raises(ValueError, match="version chain"):
@@ -207,7 +207,7 @@ def test_new_version_records_market_locale_and_pending_localized_voice_timing(sa
 def test_script_source_records_visual_reference_without_claiming_literal_reproduction(sample, tmp_path, kind):
     _, _, spec = sample
     reference_path = tmp_path / "reference-report.md"
-    reference_path.write_text("hook / proof / CTA structure", encoding="utf-8")
+    reference_path.write_text("hook / proof / CTA structure", encoding="utf-8", newline='\n')
     spec.update({
         "market": "BR", "voiceover_locale": "pt-BR",
         "angle": "结构改编", "hook": "先看这个顾虑。", "buyer_concern": "担心边界生硬",
@@ -236,7 +236,7 @@ def test_script_source_records_visual_reference_without_claiming_literal_reprodu
 def test_user_supplied_and_revision_sources_are_recorded(sample, tmp_path):
     _, _, spec = sample
     supplied_text = tmp_path / "user-script.txt"
-    supplied_text.write_text("用户提供的文字稿。", encoding="utf-8")
+    supplied_text.write_text("用户提供的文字稿。", encoding="utf-8", newline='\n')
     spec.update({"market": "BR", "voiceover_locale": "pt-BR",
                  "angle": "用户稿改写", "hook": "用户提供的开头。", "buyer_concern": "担心边界",
                  "proof_action": "连续点涂和晕染", "cta_direction": "核对色号后查看商品",
@@ -274,7 +274,7 @@ def test_audit_cannot_claim_runtime_fit_for_a_failing_estimate(sample, tmp_path,
     path = Path(result["version_path"])
     version = json.loads(path.read_text(encoding="utf-8"))
     version["script_lines"][0]["text"] = "这句话明显超过两秒能够清楚读出的长度，不能审核为时长通过。"
-    path.write_text(json.dumps(version, ensure_ascii=False), encoding="utf-8")
+    path.write_text(json.dumps(version, ensure_ascii=False), encoding="utf-8", newline='\n')
     audit = {"reviewer": "separate reviewer", "verdict": verdict,
              "checks": {"spoken_naturalness": True, "evidence_accuracy": True,
                         "runtime_fit": True, "cta_truthfulness": True},
@@ -295,7 +295,7 @@ def test_old_stored_pass_audit_gets_runtime_warning_without_mutating_audit(sampl
     version = json.loads(version_path.read_text(encoding="utf-8"))
     version["script_lines"] = [{"start_seconds": 0, "end_seconds": 2,
                                  "text": "这是一句明显超过两秒可清楚说完的中文口播稿并且还包含Color Bloom 2026。"}]
-    version_path.write_text(json.dumps(version, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    version_path.write_text(json.dumps(version, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline='\n')
     # Simulate a legacy stored result from before automatic timing verification.
     legacy_audit = {"schema_version": 1, "version": 1, "version_path": str(version_path),
                     "version_sha256": digest(version_path), "reviewed_at": "2026-10-09T00:00:00+00:00",
@@ -306,7 +306,7 @@ def test_old_stored_pass_audit_gets_runtime_warning_without_mutating_audit(sampl
                                 "commercial_attractiveness": True},
                     "notes": ["Legacy pass."], "human_approval_status": "pending_user"}
     audit_path = version_path.with_name("v0001-audit.json")
-    audit_path.write_text(json.dumps(legacy_audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    audit_path.write_text(json.dumps(legacy_audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline='\n')
     shown = show_version(version_path)
     assert shown["audit"]["checks"]["runtime_fit"] is True
     assert shown["audit"]["runtime_review"]["passes"] is False
@@ -400,11 +400,11 @@ def test_batch_contract_cli_writes_partial_contract(tmp_path):
                       "cta_direction": "核对色号后查看商品", "source_asset_ids": []}],
         "allowed_asset_ids": [], "recently_used_asset_ids": [],
         "shared_asset_reuse_authorized": False,
-    }), encoding="utf-8")
+    }), encoding="utf-8", newline='\n')
     result = subprocess.run([
         sys.executable, "scripts/plan_video.py", "batch-contract",
         "--spec", str(spec), "--output", str(output),
-    ], cwd=Path(__file__).resolve().parent.parent, capture_output=True, text=True)
+    ], cwd=Path(__file__).resolve().parent.parent, capture_output=True, text=True, encoding='utf-8')
     assert result.returncode == 0, result.stderr
     summary = json.loads(result.stdout)
     contract = json.loads(output.read_text(encoding="utf-8"))

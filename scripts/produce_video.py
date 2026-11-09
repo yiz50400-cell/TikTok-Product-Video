@@ -242,7 +242,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == "library":
-            print(json.dumps(run_library_command(args), ensure_ascii=False, indent=2))
+            print(json.dumps(run_library_command(args), ensure_ascii=True, indent=2))
             return 0
         if args.command == "render":
             plan = json.loads(args.plan.read_text(encoding="utf-8"))
@@ -293,15 +293,15 @@ def main(argv=None):
                     subtitle_path.write_text(subtitle_text, encoding="utf-8")
                 result = {"output": render_input["output"], "srt": render_input["srt"],
                           "usage": existing, "render_reused": True, "reuse_review": reuse}
-                print(json.dumps(result, ensure_ascii=False, indent=2))
+                print(json.dumps(result, ensure_ascii=True, indent=2))
                 return 0
             result = render_plan(render_input)
             if library:
                 result["usage"] = library.record(plan, context)
                 result["reuse_review"] = reuse
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+            print(json.dumps(result, ensure_ascii=True, indent=2))
     except (ValueError, OSError, KeyError, sqlite3.Error) as exc:
-        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=True), file=sys.stderr)
         return 1
     return 0
 

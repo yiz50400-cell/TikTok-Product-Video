@@ -25,7 +25,7 @@ def test_resume_preserves_success_and_retries_failed_stage(tmp_path):
     store = StageStore(tmp_path)
     def good():
         calls.append('good')
-        output = tmp_path / 'asset'; output.write_text('ready')
+        output = tmp_path / 'asset'; output.write_text('ready', encoding='utf-8', newline='\n')
         return {'outputs': [str(output)]}
     def bad():
         raise RuntimeError('temporary failure')
@@ -36,7 +36,7 @@ def test_resume_preserves_success_and_retries_failed_stage(tmp_path):
     assert resumed.run('audio', 'input-a', good)['reused']
     assert calls == ['good']
     assert resumed.run('render', 'input-b', good)['reused'] is False
-    (tmp_path / 'asset').write_text('corrupt')
+    (tmp_path / 'asset').write_text('corrupt', encoding='utf-8', newline='\n')
     assert resumed.run('audio', 'input-a', good)['reused'] is False
 
 
@@ -45,7 +45,7 @@ def test_changed_stage_input_requires_new_run_directory(tmp_path):
     store = StageStore(tmp_path)
     with pytest.raises(ValueError, match='no outputs'):
         store.run('audio', 'first', lambda: {'outputs': []})
-    (tmp_path / 'asset').write_text('ready')
+    (tmp_path / 'asset').write_text('ready', encoding='utf-8', newline='\n')
     store.run('audio', 'first', lambda: {'outputs': [str(tmp_path / 'asset')]})
     with pytest.raises(ValueError, match='new run'):
         store.run('audio', 'changed', lambda: {'outputs': []})
@@ -54,11 +54,11 @@ def test_changed_stage_input_requires_new_run_directory(tmp_path):
 def test_batch_preflight_checks_bound_approvals_before_expensive_work(tmp_path):
     from workflow.orchestration.local import preflight
     directory = tmp_path / 'approved'; directory.mkdir()
-    (directory / 'creative.json').write_text('{}')
-    (directory / 'zh-approval.json').write_text('{"status":"approved","version_sha256":"wrong"}')
-    loc = directory / 'localization-v0001.json'; loc.write_text('{}')
-    audit = directory / 'audit.json'; audit.write_text('{}')
-    plan = directory / 'execution.json'; plan.write_text('{}')
+    (directory / 'creative.json').write_text('{}', encoding='utf-8', newline='\n')
+    (directory / 'zh-approval.json').write_text('{"status":"approved","version_sha256":"wrong"}', encoding='utf-8', newline='\n')
+    loc = directory / 'localization-v0001.json'; loc.write_text('{}', encoding='utf-8', newline='\n')
+    audit = directory / 'audit.json'; audit.write_text('{}', encoding='utf-8', newline='\n')
+    plan = directory / 'execution.json'; plan.write_text('{}', encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match='Chinese approval'):
         preflight({'plan':str(plan),'localization':str(loc),'audit':str(audit)})
 
@@ -68,16 +68,16 @@ def test_batch_runner_retries_only_failed_render_and_then_reuses_all_stages(tmp_
     from scripts import run_local_batch
 
     directory = tmp_path / 'approved'; directory.mkdir()
-    creative = directory / 'creative.json'; creative.write_text('{"lines":[]}')
+    creative = directory / 'creative.json'; creative.write_text('{"lines":[]}', encoding='utf-8', newline='\n')
     approval = directory / 'zh-approval.json'
-    approval.write_text(json.dumps({'status':'approved', 'version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}))
-    localization = directory / 'localization-v0001.json'; localization.write_text('{}')
+    approval.write_text(json.dumps({'status':'approved', 'version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}), encoding='utf-8', newline='\n')
+    localization = directory / 'localization-v0001.json'; localization.write_text('{}', encoding='utf-8', newline='\n')
     audit = directory / 'localization-audit.json'; audit.write_text(json.dumps({
         'status':'passed_independent_internal_text_review',
         'localization_sha256':hashlib.sha256(localization.read_bytes()).hexdigest(),
         'creative_sha256':hashlib.sha256(creative.read_bytes()).hexdigest(),
         'zh_approval_sha256':hashlib.sha256(approval.read_bytes()).hexdigest(),
-        'material_changes_to_approved_meaning':[]}))
+        'material_changes_to_approved_meaning':[]}), encoding='utf-8', newline='\n')
     output = tmp_path / 'sample.mp4'; subtitle = tmp_path / 'sample.srt'
     plan = complete_plan(directory, output, subtitle)
     calls = []
@@ -86,17 +86,17 @@ def test_batch_runner_retries_only_failed_render_and_then_reuses_all_stages(tmp_
         script = Path(command[1]).name
         calls.append(script)
         if script == 'prepare_packaged_video.py':
-            (directory / 'execution.json').write_text(json.dumps(plan))
-            (directory / 'preparation-timing.json').write_text('{}')
-            (directory / 'voice-recording.json').write_text('{}')
+            (directory / 'execution.json').write_text(json.dumps(plan), encoding='utf-8', newline='\n')
+            (directory / 'preparation-timing.json').write_text('{}', encoding='utf-8', newline='\n')
+            (directory / 'voice-recording.json').write_text('{}', encoding='utf-8', newline='\n')
         elif script == 'produce_video.py':
             if calls.count(script) == 1:
                 raise RuntimeError('transient render error')
-            output.write_bytes(b'video'); subtitle.write_text('subtitle')
+            output.write_bytes(b'video'); subtitle.write_text('subtitle', encoding='utf-8', newline='\n')
         else:
             for name in ('qa.json','cut-review.jpg','action-review.jpg','contact-sheet.jpg'):
                 (directory / name).write_bytes(name.encode())
-        log_path.write_text('ok')
+        log_path.write_text('ok', encoding='utf-8', newline='\n')
 
     monkeypatch.setattr(run_local_batch, '_run', fake_run)
     with pytest.raises(RuntimeError, match='transient'):
@@ -112,19 +112,19 @@ def test_batch_runner_refuses_to_overwrite_existing_untracked_render(tmp_path, m
     from scripts import run_local_batch
 
     directory = tmp_path / 'approved'; directory.mkdir()
-    creative = directory / 'creative.json'; creative.write_text('{}')
+    creative = directory / 'creative.json'; creative.write_text('{}', encoding='utf-8', newline='\n')
     approval = directory / 'zh-approval.json'; approval.write_text(json.dumps({
-        'status':'approved','version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}))
-    localization = directory / 'localization-v0001.json'; localization.write_text('{}')
+        'status':'approved','version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}), encoding='utf-8', newline='\n')
+    localization = directory / 'localization-v0001.json'; localization.write_text('{}', encoding='utf-8', newline='\n')
     audit = directory / 'localization-audit.json'; audit.write_text(json.dumps({
         'status':'passed_independent_internal_text_review',
         'localization_sha256':hashlib.sha256(localization.read_bytes()).hexdigest(),
         'creative_sha256':hashlib.sha256(creative.read_bytes()).hexdigest(),
         'zh_approval_sha256':hashlib.sha256(approval.read_bytes()).hexdigest(),
-        'material_changes_to_approved_meaning':[]}))
+        'material_changes_to_approved_meaning':[]}), encoding='utf-8', newline='\n')
     output = tmp_path / 'existing.mp4'; output.write_bytes(b'keep')
     subtitle = tmp_path / 'sample.srt'
-    (directory / 'execution.json').write_text(json.dumps(complete_plan(directory,output,subtitle)))
+    (directory / 'execution.json').write_text(json.dumps(complete_plan(directory,output,subtitle)), encoding='utf-8', newline='\n')
     with pytest.raises(ValueError, match='already exists'):
         run_local_batch.run_batch(directory, stages={'render'})
     assert output.read_bytes() == b'keep'
@@ -134,22 +134,22 @@ def test_prepare_only_does_not_require_rendered_video(tmp_path, monkeypatch):
     import hashlib
     from scripts import run_local_batch
     d=tmp_path/'approved'; d.mkdir()
-    creative=d/'creative.json'; creative.write_text('{}')
+    creative=d/'creative.json'; creative.write_text('{}', encoding='utf-8', newline='\n')
     approval=d/'zh-approval.json'; approval.write_text(json.dumps({'status':'approved',
-        'version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}))
-    loc=d/'localization-v0001.json'; loc.write_text('{}')
+        'version_sha256':hashlib.sha256(creative.read_bytes()).hexdigest()}), encoding='utf-8', newline='\n')
+    loc=d/'localization-v0001.json'; loc.write_text('{}', encoding='utf-8', newline='\n')
     (d/'localization-audit.json').write_text(json.dumps({
         'status':'passed_independent_internal_text_review',
         'localization_sha256':hashlib.sha256(loc.read_bytes()).hexdigest(),
         'creative_sha256':hashlib.sha256(creative.read_bytes()).hexdigest(),
         'zh_approval_sha256':hashlib.sha256(approval.read_bytes()).hexdigest(),
-        'material_changes_to_approved_meaning':[]}))
+        'material_changes_to_approved_meaning':[]}), encoding='utf-8', newline='\n')
     output=tmp_path/'video.mp4'; subtitle=tmp_path/'video.srt'
     plan=complete_plan(d,output,subtitle)
     def fake_run(command,log_path):
-        (d/'execution.json').write_text(json.dumps(plan))
-        (d/'preparation-timing.json').write_text('{}')
-        (d/'voice-recording.json').write_text('{}')
+        (d/'execution.json').write_text(json.dumps(plan), encoding='utf-8', newline='\n')
+        (d/'preparation-timing.json').write_text('{}', encoding='utf-8', newline='\n')
+        (d/'voice-recording.json').write_text('{}', encoding='utf-8', newline='\n')
     monkeypatch.setattr(run_local_batch,'_run',fake_run)
     result=run_local_batch.run_batch(d,stages={'prepare'})
     assert result['stages']['prepare']['status']=='SUCCEEDED'
@@ -158,7 +158,7 @@ def test_prepare_only_does_not_require_rendered_video(tmp_path, monkeypatch):
 
 def test_render_fingerprint_includes_source_bytes(tmp_path):
     from scripts.run_local_batch import _plan_fingerprint
-    (tmp_path/'localization-v0001.json').write_text('{}')
+    (tmp_path/'localization-v0001.json').write_text('{}', encoding='utf-8', newline='\n')
     plan=complete_plan(tmp_path,tmp_path/'out.mp4',tmp_path/'out.srt')
     before=_plan_fingerprint(plan)
     Path(plan['source']).write_bytes(b'changed')

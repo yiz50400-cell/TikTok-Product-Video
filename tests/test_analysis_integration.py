@@ -25,7 +25,7 @@ def prepared(tmp_path, video):
         'known_facts': [], 'popularity_hypotheses': [], 'unknowns': [], 'risks': [],
     }
     input_file = tmp_path / 'input.json'
-    input_file.write_text(json.dumps(observations))
+    input_file.write_text(json.dumps(observations), encoding='utf-8', newline='\n')
     save_observations(output / 'manifest.json', input_file)
     return source, output
 

@@ -113,7 +113,7 @@ def main(argv=None):
     parser.add_argument('--require-windows',action='store_true')
     args=parser.parse_args(argv)
     report=check(args.output,font=args.font)
-    print(json.dumps(report,ensure_ascii=False,indent=2))
+    print(json.dumps(report,ensure_ascii=True,indent=2))
     if report['status']!='host_checks_passed':return 1
     if args.require_windows and not report['windows_platform_executed']:return 2
     return 0

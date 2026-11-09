@@ -96,7 +96,7 @@ def asset_dict(asset):
 def require_editable_delivery(job):
     """A registered export binds its task inputs; revisions require a new task."""
     if job.payload.get('desktop_delivery'):
-        raise ValueError('已有ChatCut本地交付，请新建任务修改素材、语言或创意，保留交付证据')
+        raise ValueError('已有本地成片交付，请新建任务修改素材、语言或创意，保留交付证据')
 
 
 def invalidate_pipeline(job, *, ordinals=None, clear_drafts=False):

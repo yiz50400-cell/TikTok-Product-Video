@@ -31,7 +31,7 @@ def mixed(sample, tmp_path):
                       'description': 'Second synthetic source: only final second observed',
                       'frame_ids': [f['id'] for f in manifest['frames']
                                     if f['source_time_seconds'] >= 1]}],
-        'known_facts': [], 'popularity_hypotheses': [], 'unknowns': [], 'risks': []}))
+        'known_facts': [], 'popularity_hypotheses': [], 'unknowns': [], 'risks': []}), encoding='utf-8', newline='\n')
     save_observations(folder / 'manifest.json', observations)
     spec['sources'] = [
         {'analysis_path': spec.pop('analysis_path'),
@@ -46,7 +46,7 @@ def mixed(sample, tmp_path):
 
 def test_mixed_version_binds_each_shot_to_its_own_analysis(mixed, tmp_path):
     result = create_version(mixed, tmp_path / 'versions')
-    saved = json.loads(Path(result['version_path']).read_text())
+    saved = json.loads(Path(result['version_path']).read_text(encoding='utf-8'))
     assert len(saved['sources']) == 2
     assert len({s['analysis']['source_sha256'] for s in saved['sources']}) == 2
     assert [s['source_index'] for s in saved['shots']] == [0, 1]

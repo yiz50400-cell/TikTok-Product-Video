@@ -1,4 +1,4 @@
-"""Register actual ChatCut exports; technical checks never imply customer acceptance."""
+"""Register actual ChatCut or Remotion exports; technical checks never imply customer acceptance."""
 from copy import deepcopy
 from datetime import datetime
 import hashlib
@@ -87,7 +87,7 @@ def validate_video(path, expected, mode):
 
 def validate_manifest(manifest):
     allowed = {'project_id', 'sources', 'video_path', 'srt_path', 'expected_duration',
-               'audio_mode', 'delivery_explanation_zh', 'delivery_text_zh', 'review'}
+               'audio_mode', 'delivery_explanation_zh', 'delivery_text_zh', 'review', 'render_record_path'}
     if not isinstance(manifest, dict) or set(manifest) - allowed:
         raise ValueError('交付清单存在未知字段')
     for key in ('project_id', 'delivery_explanation_zh', 'delivery_text_zh'):
@@ -96,6 +96,8 @@ def validate_manifest(manifest):
     for key in ('delivery_explanation_zh', 'delivery_text_zh'):
         if not re.search(r'[\u4e00-\u9fff]', manifest[key]):
             raise ValueError(f'{key}须包含中文')
+    if manifest['project_id'].startswith('remotion:') and not manifest.get('render_record_path'):
+        raise ValueError('Remotion成片必须提供render_record_path')
     expected = manifest.get('expected_duration')
     if type(expected) not in (float, int) or not math.isfinite(expected) or expected <= 0:
         raise ValueError('expected_duration须为正有限秒数')
@@ -180,6 +182,16 @@ def _register_delivery(data_dir, sessions, job_id, ordinal, manifest):
         if manifest['audio_mode'] == 'narration' and srt is None:
             raise ValueError('配音视频必须提供SRT')
         files = {'video.mp4': (video, digest(video))}
+        if manifest.get('render_record_path'):
+            from workflow.remotion_bridge import validate_render_record
+            render_path = local_file(manifest['render_record_path'], '.json')
+            render_record = validate_render_record(render_path, video, manifest['sources'], job_id, ordinal)
+            if (render_record['project_id'] != manifest['project_id']
+                    or render_record['audio_mode'] != manifest['audio_mode']
+                    or render_record['expected_duration'] != manifest['expected_duration']
+                    or render_record['files'].get('subtitles.srt') != (digest(srt) if srt else None)):
+                raise ValueError('Remotion渲染记录与交付参数或字幕不匹配')
+            files['render-record.json'] = (render_path, digest(render_path))
         if srt:
             files['subtitles.srt'] = (srt, digest(srt))
         qa = validate_video(video, manifest['expected_duration'], manifest['audio_mode'])
@@ -212,6 +224,8 @@ def _register_delivery(data_dir, sessions, job_id, ordinal, manifest):
             expected_names = {'video.mp4', '交付说明.txt', '交付文案.txt'}
             if previous['manifest'].get('srt_path'):
                 expected_names.add('subtitles.srt')
+            if previous['manifest'].get('render_record_path'):
+                expected_names.add('render-record.json')
             if set(previous['files']) != expected_names:
                 raise ValueError('已保存交付文件列表无效')
             sources.extend(validate_sources(data, session, job_id, previous['manifest']['sources']))
@@ -265,5 +279,5 @@ def _register_delivery(data_dir, sessions, job_id, ordinal, manifest):
         job.payload = saved
         job.status = batch['status']
         if old is None:
-            session.add(Activity(job_id=job_id, kind='desktop_delivery', message=f'ChatCut本地导出第{ordinal}条已登记；技术QA及复核记录不代表用户验收。'))
+            session.add(Activity(job_id=job_id, kind='desktop_delivery', message=f'本地成片第{ordinal}条已登记；技术QA及复核记录不代表用户验收。'))
         return {**record, 'rendered_count': len(deliveries), 'job_status': job.status}

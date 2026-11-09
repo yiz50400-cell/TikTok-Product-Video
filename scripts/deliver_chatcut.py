@@ -26,7 +26,7 @@ def main():
     try:
         manifest = json.loads(local_file(args.manifest, '.json').read_text(encoding='utf-8'))
         result = register_delivery(data, sessions, args.job_id, args.ordinal, manifest)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print(json.dumps(result, ensure_ascii=True, indent=2))
     except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
         parser.exit(1, f'交付登记失败: {exc}\n')
     finally:

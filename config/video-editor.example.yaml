@@ -5,6 +5,8 @@ video_editor:
   output_root: "outputs/video"
   material_source: "customer_local_files"
   desktop_editor: "chatcut"
+  packaging_engine: "remotion"
+  workflow: "chatcut_export_then_remotion_package"
   interactive_refinement: false
   prefer_vertical_9x16: true
   background_music: false
@@ -12,5 +14,5 @@ video_editor:
   final_video_codec: "h264"
   final_audio_codec: "aac"
   tts_provider: "configured_local_or_edge_tts"
-  default_delivery: "clean_mp4_plus_srt"
+  default_delivery: "packaged_mp4_plus_srt"
   fontfile: ""

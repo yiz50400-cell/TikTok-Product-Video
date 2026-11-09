@@ -12,7 +12,7 @@ def make_video(path: Path):
     subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error",
                     "-f", "lavfi", "-i", "testsrc2=size=180x320:rate=12",
                     "-t", "2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-y", str(path)],
-                   capture_output=True, text=True, check=True)
+                   capture_output=True, text=True, check=True, encoding='utf-8')
 
 
 def observation(manifest):
@@ -47,10 +47,10 @@ def test_inspect_and_annotate_keep_traceable_source(tmp_path):
     assert {cell["frame_id"] for cell in cells} == {frame["id"] for frame in manifest["frames"]}
     assert all(Path(sheet["path"]).is_file() for sheet in manifest["contact_sheets"])
     supplied = tmp_path / "supplied.json"
-    supplied.write_text(json.dumps(observation(manifest)), encoding="utf-8")
+    supplied.write_text(json.dumps(observation(manifest)), encoding="utf-8", newline='\n')
     result = save_observations(output / "manifest.json", supplied)
     assert Path(result["report_path"]).is_file()
-    assert json.loads(Path(result["analysis_path"]).read_text())["status"] == "codex_observed_needs_review"
+    assert json.loads(Path(result["analysis_path"]).read_text(encoding='utf-8'))["status"] == "codex_observed_needs_review"
     report = Path(result["report_path"]).read_text(encoding="utf-8")
     assert "ASR 未执行；OCR 未执行" in report
     assert "Synthetic moving pattern" in report
@@ -72,7 +72,7 @@ def test_reject_untraceable_or_invalid_observation(tmp_path, mutation):
     data = observation(manifest)
     mutation(data)
     supplied = tmp_path / "supplied.json"
-    supplied.write_text(json.dumps(data), encoding="utf-8")
+    supplied.write_text(json.dumps(data), encoding="utf-8", newline='\n')
     with pytest.raises(ValueError):
         save_observations(output / "manifest.json", supplied)
     assert not (output / "report.md").exists()
@@ -93,7 +93,7 @@ def test_changed_source_cannot_be_annotated(tmp_path):
     output = tmp_path / "result"
     manifest = analyze_video(video, output, interval=1, max_frames=4)
     supplied = tmp_path / "supplied.json"
-    supplied.write_text(json.dumps(observation(manifest)), encoding="utf-8")
+    supplied.write_text(json.dumps(observation(manifest)), encoding="utf-8", newline='\n')
     with video.open("ab") as changed:
         changed.write(b"changed")
     with pytest.raises(ValueError, match="missing or changed"):

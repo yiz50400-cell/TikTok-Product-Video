@@ -50,7 +50,7 @@ def test_device_change_cannot_reuse_a_cpu_result(model, tmp_path):
         writer.write(np.full((64, 64, 3), 180, np.uint8))
     writer.release()
     spec = tmp_path / 'mask.json'
-    spec.write_text('{"dimensions":[64,64],"regions":[{"name":"mark","mode":"box","box":[8,8,12,12]}]}')
+    spec.write_text('{"dimensions":[64,64],"regions":[{"name":"mark","mode":"box","box":[8,8,12,12]}]}', encoding='utf-8', newline='\n')
     args = (source, spec, model, tmp_path / 'repair', 0, .2)
     cpu = run_repair(*args, device='cpu', expected_model_md5=digest(model, 'md5'))
     gpu = run_repair(*args, device='mps', expected_model_md5=digest(model, 'md5'))

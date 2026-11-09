@@ -151,7 +151,7 @@ def main():
     try:
         result = asyncio.run(execute(args))
     except (ValueError, OSError, httpx.HTTPError) as exc:
-        print(json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False), file=sys.stderr)
+        print(json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=True), file=sys.stderr)
         return 1
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=True, indent=2))
     return 0

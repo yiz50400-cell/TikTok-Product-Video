@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 def run_cli(data_dir, *args):
     return subprocess.run([sys.executable, str(ROOT / 'scripts/workflow.py'), *args],
                           cwd=data_dir, env={**os.environ, 'WORKFLOW_DATA_DIR': str(data_dir)},
-                          capture_output=True, text=True, timeout=60)
+                          capture_output=True, text=True, timeout=60, encoding='utf-8')
 
 
 def test_codex_commands_persist_import_and_return_inline_preview_paths(tmp_path):
@@ -39,7 +39,7 @@ def test_codex_commands_persist_import_and_return_inline_preview_paths(tmp_path)
     assert len(json.loads(run_cli(tmp_path, 'list').stdout)) == 1
     assert not (tmp_path / 'dist').exists()
     inputs=tmp_path/'pipeline-inputs.json'
-    inputs.write_text(json.dumps({'items':[{'ordinal':1,'asset_id':asset['id']}]}))
+    inputs.write_text(json.dumps({'items':[{'ordinal':1,'asset_id':asset['id']}]}), encoding='utf-8', newline='\n')
     registered=run_cli(tmp_path,'pipeline-inputs',job['id'],str(inputs))
     assert registered.returncode==0,registered.stderr
     progress=run_cli(tmp_path,'run',job['id'])
@@ -69,7 +69,7 @@ def test_cli_accepts_indonesia_and_registers_actual_batch_concepts(tmp_path):
     concepts.write_text(json.dumps({'concepts': [{'ordinal': 1, 'angle': '妆效近景',
         'hook': '先展示实际晕染动作', 'buyer_concern': '怎么晕开',
         'proof_requirement': '点涂到晕染连续镜头', 'cta_direction': '查看真实色号',
-        'source_asset_ids': []}]}, ensure_ascii=False))
+        'source_asset_ids': []}]}, ensure_ascii=False), encoding='utf-8', newline='\n')
     registered = run_cli(tmp_path, 'plan-batch', job['id'], str(concepts))
     assert registered.returncode == 0, registered.stderr
     saved = json.loads(run_cli(tmp_path, 'show', job['id']).stdout)

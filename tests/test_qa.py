@@ -56,7 +56,7 @@ def test_evaluate_short_freeze_ok_and_fps_optional():
 def test_unique_report_path_never_overwrites(tmp_path):
     video = tmp_path / "a.mp4"
     first = unique_report_path(video)
-    first.write_text("{}")
+    first.write_text("{}", encoding='utf-8', newline='\n')
     assert unique_report_path(video) != first
 
 
