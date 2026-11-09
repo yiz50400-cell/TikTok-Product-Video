@@ -98,8 +98,8 @@
     },
     {
       "path": "UPGRADE-VALIDATION.md",
-      "sha256": "dd1959c17d06a02131cec1e4ddcedfe8a630c47ebb6714cff0b5ad1d7ea1535e",
-      "size": 7201
+      "sha256": "15e856c63d04172e94e1bb24f7109142a6adbee58ac3aedf3499aa07e2c98dd5",
+      "size": 7391
     },
     {
       "path": "VALIDATION.md",
@@ -228,8 +228,8 @@
     },
     {
       "path": "remotion/render.mjs",
-      "sha256": "dd12d61179572fbfe64f18feb909f73a9583ff72cab0d91fccc401d73bfd75bf",
-      "size": 1469
+      "sha256": "c4aca16e0e1da307249b045517af23bebc8bb4657d40ef9d72d18918378b2d70",
+      "size": 1514
     },
     {
       "path": "remotion/src/Composition.tsx",

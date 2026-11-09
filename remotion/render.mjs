@@ -18,6 +18,7 @@ try {
   const composition = await selectComposition({serveUrl, id: 'ProductPackaging', inputProps, browserExecutable});
   await renderMedia({serveUrl, composition, inputProps, browserExecutable,
     codec: 'h264', pixelFormat: 'yuv420p', audioCodec: 'aac',
+    colorSpace: 'bt709', imageFormat: 'png',
     muted: inputProps.audioMode === 'silent', concurrency: 2, outputLocation: output,
     crf: 18, overwrite: false});
   console.log('Rendered ProductPackaging');

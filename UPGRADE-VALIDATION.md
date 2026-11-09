@@ -9,7 +9,7 @@
 - 输入绑定任务原素材、ChatCut 项目、底片、SRT、包装参数；输出绑定模板版本、视频、字幕及 QA 哈希。渲染记录自身也有完整性指纹。
 - 渲染成功状态为 `RENDERED_PENDING_REVIEW`，交付模板默认未复核；`deliver_video.py` 检查真实复核与 Remotion 血缘后才更新交付数量。旧 ChatCut 直接交付入口保留。
 - 文字按浏览器实际字体测量换行及缩字号；仍超出安全区时停止渲染，避免静默裁字。
-- 修复 Windows JSON 命令输出和 UTF-8/LF 测试夹具；macOS CI 使用提供 drawtext/subtitles 的 ffmpeg-full。
+- 修复 Windows JSON 命令输出和 UTF-8/LF 测试夹具；macOS CI 使用提供 drawtext/subtitles 的 ffmpeg-full；补充 macOS 已退出进程组清理兼容，Remotion 显式 PNG/BT.709 limited 输出以统一 Windows yuv420p。
 
 ## 本机实测
 
@@ -17,7 +17,7 @@
 
 | 检查 | 结果 |
 | --- | --- |
-| 全量 pytest，设置 `REMOTION_SMOKE=1`，包含真实 Chromium 渲染 | **476 passed, 3 skipped，93.84 秒** |
+| 全量 pytest，设置 `REMOTION_SMOKE=1`，包含真实 Chromium 渲染 | **477 passed, 3 skipped，96.88 秒** |
 | 静音底片 → 包装 → 全解码 → 复用 → 交付登记 | 通过 |
 | 合成音轨底片 → 包装 → 音轨/SRT检查 → 交付登记 | 通过，合成音轨不是自然口播验收 |
 | 不带真实复核、损坏成片/记录、网址输入、错误素材归属 | 正确拒绝 |
@@ -27,6 +27,8 @@
 | 客户文档本地链接 | 核对通过 |
 | 独立代码审查 | 完整性与排版问题修复后，无未解决的重要问题 |
 | npm 生产依赖 audit | 0 已知漏洞（本次查询结果） |
+
+编码修正后独立 Remotion smoke 再验：14 项通过，15.88 秒。
 
 本机实际查看了合成底片包装抽帧，标题、卖点卡、字幕、CTA 在各自区域可读。这是技术布局检查，不代表真实商品画面验收。首次 Chromium 下载曾被网络中断，重试下载完成后真实渲染通过。
 
